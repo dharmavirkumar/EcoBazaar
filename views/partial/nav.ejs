@@ -1,0 +1,84 @@
+<nav class="bg-gray-900 text-white">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="flex justify-between items-center h-16">
+
+      <!-- Logo -->
+      <div class="flex items-center">
+        <a href="/" class="text-2xl font-bold text-yellow-400">
+          EcoBazaar
+        </a>
+      </div>
+
+      <!-- Menu -->
+      <div class="hidden md:flex space-x-6">
+
+<!-- 🔍 SEARCH FORM -->
+<form action="/search" method="GET" class="flex w-1/2">
+
+<input 
+type="text" 
+name="query" 
+placeholder="Search products..." 
+class="w-full px-4 py-2 text-black rounded-l outline-none"
+/>
+
+<button 
+type="submit" 
+class="bg-yellow-400 px-4 rounded-r text-black font-semibold">
+Search
+</button>
+
+</form>
+
+        <a href="/" class="hover:text-yellow-400">Home</a>
+
+        <a href="/men" class="hover:text-yellow-400">Fashion</a>
+
+        <a href="/jewellery" class="hover:text-yellow-400">Jewellery </a>
+        <a href="/beauty" class="hover:text-yellow-400">Beauty</a>
+        <a href="/electronics" class="hover:text-yellow-400">Electronics </a>
+
+       
+
+        <a href="/cart" class="hover:text-yellow-400 w-100"> </a>
+
+
+      </div>
+
+      <!-- Right Menu -->
+      
+
+      <!-- Mobile Button -->
+      <div class="md:hidden">
+        <button onclick="toggleMenu()" class="text-white text-2xl">
+          ☰
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobileMenu" class="hidden bg-gray-800 md:hidden">
+
+    <a href="/" class="block px-4 py-2 hover:bg-gray-700">Home</a>
+
+    <a href="/men" class="block px-4 py-2 hover:bg-gray-700">Fashion</a>
+
+    <a href="/jewellery" class="block px-4 py-2 hover:bg-gray-700">Jewellery</a>
+
+    <a href="/beauty" class="block px-4 py-2 hover:bg-gray-700">Beauty</a>
+
+    <a href="/electronics" class="block px-4 py-2 hover:bg-gray-700">Electronics</a>
+
+    <a href="/about" class="block px-4 py-2 hover:bg-gray-700">About</a>
+
+  </div>
+</nav>
+
+<script>
+function toggleMenu(){
+  const menu = document.getElementById("mobileMenu");
+  menu.classList.toggle("hidden");
+}
+</script>

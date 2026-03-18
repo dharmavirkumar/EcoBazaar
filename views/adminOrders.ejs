@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Orders</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+<div class="max-w-7xl mx-auto p-6">
+
+<h1 class="text-3xl font-bold mb-6">Admin Orders</h1>
+
+<table class="w-full bg-white rounded shadow">
+
+<thead class="bg-gray-200">
+<tr>
+<th class="p-3">Product</th>
+<th class="p-3">Name</th>
+<th class="p-3">Phone</th>
+<th class="p-3">Address</th>
+<th class="p-3">Payment</th>
+</tr>
+</thead>
+
+<tbody>
+
+<% orders.forEach(order => { %>
+
+<tr class="border-t">
+
+<td class="p-3">
+<img src="/uploads/<%= order.productId.image %>" 
+class="w-16 h-16 object-cover">
+<p><%= order.productId.name %></p>
+</td>
+
+<td class="p-3"><%= order.name %></td>
+<td class="p-3"><%= order.phone %></td>
+<td class="p-3"><%= order.address %></td>
+<td class="p-3"><%= order.payment %></td>
+
+</tr>
+
+<% }) %>
+
+</tbody>
+
+</table>
+
+</div>
+
+</body>
+</html>
