@@ -9,6 +9,7 @@
 
 <%- include("partial/nav") %>
 
+<!-- 🔹 MAIN PRODUCT SECTION -->
 <div class="max-w-7xl mx-auto p-6 grid md:grid-cols-2 gap-10 bg-white mt-10 rounded shadow">
 
 <% if(product){ %>
@@ -18,14 +19,15 @@
   <img src="/uploads/<%= product.image %>" 
   class="w-full h-96 object-cover rounded">
 
+  <!-- BUTTONS -->
   <div class="flex gap-4 mt-6">
     <a href="/add-to-cart/<%= product._id %>" 
-    class="flex-1 border border-blue-500 text-blue-500 py-3 rounded text-center font-semibold">
+    class="flex-1 border border-blue-500 text-blue-500 py-3 rounded text-center font-semibold hover:bg-blue-500 hover:text-white transition">
       🛒 Add to Cart
     </a>
 
     <a href="/buy-now/<%= product._id %>" 
-    class="flex-1 bg-green-600 text-white py-3 rounded text-center font-semibold">
+    class="flex-1 bg-green-600 text-white py-3 rounded text-center font-semibold hover:bg-green-700 transition">
       ⚡ Buy Now
     </a>
   </div>
@@ -48,7 +50,8 @@
     (<%= reviews ? reviews.length : 0 %> reviews)
   </p>
 
-  <p class="text-gray-600 mb-4">
+  <!-- DESCRIPTION -->
+  <p class="text-gray-600 mb-4 leading-relaxed">
     <%= product.description %>
   </p>
 
@@ -56,22 +59,24 @@
     🚚 Free Delivery
   </p>
 
-  <!-- Highlights -->
+  <!-- PRODUCT INFO -->
   <div class="bg-gray-100 p-4 rounded">
-    <h2 class="font-bold mb-2">Delivery within 4-5 Days </h2>
-    <p><strong>Category:</strong> <%= product.category %></p>
+    
+    
     <p><strong>Price:</strong> ₹ <%= product.price %></p>
+    <p><strong>Delivery:</strong> 4-5 Days</p>
   </div>
 
 </div>
 
 <% } else { %>
 
-<p>Product not found</p>
+<p class="text-center text-red-500">Product not found</p>
 
 <% } %>
 
 </div>
+
 
 <!-- 🔥 SIMILAR PRODUCTS -->
 <div class="max-w-7xl mx-auto mt-10">
@@ -84,7 +89,7 @@
 
   <% similarProducts.forEach(item => { %>
 
-    <div class="bg-white p-4 rounded shadow hover:shadow-lg">
+    <div class="bg-white p-4 rounded shadow hover:shadow-lg transition">
 
       <a href="/product/<%= item._id %>">
         <img src="/uploads/<%= item.image %>" 
@@ -98,7 +103,7 @@
       <p class="text-green-600 font-bold">₹ <%= item.price %></p>
 
       <a href="/product/<%= item._id %>" 
-      class="block mt-2 bg-blue-500 text-white text-center py-1 rounded">
+      class="block mt-2 bg-blue-500 text-white text-center py-1 rounded hover:bg-blue-600">
         View
       </a>
 
@@ -116,7 +121,8 @@
 
 </div>
 
-<!-- ⭐ REVIEWS SECTION -->
+
+<!-- ⭐ REVIEWS -->
 <div class="max-w-5xl mx-auto mt-10">
 
 <h2 class="text-xl font-bold mb-4">Customer Reviews</h2>
@@ -147,6 +153,7 @@
 
 </div>
 
+
 <!-- ✍️ ADD REVIEW -->
 <div class="max-w-5xl mx-auto mt-10 bg-white p-6 rounded shadow">
 
@@ -171,7 +178,7 @@ class="w-full border p-2 mb-3 rounded" required>
 <textarea name="comment" placeholder="Write your review..."
 class="w-full border p-2 mb-3 rounded"></textarea>
 
-<button class="bg-blue-500 text-white px-4 py-2 rounded">
+<button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
 Submit Review
 </button>
 

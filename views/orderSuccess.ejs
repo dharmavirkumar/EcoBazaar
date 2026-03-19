@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Order Success</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+<%- include("partial/nav") %>
+
+<div class="flex items-center justify-center min-h-[80vh] px-4">
+
+  <div class="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center">
+
+    <!-- ✅ Success Icon -->
+    <div class="flex justify-center">
+      <div class="bg-green-100 p-4 rounded-full">
+        <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- ✅ Heading -->
+    <h1 class="text-2xl font-bold text-gray-800 mt-4">
+      Order Placed Successfully 🎉
+    </h1>
+
+    <!-- ✅ Message -->
+    <p class="text-gray-500 mt-2">
+      Thank you for your purchase. Your order has been placed successfully.
+    </p>
+
+    <!-- ✅ Order Info -->
+    <div class="bg-gray-100 p-4 rounded mt-6 text-left">
+      <p class="text-sm text-gray-600">
+        📦 Your order will be delivered within <b>3-5 days</b>.
+      </p>
+      <p class="text-sm text-gray-600 mt-2">
+        💳 Payment: Cash on Delivery
+      </p>
+    </div>
+
+    <!-- ✅ Buttons -->
+    <div class="mt-6 flex gap-3">
+
+      <a href="/" 
+      class="flex-1 bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+        🏠 Go Home
+      </a>
+
+      <a href="/cart" 
+      class="flex-1 border border-gray-300 py-2 rounded hover:bg-gray-100">
+        🛒 View Cart
+      </a>
+
+    </div>
+
+  </div>
+
+</div>
+
+<%- include("partial/footer") %>
+
+</body>
+</html>

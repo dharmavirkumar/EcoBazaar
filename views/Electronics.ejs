@@ -23,9 +23,17 @@
 
 <img src="/uploads/<%= product.image %>" class="w-full h-40 object-cover">
 
-<h2 class="text-lg font-semibold mt-3"><%= product.name %></h2>
+<h2 class="text-lg font-semibold mt-3"><%= product.name.substring(0, 30) %></h2>
 
 <p class="text-gray-600">₹ <%= product.price %></p>
+
+<div>
+    <p><span> 🚚Free Delevery </span></p>
+</div>
+
+<p class="mb-4 text-yellow-500">
+⭐ Average Rating: <%= typeof avgRating !== "undefined" ? avgRating.toFixed(1) : "No rating" %>
+</p>
 
 <p class="text-gray-600">
 <%= product.description.substring(0, 60) %>...

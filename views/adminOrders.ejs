@@ -27,12 +27,21 @@
 
 <% orders.forEach(order => { %>
 
-<tr class="border-t">
-
 <td class="p-3">
-<img src="/uploads/<%= order.productId.image %>" 
-class="w-16 h-16 object-cover">
-<p><%= order.productId.name %></p>
+
+<% if(order.productId){ %>
+
+  <img src="/uploads/<%= order.productId.image %>" 
+  class="w-16 h-16 object-cover">
+
+  <p><%= order.productId.name %></p>
+
+<% } else { %>
+
+  <p class="text-red-500">Product Deleted</p>
+
+<% } %>
+
 </td>
 
 <td class="p-3"><%= order.name %></td>
