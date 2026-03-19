@@ -6,6 +6,11 @@ const multer = require('multer');
 const path = require('path');
 mongoose = require('mongoose');
 const Order = require('../models/Order');
+const Review = require("../models/Review");
+
+
+
+
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
    destination: function (req, file, cb) {
@@ -61,21 +66,29 @@ router.get('/men',async (req,res)=>{
 
 router.get("/product/:id", async (req, res) => {
 
-  const id = req.params.id;
+  const product = await Product.findById(req.params.id);
 
-  // Check valid ID
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.send("Invalid Product ID");
+  const similarProducts = await Product.find({
+    category: product.category,
+    _id: { $ne: product._id }
+  }).limit(4);
+
+  // ⭐ GET REVIEWS
+  const reviews = await Review.find({ productId: product._id });
+
+  // ⭐ AVERAGE RATING
+  let avgRating = 0;
+
+  if (reviews.length > 0) {
+    avgRating = reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
   }
 
-  const product = await Product.findById(id);
-
-  if (!product) {
-    return res.send("Product Not Found");
-  }
-
-  res.render("productDetails", { product });
-
+  res.render("productDetails", {
+    product,
+    similarProducts,
+    reviews,
+    avgRating
+  });
 });
 
 
@@ -181,10 +194,67 @@ router.get("/about", (req, res) => {
   res.render("about");
 });
 
+router.get("/add-to-cart/:id", async (req, res) => {
+
+  const product = await Product.findById(req.params.id);
+
+  if (!req.session.cart) {
+    req.session.cart = [];
+  }
+
+  const cart = req.session.cart;
+
+  // Check if product already exists
+  const existingProduct = cart.find(item => item._id == req.params.id);
+
+  if (existingProduct) {
+    existingProduct.qty += 1;
+  } else {
+    cart.push({
+      _id: product._id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      qty: 1
+    });
+  }
+
+  res.redirect("/cart");
+
+});
+
+router.get("/cart", (req, res) => {
+
+  const cart = req.session.cart || [];
+
+  let total = 0;
+
+  cart.forEach(item => {
+    total += item.price * item.qty;
+  });
+
+  res.render("cart", { cart, total });
+
+});
 
 
 
+// 👉 Add Review
+router.post("/add-review", async (req, res) => {
 
+  const { productId, name, rating, comment } = req.body;
+
+  const newReview = new Review({
+    productId,
+    name,
+    rating,
+    comment
+  });
+
+  await newReview.save();
+
+  res.redirect("/product/" + productId);
+});
 
 module.exports = router;
 

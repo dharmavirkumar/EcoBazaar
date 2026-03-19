@@ -13,6 +13,8 @@
       <div class="hidden md:flex space-x-6">
 
 <!-- 🔍 SEARCH FORM -->
+
+<!-- <div>
 <form action="/search" method="GET" class="flex w-1/2">
 
 <input 
@@ -28,16 +30,27 @@ class="bg-yellow-400 px-4 rounded-r text-black font-semibold">
 Search
 </button>
 
+</div> -->
+
+
 </form>
 
-        <a href="/" class="hover:text-yellow-400">Home</a>
+   <a href="/" class="hover:text-yellow-400">Home</a>
 
         <a href="/men" class="hover:text-yellow-400">Fashion</a>
 
         <a href="/jewellery" class="hover:text-yellow-400">Jewellery </a>
         <a href="/beauty" class="hover:text-yellow-400">Beauty</a>
         <a href="/electronics" class="hover:text-yellow-400">Electronics </a>
+        <a href="/cart" class="relative">🛒<% if(cartCount > 0){ %>
+  <span class="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-2 rounded-full">
+    <%= cartCount %>
+  </span>
+  <% } %>
 
+</a>
+
+       
        
 
         <a href="/cart" class="hover:text-yellow-400 w-100"> </a>
