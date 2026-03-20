@@ -10,6 +10,7 @@ const Order = require("../models/Order");
 const Review = require("../models/Review");
 const transporter = require("../config/email");
 
+
 // ================= MULTER =================
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -131,7 +132,9 @@ router.get("/add-to-cart/:id", async (req, res) => {
 
   const cart = req.session.cart;
 
-  const existing = cart.find((item) => item._id == req.params.id);
+ const existing = cart.find(
+  (item) => item._id.toString() === req.params.id
+);
 
   if (existing) {
     existing.qty += 1;
