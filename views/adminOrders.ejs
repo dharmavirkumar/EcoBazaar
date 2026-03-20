@@ -31,8 +31,7 @@
 
 <% if(order.productId){ %>
 
-  <img src="/uploads/<%= order.productId.image %>" 
-  class="w-16 h-16 object-cover">
+ <img src="<%= product.image %>" class="w-full h-40 object-cover">
 
   <p><%= order.productId.name %></p>
 

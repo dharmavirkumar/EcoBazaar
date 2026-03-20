@@ -2,18 +2,27 @@
   "name": "ecommerce-app",
   "version": "1.0.0",
   "description": "",
+  "keywords": [],
+  "homepage": "https://github.com/dharmavirkumar/EcoBazaar#readme",
+  "bugs": {
+    "url": "https://github.com/dharmavirkumar/EcoBazaar/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dharmavirkumar/EcoBazaar.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.2.2",
+    "cloudinary": "^1.41.3",
     "dotenv": "^17.3.1",
     "ejs": "^5.0.1",
     "express": "^5.2.1",
@@ -21,6 +30,7 @@
     "mongodb": "^7.1.0",
     "mongoose": "^9.3.0",
     "multer": "^2.1.1",
+    "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^8.0.3",
     "nodemon": "^3.1.14",
     "razorpay": "^2.9.6"

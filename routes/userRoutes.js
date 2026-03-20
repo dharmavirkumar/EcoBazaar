@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary");
 
 const Product = require("../models/Product");
 const Order = require("../models/Order");
@@ -9,12 +11,15 @@ const Review = require("../models/Review");
 const transporter = require("../config/email");
 
 // ================= MULTER =================
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "public/uploads/"),
-  filename: (req, file, cb) =>
-    cb(null, Date.now() + "-" + file.originalname),
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "ecommerce-products",
+    allowed_formats: ["jpg", "png", "jpeg"],
+  },
 });
-const upload = multer({ storage });
+
+const upload = multer({ storage: storage });
 
 // ================= HOME =================
 router.get("/", async (req, res) => {
@@ -48,25 +53,23 @@ router.get("/add-product", (req, res) => {
   res.render("Products");
 });
 
-router.post("/add-product", upload.single("image"), async (req, res) => {
-  try {
-    const { name, price, description, category } = req.body;
-    const image = req.file ? req.file.filename : "";
+router.post('/add-product', upload.single("image"), async (req,res)=>{
 
-    const newProduct = new Product({
+   const { name, price, description, category } = req.body;
+
+   const image = req.file ? req.file.path : "";
+
+   const newProduct = new Product({
       name,
       price,
       description,
       category,
-      image,
-    });
+      image
+   });
 
-    await newProduct.save();
-    res.redirect("/");
-  } catch (err) {
-    console.log(err);
-    res.send("Error adding product");
-  }
+   await newProduct.save();
+
+   res.redirect('/');
 });
 
 // ================= PRODUCT DETAILS =================
