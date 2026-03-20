@@ -92,7 +92,8 @@ class="w-full h-100 object-cover">
     <div class="bg-white p-4 rounded shadow hover:shadow-lg transition">
 
       <a href="/product/<%= item._id %>">
-        <img src="<%= product.image %>" class="w-full h-40 object-cover">
+      <img src="<%= item.image.startsWith('http') ? item.image : '/uploads/' + item.image %>" 
+      class="w-full h-40 object-cover rounded">
       </a>
 
       <h3 class="mt-3 font-semibold">

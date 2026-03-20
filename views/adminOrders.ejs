@@ -31,7 +31,8 @@
 
 <% if(order.productId){ %>
 
- <img src="<%= product.image %>" class="w-full h-40 object-cover">
+ <img src="<%= order.productId.image.startsWith('http') ? order.productId.image : '/uploads/' + order.productId.image %>" 
+class="w-full h-100 object-cover">
 
   <p><%= order.productId.name %></p>
 
