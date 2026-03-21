@@ -231,6 +231,10 @@ router.post("/place-order", async (req, res) => {
 
     const product = await Product.findById(productId);
 
+    if (!product) {
+      return res.send("Product not found");
+    }
+
     const newOrder = new Order({
       name,
       email,
@@ -238,23 +242,28 @@ router.post("/place-order", async (req, res) => {
       phone2,
       address,
       productId,
-      size: product.category === "fashion" ? size : null,
+      size: product.category === "fashion" ? (size || "M") : null,
       payment: `Ordered ${product.name} for ₹${product.price}`,
     });
 
     await newOrder.save();
 
-    // EMAIL
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Order Confirmation 🛒",
-      html: `<h2>Thanks ${name}!</h2><p>Order placed successfully 🎉</p>`,
-    });
+    // ✅ EMAIL (SAFE)
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Order Confirmation 🛒",
+        html: `<h2>Thanks ${name}!</h2><p>Order placed successfully 🎉</p>`,
+      });
+    } catch (emailErr) {
+      console.log("Email failed:", emailErr.message);
+    }
 
     res.render("orderSuccess");
+
   } catch (err) {
-    console.log(err);
+    console.log("ORDER ERROR:", err);
     res.send("Order failed");
   }
 });
