@@ -291,4 +291,21 @@ router.post("/add-review", async (req, res) => {
 // ================= STATIC =================
 router.get("/about", (req, res) => res.render("about"));
 
+
+
+router.get("/remove-from-cart/:id", (req, res) => {
+
+  const id = req.params.id;
+
+  let cart = req.session.cart || [];
+
+  // filter out item
+  cart = cart.filter(item => item._id.toString() !== id);
+
+  // update session
+  req.session.cart = cart;
+
+  res.redirect("/cart");
+});
+
 module.exports = router;
