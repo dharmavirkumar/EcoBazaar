@@ -1,76 +1,133 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Buy Now</title>
-<script src="https://cdn.tailwindcss.com"></script>
+  <title>Buy Now</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-100">
 
 <%- include("partial/nav") %>
 
-<div class="max-w-6xl mx-auto mt-10 grid md:grid-cols-2 gap-6">
+<div class="max-w-7xl mx-auto mt-10 grid md:grid-cols-2 gap-8 px-4">
 
-<!-- LEFT: PRODUCT -->
-<div class="bg-white p-6 rounded shadow">
+  <!-- 🛒 LEFT: PRODUCT CARD -->
+  <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition">
 
-<h2 class="text-xl font-bold mb-4">Order Summary</h2>
+    <h2 class="text-2xl font-bold mb-4 border-b pb-2">🛒 Order Summary</h2>
 
-<img src="<%= product.image %>" class="w-full h-100 object-cover">
+    <div class="overflow-hidden rounded-xl">
+      <img src="<%= product.image %>" 
+      class="w-full h-72 object-cover hover:scale-105 transition duration-300">
+    </div>
 
-<h3 class="text-lg font-semibold mt-4"><%= product.name %></h3>
+    <h3 class="text-xl font-semibold mt-5">
+      <%= product.name %>
+    </h3>
 
-<p class="text-green-600 text-xl mt-2">₹ <%= product.price %></p>
+    <p class="text-green-600 text-2xl font-bold mt-2">
+      ₹ <%= product.price %>
+    </p>
 
-<p class="text-gray-600 mt-2"><%= product.description %></p>
+    <p class="text-gray-500 mt-3 text-sm leading-relaxed">
+      <%= product.description %>
+    </p>
 
-</div>
+    <div class="mt-4 text-green-600 font-semibold">
+      🚚 Free Delivery | 4-5 Days
+    </div>
 
-<!-- RIGHT: ADDRESS + PAYMENT -->
-<div class="bg-white p-6 rounded shadow">
+  </div>
 
-<h2 class="text-xl font-bold mb-4">Delivery Details</h2>
 
-<form action="/place-order" method="POST">
+  <!-- 📦 RIGHT: ADDRESS FORM -->
+  <div class="bg-white p-8 rounded-2xl shadow-lg">
 
-<input type="hidden" name="productId" value="<%= product._id %>">
+    <!-- HEADER -->
+    <h1 class="text-2xl font-bold mb-6 border-b pb-2">
+      📍 Add Delivery Address
+    </h1>
 
-<!-- Name -->
-<input type="text" name="name" placeholder="Full Name"
-class="w-full border p-2 rounded mb-3" required>
+    <form action="/place-order" method="POST" class="space-y-5">
 
-<!-- Phone -->
-<input type="text" name="phone" placeholder="Mobile Number"
-class="w-full border p-2 rounded mb-3" required>
+      <input type="hidden" name="productId" value="<%= product._id %>">
 
-<!-- Phone2 -->
-<input type="text" name="phone2" placeholder="Alternate Mobile Number"
-class="w-full border p-2 rounded mb-3" required>
+      <!-- CONTACT -->
+      <div>
+        <h2 class="font-semibold mb-3 text-gray-700">Contact Details</h2>
 
-<!-- Email -->
-<input type="email" name="email" placeholder="Email Address"
-class="w-full border p-2 rounded mb-3" required>
+        <input type="text" name="name" placeholder="Full Name"
+        class="w-full border p-3 rounded-lg mb-3 focus:ring-2 focus:ring-pink-400 outline-none" required>
 
-<!-- Address -->
-<textarea name="address" placeholder="Full Address"
-class="w-full border p-2 rounded mb-3" required></textarea>
+        <input type="text" name="phone" placeholder="Phone Number"
+        class="w-full border p-3 rounded-lg mb-3 focus:ring-2 focus:ring-pink-400 outline-none" required>
 
-<!-- Payment -->
-<select name="payment" class="w-full border p-2 rounded mb-4">
-<option value="cod">Cash on Delivery</option>
-<option value="online">Online Payment</option>
-</select>
+        <input type="text" name="phone2" placeholder="Alternate Number (optional)"
+        class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-pink-400 outline-none">
 
-<button type="submit"
-class="w-full bg-green-600 text-white py-3 rounded hover:bg-green-700">
+        <input type="email" name="email" placeholder="Email Address"
+        class="w-full border p-3 rounded-lg mt-3 focus:ring-2 focus:ring-pink-400 outline-none" required>
 
-Place Order
+      </div>
+    
 
-</button>
+      <!-- ADDRESS -->
+      <div>
+        <h2 class="font-semibold mb-2 text-gray-700">Address</h2>
 
-</form>
+        <input type="text" name="house" placeholder="House No / Building"
+        class="w-full border p-3 rounded-lg mb-3 focus:ring-2 focus:ring-pink-400 outline-none" required>
 
-</div>
+        <input type="text" name="area" placeholder="Road / Area / Colony"
+        class="w-full border p-3 rounded-lg mb-3 focus:ring-2 focus:ring-pink-400 outline-none" required>
+
+        <input type="text" name="pincode" placeholder="Pincode"
+        class="w-full border p-3 rounded-lg mb-3 focus:ring-2 focus:ring-pink-400 outline-none" required>
+
+        <div class="flex gap-2">
+          <input type="text" name="city" placeholder="City"
+          class="w-1/2 border p-3 rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" required>
+
+          <input type="text" name="state" placeholder="State"
+          class="w-1/2 border p-3 rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" required>
+        </div>
+
+        <input type="text" name="landmark" placeholder="Nearby Landmark (optional)"
+        class="w-full border p-3 rounded-lg mt-3 focus:ring-2 focus:ring-pink-400 outline-none">
+      </div>
+
+      <!-- SIZE -->
+      <% if(product.category === "fashion"){ %>
+
+      <div>
+        <h2 class="font-semibold mb-3 text-gray-700">Select Size</h2>
+
+        <div class="flex gap-3 flex-wrap">
+          <% ["S","M","L","XL","XXL"].forEach(size => { %>
+            <label>
+              <input type="radio" name="size" value="<%= size %>" class="hidden peer" required>
+              <span class="px-5 py-2 border rounded-full cursor-pointer 
+              peer-checked:bg-pink-600 peer-checked:text-white 
+              hover:bg-pink-100 transition">
+                <%= size %>
+              </span>
+            </label>
+          <% }) %>
+        </div>
+      </div>
+
+      <% } %>
+
+      <!-- BUTTON -->
+      <button class="w-full bg-gradient-to-r from-pink-500 to-purple-600 
+      text-white py-3 rounded-xl text-lg font-semibold 
+      hover:scale-105 transition transform shadow-md">
+        🚀 Save Address & Place Order
+      </button>
+
+    </form>
+
+  </div>
 
 </div>
 

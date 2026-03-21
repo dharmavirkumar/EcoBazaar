@@ -11,6 +11,49 @@ const Review = require("../models/Review");
 const transporter = require("../config/email");
 
 
+
+
+const PDFDocument = require("pdfkit");
+const fs = require("fs");
+const path = require("path");
+
+function generateInvoice(order, product) {
+  const filePath = path.join(__dirname, `../invoices/invoice_${Date.now()}.pdf`);
+
+  const doc = new PDFDocument();
+
+  doc.pipe(fs.createWriteStream(filePath));
+
+  // Title
+  doc.fontSize(20).text("INVOICE", { align: "center" });
+
+  doc.moveDown();
+
+  // Customer
+  doc.fontSize(12).text(`Name: ${order.name}`);
+  doc.text(`Email: ${order.email}`);
+  doc.text(`Phone: ${order.phone}`);
+
+  doc.moveDown();
+
+  // Product
+  doc.text(`Product: ${product.name}`);
+  doc.text(`Price: ₹${product.price}`);
+  doc.text(`Size: ${order.size || "N/A"}`);
+
+  doc.moveDown();
+
+  doc.text(`Address: ${order.address}`);
+
+  doc.moveDown();
+  doc.text("Thank you for your purchase ❤️");
+
+  doc.end();
+
+  return filePath;
+}
+
+
 // ================= MULTER =================
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -192,21 +235,39 @@ router.post("/checkout", async (req, res) => {
         phone2,
         address,
         productId: item._id,
-        size: product.category === "fashion" ? item.size : null,
+        size: item.size || null,
         payment: `Ordered ${item.name} x ${item.qty}`,
       }).save();
     }
-     // ✅ SEND EMAIL (FIXED POSITION)
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Order Confirmation 🛒",
-      html: `
-        <h2>Thanks ${name}!</h2>
-        <p>Your order has been placed successfully 🎉</p>
-        <p>📦 Delivery within 3-5 days</p>
-      `,
-    });
+// ✅ Generate invoice HERE
+const filePath = generateInvoice(newOrder, product);
+
+// ✅ Send email with attachment
+await transporter.sendMail({
+  from: process.env.EMAIL_USER,
+  to: email,
+  subject: "Order Confirmation 🛒",
+  html: `
+    <h2>Thanks ${name}! 🎉</h2>
+
+    <p>Your order has been placed successfully.</p>
+
+    <h3>🛒 Product Details:</h3>
+    <p><b>Name:</b> ${product.name}</p>
+    <p><b>Price:</b> ₹${product.price}</p>
+    <p><b>Size:</b> ${size || "N/A"}</p>
+
+    <img src="${product.image}" width="200"/>
+
+    <p>📦 Delivery within 3-5 days</p>
+  `,
+  attachments: [
+    {
+      filename: "invoice.pdf",
+      path: filePath,
+    },
+  ],
+});
 
 
     req.session.cart = [];
@@ -227,7 +288,27 @@ router.get("/buy-now/:id", async (req, res) => {
 // ================= SINGLE ORDER =================
 router.post("/place-order", async (req, res) => {
   try {
-    const { name, email, phone, phone2, address, productId, size } = req.body;
+    const {
+      name,
+      email,
+      phone,
+      phone2,
+      house,
+      area,
+      city,
+      state,
+      pincode,
+      landmark,
+      productId,
+      size
+    } = req.body;
+
+    // 🔥 Create address
+    const address = `
+    ${house}, ${area},
+    ${city}, ${state} - ${pincode}
+    ${landmark ? "Landmark: " + landmark : ""}
+    `;
 
     const product = await Product.findById(productId);
 
@@ -248,17 +329,26 @@ router.post("/place-order", async (req, res) => {
 
     await newOrder.save();
 
-    // ✅ EMAIL (SAFE)
-    try {
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "Order Confirmation 🛒",
-        html: `<h2>Thanks ${name}!</h2><p>Order placed successfully 🎉</p>`,
-      });
-    } catch (emailErr) {
-      console.log("Email failed:", emailErr.message);
-    }
+    // ✅ EMAIL SAFE
+    await transporter.sendMail({
+  from: process.env.EMAIL_USER,
+  to: email,
+  subject: "Order Confirmation 🛒",
+  html: `
+    <h2>Thanks ${name}! 🎉</h2>
+
+    <p>Your order has been placed successfully.</p>
+
+    <h3>🛒 Product Details:</h3>
+    <p><b>Name:</b> ${product.name}</p>
+    <p><b>Price:</b> ₹${product.price}</p>
+    <p><b>Size:</b> ${size || "N/A"}</p>
+
+    <img src="${product.image}" width="200" style="border-radius:10px"/>
+
+    <p>📦 Delivery within 3-5 days</p>
+  `,
+});
 
     res.render("orderSuccess");
 

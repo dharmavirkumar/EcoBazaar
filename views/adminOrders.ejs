@@ -17,9 +17,12 @@
 <tr>
 <th class="p-3">Product</th>
 <th class="p-3">Name</th>
+
 <th class="p-3">Phone</th>
+<th class="p-3">Email</th>
 <th class="p-3">Address</th>
 <th class="p-3">Payment</th>
+<th class="p-3">Size</th>
 </tr>
 </thead>
 
@@ -46,6 +49,7 @@ class="w-full h-100 object-cover">
 
 <td class="p-3"><%= order.name %></td>
 <td class="p-3"><%= order.phone %></td>
+<td class="p-3"><%= order.email %></td>
 <td class="p-3"><%= order.address %></td>
 <td class="p-3"><%= order.payment %></td>
 <td class="p-3"><%= order.size || "N/A" %></td>
