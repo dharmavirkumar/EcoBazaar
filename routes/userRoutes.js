@@ -144,6 +144,7 @@ router.get("/add-to-cart/:id", async (req, res) => {
       name: product.name,
       price: product.price,
       image: product.image,
+      size: product.category === "fashion" ? product.size : null,
       qty: 1,
     });
   }
@@ -191,6 +192,7 @@ router.post("/checkout", async (req, res) => {
         phone2,
         address,
         productId: item._id,
+        size: product.category === "fashion" ? item.size : null,
         payment: `Ordered ${item.name} x ${item.qty}`,
       }).save();
     }
@@ -225,7 +227,7 @@ router.get("/buy-now/:id", async (req, res) => {
 // ================= SINGLE ORDER =================
 router.post("/place-order", async (req, res) => {
   try {
-    const { name, email, phone, phone2, address, productId } = req.body;
+    const { name, email, phone, phone2, address, productId, size } = req.body;
 
     const product = await Product.findById(productId);
 
@@ -236,6 +238,7 @@ router.post("/place-order", async (req, res) => {
       phone2,
       address,
       productId,
+      size: product.category === "fashion" ? size : null,
       payment: `Ordered ${product.name} for ₹${product.price}`,
     });
 

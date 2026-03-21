@@ -78,6 +78,34 @@ class="w-full h-100 object-cover">
 </div>
 
 
+<form action="/place-order" method="POST">
+
+<input type="hidden" name="productId" value="<%= product._id %>">
+
+<% if(product.category === "fashion"){ %>
+
+  <div class="mt-4">
+    <h3>Select Size</h3>
+
+    <div class="flex gap-3">
+      <button type="button" class="size-btn">S</button>
+      <button type="button" class="size-btn active">M</button>
+      <button type="button" class="size-btn">L</button>
+      <button type="button" class="size-btn">XL</button>
+    </div>
+
+    <!-- hidden -->
+    <input type="hidden" name="size" id="selectedSize" value="M">
+
+  </div>
+
+<% } %>
+
+
+
+</form>
+
+
 <!-- 🔥 SIMILAR PRODUCTS -->
 <div class="max-w-7xl mx-auto mt-10">
 
@@ -187,6 +215,40 @@ Submit Review
 </div>
 
 <%- include("partial/footer") %>
+<style>
+.size-btn {
+  padding: 10px 20px;
+  border: 2px solid #ccc;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
 
+.size-btn:hover {
+  border-color: #a855f7;
+}
+
+.size-btn.active {
+  border-color: #a855f7;
+  background-color: #f3e8ff;
+  color: #a855f7;
+}
+</style>
+<script>
+const buttons = document.querySelectorAll(".size-btn");
+const hiddenInput = document.getElementById("selectedSize");
+
+if(buttons.length > 0){
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      buttons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      hiddenInput.value = btn.innerText;
+    });
+  });
+}
+</script>
 </body>
+
 </html>
