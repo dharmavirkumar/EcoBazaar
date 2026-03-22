@@ -286,7 +286,8 @@ router.get("/buy-now/:id", async (req, res) => {
 });
 
 // ================= SINGLE ORDER =================
-router.post("/place-order", async (req, res) => {
+
+   router.post("/place-order", async (req, res) => {
   try {
     const {
       name,
@@ -303,7 +304,7 @@ router.post("/place-order", async (req, res) => {
       size
     } = req.body;
 
-    // 🔥 Create address
+    // 🔥 Address combine
     const address = `
     ${house}, ${area},
     ${city}, ${state} - ${pincode}
@@ -327,29 +328,31 @@ router.post("/place-order", async (req, res) => {
       payment: `Ordered ${product.name} for ₹${product.price}`,
     });
 
-    await newOrder.save();
+    await newOrder.save(); // ✅ ORDER SAVED
 
-    // ✅ EMAIL SAFE
-    await transporter.sendMail({
-  from: process.env.EMAIL_USER,
-  to: email,
-  subject: "Order Confirmation 🛒",
-  html: `
-    <h2>Thanks ${name}! 🎉</h2>
+    // ✅ EMAIL (SAFE BLOCK)
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Order Confirmation 🛒",
+        html: `
+          <h2>Thanks ${name}! 🎉</h2>
+          <p>Your order has been placed successfully.</p>
 
-    <p>Your order has been placed successfully.</p>
+          <h3>${product.name}</h3>
+          <p>₹${product.price}</p>
 
-    <h3>🛒 Product Details:</h3>
-    <p><b>Name:</b> ${product.name}</p>
-    <p><b>Price:</b> ₹${product.price}</p>
-    <p><b>Size:</b> ${size || "N/A"}</p>
+          <img src="${product.image}" width="200"/>
 
-    <img src="${product.image}" width="200" style="border-radius:10px"/>
+          <p>📦 Delivery within 3-5 days</p>
+        `,
+      });
+    } catch (emailErr) {
+      console.log("❌ Email failed:", emailErr.message);
+    }
 
-    <p>📦 Delivery within 3-5 days</p>
-  `,
-});
-
+    // ✅ FINAL RESPONSE (IMPORTANT)
     res.render("orderSuccess");
 
   } catch (err) {
