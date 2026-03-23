@@ -55,8 +55,14 @@ Search
 
         <a href="/cart" class="hover:text-yellow-400 w-100"> </a>
 
-
+<% if(user){ %>
+  <span>Welcome <%= user.name %></span>
+  <a href="/logout">Logout</a>
+<% } else { %>
+  <a href="/login">Login</a>
+<% } %>
       </div>
+     
 
       <!-- Right Menu -->
       

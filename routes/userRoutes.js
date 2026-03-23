@@ -9,13 +9,97 @@ const Product = require("../models/Product");
 const Order = require("../models/Order");
 const Review = require("../models/Review");
 const transporter = require("../config/email");
-
-
-
-
+const bcrypt = require("bcrypt");
+const User = require("../models/User");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
+
+
+function isLoggedIn(req, res, next) {
+
+  if (!req.session.user) {
+    return res.redirect("/login"); // ❌ login nahi → redirect
+  }
+
+  next(); // ✅ login hai → allow
+}
+ 
+// Register page
+router.get("/register", (req, res) => {
+  res.render("register");
+});
+
+// Register logic
+router.post("/register", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // check existing user
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.send("User already exists");
+    }
+
+    // hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword
+    });
+
+    await newUser.save();
+
+    res.redirect("/login");
+
+  } catch (err) {
+    console.log(err);
+    res.send("Registration failed");
+  }
+});
+
+
+
+// Login page
+router.get("/login", (req, res) => {
+  res.render("login");
+});
+
+// Login logic
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.send("User not found");
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.send("Wrong password");
+    }
+
+    // ✅ SESSION SAVE
+    req.session.user = user;
+
+    res.redirect("/");
+
+  } catch (err) {
+    console.log(err);
+    res.send("Login failed");
+  }
+});
+
+router.get("/logout", (req, res) => {
+  req.session.destroy();
+  res.redirect("/");
+});
+
 
 function generateInvoice(order, product) {
   const filePath = path.join(__dirname, `../invoices/invoice_${Date.now()}.pdf`);
@@ -206,8 +290,10 @@ router.get("/cart", (req, res) => {
   res.render("cart", { cart, total });
 });
 
+
 // ================= CHECKOUT =================
-router.get("/checkout", (req, res) => {
+
+router.get("/checkout", isLoggedIn, (req, res) => {
   const cart = req.session.cart || [];
 
   const total = cart.reduce(
@@ -280,14 +366,16 @@ await transporter.sendMail({
 });
 
 // ================= BUY NOW =================
-router.get("/buy-now/:id", async (req, res) => {
+
+router.get("/buy-now/:id", isLoggedIn, async (req, res) => {
   const product = await Product.findById(req.params.id);
   res.render("buyNow", { product });
 });
 
 // ================= SINGLE ORDER =================
 
-   router.post("/place-order", async (req, res) => {
+
+   router.post("/place-order",isLoggedIn, async (req, res) => {
   try {
     const {
       name,
