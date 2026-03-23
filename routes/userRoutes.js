@@ -17,13 +17,21 @@ const path = require("path");
 
 
 function isLoggedIn(req, res, next) {
-
   if (!req.session.user) {
-    return res.redirect("/login"); // ❌ login nahi → redirect
+    return res.redirect("/login");
   }
-
-  next(); // ✅ login hai → allow
+  next();
 }
+
+// ✅ My Orders Page
+router.get("/my-orders", isLoggedIn, async (req, res) => {
+
+  const orders = await Order.find({
+    userId: req.session.user._id
+  }).populate("productId").sort({ createdAt: -1 });
+
+  res.render("myOrders", { orders });
+});
  
 // Register page
 router.get("/register", (req, res) => {
@@ -138,6 +146,37 @@ function generateInvoice(order, product) {
 }
 
 
+router.get("/download-invoice/:id", isLoggedIn, async (req, res) => {
+  const order = await Order.findById(req.params.id).populate("productId");
+
+  if (!order) return res.send("Order not found");
+
+  const doc = new PDFDocument();
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", "attachment; filename=invoice.pdf");
+
+  doc.pipe(res);
+
+  doc.fontSize(20).text("INVOICE", { align: "center" });
+
+  doc.moveDown();
+  doc.text(`Name: ${order.name}`);
+  doc.text(`Email: ${order.email}`);
+  doc.text(`Phone: ${order.phone}`);
+
+  doc.moveDown();
+  doc.text(`Product: ${order.productId.name}`);
+  doc.text(`Price: ₹${order.productId.price}`);
+  doc.text(`Status: ${order.status}`);
+
+  doc.moveDown();
+  doc.text(`Address: ${order.address}`);
+
+  doc.end();
+});
+
+
 // ================= MULTER =================
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -239,16 +278,27 @@ router.get("/product/:id", async (req, res) => {
 
 // ================= SEARCH =================
 router.get("/search", async (req, res) => {
-  const query = req.query.query;
+  try {
+    const query = req.query.q;
 
-  const products = await Product.find({
-    $or: [
-      { name: { $regex: query, $options: "i" } },
-      { category: { $regex: query, $options: "i" } },
-    ],
-  });
+    if (!query) {
+      return res.redirect("/");
+    }
 
-  res.render("index", { products });
+    const products = await Product.find({
+      $or: [
+        { name: { $regex: query, $options: "i" } },
+        { category: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } }
+      ]
+    });
+
+    res.render("searchResults", { products, query });
+
+  } catch (err) {
+    console.log(err);
+    res.send("Search failed");
+  }
 });
 
 // ================= CART =================
@@ -412,6 +462,7 @@ router.get("/buy-now/:id", isLoggedIn, async (req, res) => {
       phone2,
       address,
       productId,
+      userId: req.session.user._id, // ✅ IMPORTANT
       size: product.category === "fashion" ? (size || "M") : null,
       payment: `Ordered ${product.name} for ₹${product.price}`,
     });
@@ -449,11 +500,19 @@ router.get("/buy-now/:id", isLoggedIn, async (req, res) => {
   }
 });
 
-// ================= ADMIN =================
-router.get("/admin/orders", async (req, res) => {
-  const orders = await Order.find().populate("productId");
-  res.render("adminOrders", { orders });
+router.get("/cancel-order/:id", isLoggedIn, async (req, res) => {
+  await Order.findByIdAndUpdate(req.params.id, {
+    status: "Cancelled"
+  });
+
+  res.redirect("/my-orders");
 });
+
+// ================= ADMIN =================
+// router.get("/admin/orders", async (req, res) => {
+//   const orders = await Order.find().populate("productId");
+//   res.render("adminOrders", { orders });
+// });
 
 // ================= REVIEW =================
 router.post("/add-review", async (req, res) => {
@@ -488,5 +547,112 @@ router.get("/remove-from-cart/:id", (req, res) => {
 
   res.redirect("/cart");
 });
+
+
+// Update Order Status
+router.post("/admin/update-status/:id", async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    await Order.findByIdAndUpdate(req.params.id, { status });
+
+    res.redirect("/admin/orders");
+
+  } catch (err) {
+    console.log(err);
+    res.send("Status update failed");
+  }
+});
+
+function isAdmin(req, res, next) {
+  if (!req.session.user || req.session.user.email !== "admin@gmail.com") {
+    return res.send("Access Denied");
+  }
+  next();
+}
+
+router.get("/admin/orders", isAdmin, async (req, res) => {
+  const orders = await Order.find().populate("productId");
+  res.render("adminOrders", { orders });
+});
+
+router.get("/admin/products", async (req, res) => {
+  const products = await Product.find().sort({ createdAt: -1 });
+  res.render("adminProducts", { products });
+});
+
+router.get("/admin/edit-product/:id", async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  res.render("editProduct", { product });
+});
+
+router.post("/admin/edit-product/:id", upload.single("image"), async (req, res) => {
+
+  const { name, price, description, category } = req.body;
+
+  const updateData = {
+    name,
+    price,
+    description,
+    category
+  };
+
+  if (req.file) {
+    updateData.image = req.file.path;
+  }
+
+  await Product.findByIdAndUpdate(req.params.id, updateData);
+
+  res.redirect("/admin/products");
+});
+
+
+router.get("/admin/delete-product/:id", async (req, res) => {
+  await Product.findByIdAndDelete(req.params.id);
+  res.redirect("/admin/products");
+});
+
+router.get("/admin/dashboard", async (req, res) => {
+
+  const totalProducts = await Product.countDocuments();
+  const totalOrders = await Order.countDocuments();
+
+  const orders = await Order.find();
+
+ let revenue = 0;
+
+orders.forEach(o => {
+  if (o.payment) {
+    const match = o.payment.match(/\d+/);
+    if (match) {
+      revenue += parseInt(match[0]);
+    }
+  }
+});
+
+  
+  res.render("adminDashboard", {
+    totalProducts,
+    totalOrders,
+    revenue
+  });
+});
+
+router.get("/admin/products/search", async (req, res) => {
+  const q = req.query.q;
+
+  const products = await Product.find({
+    name: { $regex: q, $options: "i" }
+  });
+
+  res.render("adminProducts", { products });
+});
+
+
+
+
+
+
+
 
 module.exports = router;

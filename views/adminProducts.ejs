@@ -1,0 +1,47 @@
+<div class="max-w-7xl mx-auto p-6">
+
+<h1 class="text-3xl font-bold mb-6">📦 Products</h1>
+
+<input type="text" id="search" placeholder="Search product..."
+class="border p-2 mb-4 w-full rounded">
+
+<div class="grid md:grid-cols-3 gap-6" id="productList">
+
+<% products.forEach(p => { %>
+<div class="bg-white p-4 rounded shadow product-card">
+
+  <img src="<%= p.image %>" class="w-full h-40 object-cover rounded">
+
+  <h2 class="font-bold mt-2"><%= p.name %></h2>
+  <p>₹ <%= p.price %></p>
+
+  <div class="flex gap-2 mt-3">
+    <a href="/admin/edit-product/<%= p._id %>"
+      class="bg-blue-500 text-white px-3 py-1 rounded">Edit</a>
+
+    <button onclick="confirmDelete('<%= p._id %>')"
+      class="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+  </div>
+
+</div>
+<% }) %>
+
+</div>
+</div>
+
+<script>
+// 🔍 Search filter
+document.getElementById("search").addEventListener("keyup", function(){
+  let val = this.value.toLowerCase();
+  document.querySelectorAll(".product-card").forEach(card => {
+    card.style.display = card.innerText.toLowerCase().includes(val) ? "block" : "none";
+  });
+});
+
+// 🗑 Delete modal
+function confirmDelete(id){
+  if(confirm("Are you sure to delete this product?")){
+    window.location.href = "/admin/delete-product/" + id;
+  }
+}
+</script>

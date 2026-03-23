@@ -1,66 +1,157 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin Orders</title>
-<script src="https://cdn.tailwindcss.com"></script>
+  <title>Admin Orders</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-100">
 
 <div class="max-w-7xl mx-auto p-6">
 
-<h1 class="text-3xl font-bold mb-6">Admin Orders</h1>
+  <h1 class="text-3xl font-bold mb-6 text-gray-800">
+    Admin Orders 📦
+  </h1>
 
-<table class="w-full bg-white rounded shadow">
+  <% if(orders.length > 0){ %>
 
-<thead class="bg-gray-200">
-<tr>
-<th class="p-3">Product</th>
-<th class="p-3">Name</th>
+  <div class="overflow-x-auto">
+    <table class="w-full bg-white rounded-xl shadow overflow-hidden">
 
-<th class="p-3">Phone</th>
-<th class="p-3">Email</th>
-<th class="p-3">Address</th>
-<th class="p-3">Payment</th>
-<th class="p-3">Size</th>
-</tr>
-</thead>
+      <!-- HEADER -->
+      <thead class="bg-gray-200 text-gray-700 text-sm uppercase">
+        <tr>
+          <th class="p-4 text-left">Product</th>
+          <th class="p-4">Customer</th>
+          <th class="p-4">Contact</th>
+          <th class="p-4">Address</th>
+          <th class="p-4">Payment</th>
+          <th class="p-4">Size</th>
+          <th class="p-4">Status</th>
+          <th class="p-4">Action</th>
+        </tr>
+      </thead>
 
-<tbody>
+      <!-- BODY -->
+      <tbody>
 
-<% orders.forEach(order => { %>
+      <% orders.forEach(order => { %>
 
-<td class="p-3">
+        <tr class="border-b hover:bg-gray-50">
 
-<% if(order.productId){ %>
+          <!-- PRODUCT -->
+          <td class="p-4 flex items-center gap-3">
 
- <img src="<%= order.productId.image.startsWith('http') ? order.productId.image : '/uploads/' + order.productId.image %>" 
-class="w-full h-100 object-cover">
+            <% if(order.productId){ %>
 
-  <p><%= order.productId.name %></p>
+              <img 
+                src="<%= order.productId.image && order.productId.image.startsWith('http') 
+                  ? order.productId.image 
+                  : '/uploads/' + (order.productId.image || 'default.png') %>" 
+                class="w-16 h-16 object-cover rounded border">
 
-<% } else { %>
+              <div>
+                <p class="font-semibold text-gray-800">
+                  <%= order.productId.name %>
+                </p>
+                <p class="text-sm text-gray-500">
+                  ₹ <%= order.productId.price %>
+                </p>
+              </div>
 
-  <p class="text-red-500">Product Deleted</p>
+            <% } else { %>
 
-<% } %>
+              <p class="text-red-500">Product Deleted</p>
 
-</td>
+            <% } %>
 
-<td class="p-3"><%= order.name %></td>
-<td class="p-3"><%= order.phone %></td>
-<td class="p-3"><%= order.email %></td>
-<td class="p-3"><%= order.address %></td>
-<td class="p-3"><%= order.payment %></td>
-<td class="p-3"><%= order.size || "N/A" %></td>
+          </td>
 
-</tr>
+          <!-- CUSTOMER -->
+          <td class="p-4 text-center">
+            <p class="font-medium"><%= order.name %></p>
+          </td>
 
-<% }) %>
+          <!-- CONTACT -->
+          <td class="p-4 text-center text-sm">
+            <p><%= order.phone %></p>
+            <p class="text-gray-500"><%= order.email %></p>
+          </td>
 
-</tbody>
+          <!-- ADDRESS -->
+          <td class="p-4 text-sm text-gray-600">
+            <%= order.address %>
+          </td>
 
-</table>
+          <!-- PAYMENT -->
+          <td class="p-4 text-sm">
+            <%= order.payment %>
+          </td>
+
+          <!-- SIZE -->
+          <td class="p-4 text-center">
+            <%= order.size || "N/A" %>
+          </td>
+
+          <!-- STATUS -->
+          <td class="p-4 text-center">
+
+            <span class="px-3 py-1 rounded-full text-xs font-medium
+              <%= order.status === 'Placed' ? 'bg-yellow-100 text-yellow-700' : 
+                  order.status === 'Shipped' ? 'bg-blue-100 text-blue-700' :
+                  order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-700' :
+                  order.status === 'Delivered' ? 'bg-green-100 text-green-700' :
+                  order.status === 'Cancelled' ? 'bg-red-100 text-red-600' :
+                  'bg-gray-100 text-gray-600' %>">
+
+              <%= order.status %>
+
+            </span>
+
+          </td>
+
+          <!-- ACTION -->
+          <td class="p-4 text-center">
+
+            <form action="/admin/update-status/<%= order._id %>" method="POST" class="flex gap-2 justify-center">
+
+              <select name="status" class="border rounded px-2 py-1 text-sm">
+
+                <option <%= order.status === 'Placed' ? 'selected' : '' %>>Placed</option>
+                <option <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                <option <%= order.status === 'Out for Delivery' ? 'selected' : '' %>>Out for Delivery</option>
+                <option <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                <option <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+
+              </select>
+
+              <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm">
+                Update
+              </button>
+
+            </form>
+
+          </td>
+
+        </tr>
+
+      <% }) %>
+
+      </tbody>
+
+    </table>
+  </div>
+
+  <% } else { %>
+
+    <!-- EMPTY STATE -->
+    <div class="text-center mt-20">
+      <h2 class="text-xl font-semibold text-gray-700">
+        No orders found 😔
+      </h2>
+    </div>
+
+  <% } %>
 
 </div>
 
