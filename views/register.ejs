@@ -56,15 +56,15 @@
         </div>
 
         <!-- PASSWORD -->
-        <div>
-          <label class="block text-gray-600 mb-1">Password</label>
-          <input 
-            type="password" 
-            name="password" 
-            required
-            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-            placeholder="Enter password">
-        </div>
+        <input type="password" id="password" name="password" placeholder="Enter password"
+        class="w-full px-4 py-2 border rounded-lg">
+
+        <!-- Strength bar -->
+<div class="w-full bg-gray-200 h-2 rounded mt-2">
+  <div id="strengthBar" class="h-2 rounded"></div>
+</div>
+
+<p id="strengthText" class="text-sm mt-1"></p>
 
         <!-- BUTTON -->
         <button 
@@ -84,8 +84,48 @@
     </div>
 
   </div>
+<!-- <a href="/auth/google"
+class="block text-center bg-red-500 text-white py-2 rounded mt-4">
+Login with Google
+</a> -->
 
 </div>
 
 </body>
+<script>
+const password = document.getElementById("password");
+const bar = document.getElementById("strengthBar");
+const text = document.getElementById("strengthText");
+
+password.addEventListener("input", () => {
+  const val = password.value;
+  let strength = 0;
+
+  if (val.length > 5) strength++;
+  if (val.match(/[A-Z]/)) strength++;
+  if (val.match(/[0-9]/)) strength++;
+  if (val.match(/[@$!%*?&]/)) strength++;
+
+  if (strength === 1) {
+    bar.style.width = "25%";
+    bar.style.background = "red";
+    text.innerText = "Weak";
+  } 
+  else if (strength === 2) {
+    bar.style.width = "50%";
+    bar.style.background = "orange";
+    text.innerText = "Medium";
+  } 
+  else if (strength === 3) {
+    bar.style.width = "75%";
+    bar.style.background = "blue";
+    text.innerText = "Strong";
+  } 
+  else if (strength === 4) {
+    bar.style.width = "100%";
+    bar.style.background = "green";
+    text.innerText = "Very Strong 💪";
+  }
+});
+</script>
 </html>

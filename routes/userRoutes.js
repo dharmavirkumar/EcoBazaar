@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../config/cloudinary");
+const otpGenerator = require("otp-generator");
 
 const Product = require("../models/Product");
 const Order = require("../models/Order");
@@ -39,33 +40,54 @@ router.get("/register", (req, res) => {
 });
 
 // Register logic
+
+
 router.post("/register", async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
+  const { name, email, password } = req.body;
 
-    // check existing user
-    const existing = await User.findOne({ email });
-    if (existing) {
-      return res.send("User already exists");
-    }
+  const existing = await User.findOne({ email });
+  if (existing) return res.send("User exists");
 
-    // hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new User({
-      name,
-      email,
-      password: hashedPassword
-    });
+  const otp = otpGenerator.generate(6, { digits: true, alphabets: false });
 
-    await newUser.save();
+  const user = new User({
+    name,
+    email,
+    password: hashedPassword,
+    otp,
+    otpExpiry: Date.now() + 5 * 60 * 1000 // 5 min
+  });
 
-    res.redirect("/login");
+  await user.save();
 
-  } catch (err) {
-    console.log(err);
-    res.send("Registration failed");
+  // 📧 Send OTP
+  await transporter.sendMail({
+    to: email,
+    subject: "OTP Verification",
+    html: `<h2>Your OTP is: ${otp}</h2>`
+  });
+
+  res.render("verifyOtp", { email });
+});
+
+
+router.post("/verify-otp", async (req, res) => {
+  const { email, otp } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user || user.otp !== otp || user.otpExpiry < Date.now()) {
+    return res.send("Invalid or expired OTP");
   }
+
+  user.isVerified = true;
+  user.otp = null;
+
+  await user.save();
+
+  res.redirect("/login");
 });
 
 
@@ -107,6 +129,7 @@ router.get("/logout", (req, res) => {
   req.session.destroy();
   res.redirect("/");
 });
+
 
 
 function generateInvoice(order, product) {
@@ -191,7 +214,11 @@ const upload = multer({ storage: storage });
 // ================= HOME =================
 router.get("/", async (req, res) => {
   const products = await Product.find().limit(8);
-  res.render("index", { products });
+  res.render("index", {
+  products,
+  user: req.session.user,
+  cartCount: req.session.cart ? req.session.cart.length : 0
+});
 });
 
 // ================= CATEGORY =================
@@ -581,29 +608,63 @@ router.get("/admin/products", async (req, res) => {
   res.render("adminProducts", { products });
 });
 
+// ================= EDIT PRODUCT PAGE =================
 router.get("/admin/edit-product/:id", async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  res.render("editProduct", { product });
+  try {
+    const id = req.params.id;
+
+    // 🔥 IMPORTANT FIX (CastError avoid)
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.send("Invalid Product ID");
+    }
+
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.send("Product not found");
+    }
+
+    res.render("editProduct", { product });
+
+  } catch (err) {
+    console.log("Edit GET Error:", err);
+    res.send("Error loading edit page");
+  }
 });
 
+
+// ================= UPDATE PRODUCT =================
 router.post("/admin/edit-product/:id", upload.single("image"), async (req, res) => {
+  try {
+    const id = req.params.id;
 
-  const { name, price, description, category } = req.body;
+    // 🔥 IMPORTANT FIX
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.send("Invalid Product ID");
+    }
 
-  const updateData = {
-    name,
-    price,
-    description,
-    category
-  };
+    const { name, price, description, category } = req.body;
 
-  if (req.file) {
-    updateData.image = req.file.path;
+    const updateData = {
+      name,
+      price,
+      description,
+      category
+    };
+
+    // ✅ Image update only if uploaded
+    if (req.file) {
+      updateData.image = req.file.path;
+    }
+
+    await Product.findByIdAndUpdate(id, updateData);
+
+    res.redirect("/admin/products");
+
+  } catch (err) {
+    console.log("Edit POST Error:", err);
+    res.send("Update failed");
   }
-
-  await Product.findByIdAndUpdate(req.params.id, updateData);
-
-  res.redirect("/admin/products");
 });
 
 
@@ -647,10 +708,6 @@ router.get("/admin/products/search", async (req, res) => {
 
   res.render("adminProducts", { products });
 });
-
-
-
-
 
 
 
