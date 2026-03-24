@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+<!-- HEADER -->
+<div class="bg-gray-900 text-white p-4 flex justify-between">
+  <h1 class="text-xl font-bold">Admin Panel</h1>
+  <a href="/" class="bg-yellow-400 text-black px-3 py-1 rounded">Back</a>
+</div>
+
+<!-- TABS -->
+<div class="max-w-7xl mx-auto mt-6">
+
+  <div class="flex gap-4 border-b pb-2">
+    <button onclick="showTab('dashboard')" class="tab-btn text-blue-500 font-semibold">Dashboard</button>
+    <button onclick="showTab('products')" class="tab-btn">Products</button>
+    <button onclick="showTab('orders')" class="tab-btn">Orders</button>
+  </div>
+
+  <!-- ================= DASHBOARD ================= -->
+  <div id="dashboard" class="tab-content mt-6">
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <div class="bg-white p-6 rounded shadow text-center">
+        <h2 class="text-gray-500">Total Products</h2>
+        <p class="text-3xl font-bold text-blue-500"><%= totalProducts %></p>
+      </div>
+
+      <div class="bg-white p-6 rounded shadow text-center">
+        <h2 class="text-gray-500">Total Orders</h2>
+        <p class="text-3xl font-bold text-green-500"><%= totalOrders %></p>
+      </div>
+
+      <div class="bg-white p-6 rounded shadow text-center">
+        <h2 class="text-gray-500">Revenue</h2>
+        <p class="text-3xl font-bold text-purple-500">₹ <%= revenue %></p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ================= PRODUCTS ================= -->
+  <div id="products" class="tab-content hidden mt-6">
+
+    <!-- ADD PRODUCT -->
+    <form action="/add-product" method="POST" enctype="multipart/form-data"
+      class="bg-white p-6 rounded shadow mb-6">
+
+      <h2 class="text-xl font-bold mb-4">Add Product</h2>
+
+      <input type="text" name="name" placeholder="Product Name"
+        class="w-full border p-2 mb-3 rounded" required>
+
+      <input type="number" name="price" placeholder="Price"
+        class="w-full border p-2 mb-3 rounded" required>
+
+    <input type="number" name="discount" placeholder="Discount (%)"
+        class="w-full border p-2 mb-3 rounded">
+
+      <textarea name="description" placeholder="Description"
+        class="w-full border p-2 mb-3 rounded"></textarea>
+
+      <select name="category" class="w-full border p-2 mb-3 rounded">
+        <option value="fashion">Fashion</option>
+        <option value="electronics">Electronics</option>
+        <option value="Beauty">Beauty</option>
+        <option value="Jewellery">Accessories</option>
+      </select>
+
+      <input type="file" name="image" class="mb-3">
+
+      <button class="bg-blue-500 text-white px-4 py-2 rounded">
+        Add Product
+      </button>
+    </form>
+
+    <!-- PRODUCT LIST -->
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+
+      <% products.forEach(p => { %>
+
+      <div class="bg-white p-4 rounded shadow">
+
+        <img src="<%= p.image %>" class="w-full h-40 object-cover rounded">
+
+        <h3 class="font-semibold mt-2"><%= p.name %></h3>
+        <p class="text-green-600">₹ <%= p.price %></p>
+
+        <div class="flex gap-2 mt-3">
+          <a href="/admin/edit-product/<%= p._id %>"
+            class="flex-1 bg-yellow-400 text-center py-1 rounded">Edit</a>
+
+          <a href="/admin/delete-product/<%= p._id %>"
+            class="flex-1 bg-red-500 text-white text-center py-1 rounded">
+            Delete
+          </a>
+        </div>
+
+      </div>
+
+      <% }) %>
+
+    </div>
+
+  </div>
+
+  <!-- ================= ORDERS ================= -->
+  <div id="orders" class="tab-content hidden mt-6">
+
+    <div class="bg-white p-6 rounded shadow">
+
+      <h2 class="text-xl font-bold mb-4">All Orders</h2>
+
+      <% orders.forEach(o => { %>
+
+      <div class="border-b py-4 flex justify-between items-center">
+
+        <div>
+          <p class="font-semibold"><%= o.productId?.name %></p>
+          <p>₹ <%= o.productId?.price %></p>
+          <p class="text-sm text-gray-500"><%= o.address %></p>
+        </div>
+
+        <form action="/admin/update-status/<%= o._id %>" method="POST">
+          <select name="status" class="border p-1">
+            <option <%= o.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+            <option <%= o.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+            <option <%= o.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+            <option <%= o.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+          </select>
+
+          <button class="bg-blue-500 text-white px-2 py-1 ml-2 rounded">
+            Update
+          </button>
+        </form>
+
+      </div>
+
+      <% }) %>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- JS -->
+<script>
+function showTab(tab) {
+  document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+  document.getElementById(tab).classList.remove("hidden");
+
+  document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("text-blue-500", "font-bold"));
+  event.target.classList.add("text-blue-500", "font-bold");
+}
+</script>
+
+</body>
+</html>

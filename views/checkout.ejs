@@ -1,94 +1,140 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Checkout</title>
-<script src="https://cdn.tailwindcss.com"></script>
+  <title>Checkout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-100">
 
 <%- include("partial/nav") %>
 
-<div class="max-w-7xl mx-auto p-6 grid md:grid-cols-2 gap-10 mt-10">
+<div class="max-w-7xl mx-auto mt-10 grid md:grid-cols-2 gap-8 px-4">
 
-<!-- LEFT: ADDRESS FORM -->
-<div class="bg-white p-6 rounded shadow">
+  <!-- 🛒 LEFT: CART SUMMARY -->
+  <div class="bg-white p-6 rounded-2xl shadow-lg">
 
-<h2 class="text-xl font-bold mb-4">Shipping Details</h2>
+    <h2 class="text-2xl font-bold mb-4 border-b pb-2">🛒 Order Summary</h2>
 
-<form action="/checkout" method="POST">
+    <% if(cart.length > 0){ %>
 
-<input type="text" name="name" placeholder="Full Name"
-class="w-full border p-2 mb-3 rounded" required>
+      <% cart.forEach(item => { %>
 
-<input type="email" name="email" placeholder="Email"
-class="w-full border p-2 mb-3 rounded" required>
+        <div class="flex items-center gap-4 mb-4 border-b pb-3">
 
-<input type="text" name="phone" placeholder="Phone Number"
-class="w-full border p-2 mb-3 rounded" required>
+          <!-- IMAGE -->
+          <img src="<%= item.image %>" 
+          class="w-20 h-20 object-cover rounded">
 
-<input type="text" name="phone2" placeholder="Alternate Phone Number"
-class="w-full border p-2 mb-3 rounded" required>
+          <!-- DETAILS -->
+          <div class="flex-1">
+            <h3 class="font-semibold"><%= item.name %></h3>
+            <p class="text-gray-500 text-sm">Qty: <%= item.qty %></p>
+          </div>
 
-<textarea name="address" placeholder="Full Address"
-class="w-full border p-2 mb-3 rounded" required></textarea>
+          <!-- PRICE -->
+          <p class="text-green-600 font-bold">
+            ₹ <%= item.price * item.qty %>
+          </p>
 
-<button class="w-full bg-green-600 text-white py-2 rounded">
-Place Order
-</button>
+        </div>
 
+      <% }) %>
 
-</form>
-
-</div>
-
-<!-- RIGHT: ORDER SUMMARY -->
-<div class="bg-white p-6 rounded shadow">
-
-<h2 class="text-xl font-bold mb-4">Order Summary</h2>
-
-<% if(cart.length > 0){ %>
-
-  <% cart.forEach(item => { %>
-
-    <div class="flex items-center gap-4 mb-4 border-b pb-3">
-
-      <img src="/uploads/<%= item.image %>" 
-      class="w-16 h-16 object-cover rounded">
-
-      <div class="flex-1">
-        <h3 class="font-semibold"><%= item.name %></h3>
-        <p>Qty: <%= item.qty %></p>
+      <!-- TOTAL -->
+      <div class="mt-4 border-t pt-4">
+        <h3 class="text-xl font-bold">
+          Total: ₹ <%= total %>
+        </h3>
       </div>
 
-      <p class="font-bold text-green-600">
-        ₹ <%= item.price * item.qty %>
-      </p>
+    <% } else { %>
 
-    </div>
+      <p class="text-gray-500">Your cart is empty 😔</p>
 
-  <% }) %>
-
-  <div class="mt-4 border-t pt-4">
-
-    <h3 class="text-lg font-bold">
-      Total: ₹ <%= total %>
-    </h3>
+    <% } %>
 
   </div>
 
-<% } else { %>
 
-<p>Your cart is empty</p>
+  <!-- 📦 RIGHT: ADDRESS FORM -->
+  <div class="bg-white p-8 rounded-2xl shadow-lg">
 
-<% } %>
+    <h1 class="text-2xl font-bold mb-6 border-b pb-2">
+      📍 Add Delivery Address
+    </h1>
 
-</div>
+    <form action="/checkout" method="POST" class="space-y-5">
+
+      <!-- CONTACT -->
+      <div>
+        <h2 class="font-semibold mb-3 text-gray-700">Contact Details</h2>
+
+        <input type="text" name="name" placeholder="Full Name"
+        class="w-full border p-3 rounded-lg mb-3" required>
+
+        <input type="text" name="phone" placeholder="Phone Number"
+        class="w-full border p-3 rounded-lg mb-3" required>
+
+        <input type="text" name="phone2" placeholder="Alternate Number"
+        class="w-full border p-3 rounded-lg">
+
+        <input type="email" name="email" placeholder="Email Address"
+        class="w-full border p-3 rounded-lg mt-3" required>
+      </div>
+
+      <!-- ADDRESS -->
+      <div>
+        <h2 class="font-semibold mb-2 text-gray-700">Address</h2>
+
+        <input type="text" name="house" placeholder="House No / Building"
+        class="w-full border p-3 rounded-lg mb-3" required>
+
+        <input type="text" name="area" placeholder="Road / Area / Colony"
+        class="w-full border p-3 rounded-lg mb-3" required>
+
+        <input type="text" name="pincode" placeholder="Pincode"
+        class="w-full border p-3 rounded-lg mb-3" required>
+
+        <div class="flex gap-2">
+          <input type="text" name="city" placeholder="City"
+          class="w-1/2 border p-3 rounded-lg" required>
+
+          <input type="text" name="state" placeholder="State"
+          class="w-1/2 border p-3 rounded-lg" required>
+        </div>
+
+        <input type="text" name="landmark" placeholder="Nearby Landmark"
+        class="w-full border p-3 rounded-lg mt-3">
+      </div>
+
+      <!-- OPTIONAL SIZE -->
+      <div>
+        <h2 class="font-semibold mb-3 text-gray-700">Select Size (Optional)</h2>
+
+        <select name="size" class="w-full border p-3 rounded">
+          <option value="">Select Size</option>
+          <option>S</option>
+          <option>M</option>
+          <option>L</option>
+          <option>XL</option>
+        </select>
+      </div>
+
+      <!-- BUTTON -->
+      <button class="w-full bg-gradient-to-r from-pink-500 to-purple-600 
+      text-white py-3 rounded-xl text-lg font-semibold 
+      hover:scale-105 transition shadow-md">
+        🚀 Place Order
+      </button>
+
+    </form>
+
+  </div>
 
 </div>
 
 <%- include("partial/footer") %>
-
 
 </body>
 </html>

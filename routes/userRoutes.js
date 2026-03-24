@@ -238,32 +238,37 @@ router.get("/beauty", async (req, res) => {
 });
 
 router.get("/jewellery", async (req, res) => {
-  const products = await Product.find({ category: "Jewellery" });
-  res.render("Jewellery", { products });
+const products = await Product.find({
+  category: { $regex: "jewellery", $options: "i" }
+});
+res.render("Jewellery", { products });
 });
 
 // ================= ADD PRODUCT =================
-router.get("/add-product", (req, res) => {
-  res.render("Products");
-});
 
-router.post('/add-product', upload.single("image"), async (req,res)=>{
 
-   const { name, price, description, category } = req.body;
+router.post('/add-product', upload.single("image"), async (req, res) => {
 
-   const image = req.file ? req.file.path : "";
+  const { name, price, description, category, discount } = req.body;
 
-   const newProduct = new Product({
-      name,
-      price,
-      description,
-      category,
-      image
-   });
+  const image = req.file ? req.file.path : "";
 
-   await newProduct.save();
+  // ✅ discount calculation
+  const finalPrice = price - (price * (discount || 0) / 100);
 
-   res.redirect('/');
+  const newProduct = new Product({
+    name,
+    price,
+    description,
+    category,
+    image,
+    discount,
+    finalPrice
+  });
+
+  await newProduct.save();
+
+  res.redirect('/');
 });
 
 // ================= PRODUCT DETAILS =================
@@ -369,75 +374,100 @@ router.get("/cart", (req, res) => {
 
 
 // ================= CHECKOUT =================
+router.get("/checkout", isLoggedIn, (req, res) => { 
+  const cart = req.session.cart || []; 
+  const total = cart.reduce( (sum, item) => sum + item.price * item.qty, 0 ); 
 
-router.get("/checkout", isLoggedIn, (req, res) => {
-  const cart = req.session.cart || [];
+  res.render("checkout", { cart, total }); });
 
-  const total = cart.reduce(
-    (sum, item) => sum + item.price * item.qty,
-    0
-  );
-
-  res.render("checkout", { cart, total });
-});
-
-router.post("/checkout", async (req, res) => {
+  
+router.post("/checkout", isLoggedIn, async (req, res) => {
   try {
-    const { name, email, phone, phone2, address } = req.body;
+    const {
+      name,
+      email,
+      phone,
+      phone2,
+      house,
+      area,
+      city,
+      state,
+      pincode,
+      landmark
+    } = req.body;
+
     const cart = req.session.cart || [];
 
     if (cart.length === 0) {
       return res.send("Cart is empty");
     }
 
+    // 🔥 Address combine (same as Buy Now)
+    const address = `
+      ${house}, ${area},
+      ${city}, ${state} - ${pincode}
+      ${landmark ? "Landmark: " + landmark : ""}
+    `;
+
+    let firstOrder = null;
+    let firstProduct = null;
+
     for (let item of cart) {
-      await new Order({
+
+      const product = await Product.findById(item._id);
+
+      if (!product) continue;
+
+      const newOrder = new Order({
         name,
         email,
         phone,
         phone2,
         address,
         productId: item._id,
+        userId: req.session.user._id,
         size: item.size || null,
-        payment: `Ordered ${item.name} x ${item.qty}`,
-      }).save();
+        payment: `Ordered ${product.name} x ${item.qty}`
+      });
+
+      await newOrder.save();
+
+      // ✅ Save first order (for email/invoice)
+      if (!firstOrder) {
+        firstOrder = newOrder;
+        firstProduct = product;
+      }
     }
-// ✅ Generate invoice HERE
-const filePath = generateInvoice(newOrder, product);
 
-// ✅ Send email with attachment
-await transporter.sendMail({
-  from: process.env.EMAIL_USER,
-  to: email,
-  subject: "Order Confirmation 🛒",
-  html: `
-    <h2>Thanks ${name}! 🎉</h2>
+    // ✅ EMAIL (same clean logic as Buy Now)
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Order Confirmation 🛒",
+        html: `
+          <h2>Thanks ${name}! 🎉</h2>
+          <p>Your order has been placed successfully.</p>
 
-    <p>Your order has been placed successfully.</p>
+          <h3>${firstProduct.name}</h3>
+          <p>₹${firstProduct.price}</p>
 
-    <h3>🛒 Product Details:</h3>
-    <p><b>Name:</b> ${product.name}</p>
-    <p><b>Price:</b> ₹${product.price}</p>
-    <p><b>Size:</b> ${size || "N/A"}</p>
+          <img src="${firstProduct.image}" width="200"/>
 
-    <img src="${product.image}" width="200"/>
+          <p>📦 Delivery within 3-5 days</p>
+        `
+      });
+    } catch (err) {
+      console.log("Email failed:", err.message);
+    }
 
-    <p>📦 Delivery within 3-5 days</p>
-  `,
-  attachments: [
-    {
-      filename: "invoice.pdf",
-      path: filePath,
-    },
-  ],
-});
-
-
+    // ✅ CLEAR CART
     req.session.cart = [];
 
     res.render("orderSuccess");
+
   } catch (err) {
-    console.log(err);
+    console.log("Checkout Error:", err);
     res.send("Checkout failed");
   }
 });
@@ -700,15 +730,50 @@ orders.forEach(o => {
 });
 
 router.get("/admin/products/search", async (req, res) => {
-  const q = req.query.q;
+  try {
+    let q = req.query.q;
 
-  const products = await Product.find({
-    name: { $regex: q, $options: "i" }
-  });
+    // ✅ SAFETY CHECK
+    if (!q || typeof q !== "string") {
+      return res.redirect("/admin/products");
+    }
 
-  res.render("adminProducts", { products });
+    q = q.trim(); // remove spaces
+
+    const products = await Product.find({
+      name: { $regex: q, $options: "i" }
+    });
+
+    res.render("adminProducts", { products });
+
+  } catch (err) {
+    console.log("Search Error:", err);
+    res.send("Search failed");
+  }
 });
 
+
+router.get("/admin", isAdmin, async (req, res) => {
+  const products = await Product.find().sort({ createdAt: -1 });
+  const orders = await Order.find().populate("productId");
+
+  const totalProducts = await Product.countDocuments();
+  const totalOrders = await Order.countDocuments();
+
+  let revenue = 0;
+  orders.forEach(o => {
+    const match = o.payment?.match(/\d+/);
+    if (match) revenue += parseInt(match[0]);
+  });
+
+  res.render("adminPanel", {
+    products,
+    orders,
+    totalProducts,
+    totalOrders,
+    revenue
+  });
+});
 
 
 

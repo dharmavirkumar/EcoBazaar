@@ -4,7 +4,15 @@ const productSchema = new mongoose.Schema({
   price: Number,
   description: String,
   category: String,
-  image: String
+  image: String,
+  // ✅ NEW FIELDS
+  discount: {
+    type: Number, // percentage
+    default: 0
+  },
+  finalPrice: {
+    type: Number
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Product", productSchema);

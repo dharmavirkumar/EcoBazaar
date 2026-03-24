@@ -44,9 +44,31 @@ class="w-full h-100 object-cover">
     <%= product.name %>
   </h1>
 
-  <p class="text-3xl text-green-600 font-bold mb-2">
-    ₹ <%= product.price %>
-  </p>
+  <p class="text-3xl font-bold mb-2">
+
+  <% if(product.discount > 0){ %>
+
+    <span class="text-gray-400 line-through mr-2">
+      ₹ <%= product.price %>
+    </span>
+
+    <span class="text-green-600">
+      ₹ <%= product.finalPrice %>
+    </span>
+
+    <span class="text-red-500 text-lg ml-2">
+      (<%= product.discount %>% OFF)
+    </span>
+
+  <% } else { %>
+
+    <span class="text-green-600">
+      ₹ <%= product.price %>
+    </span>
+
+  <% } %>
+
+</p>
 
   <!-- ⭐ Rating -->
   <p class="text-yellow-500 mb-3">
@@ -70,6 +92,60 @@ class="w-full h-100 object-cover">
     <p><strong>Price:</strong> ₹ <%= product.price %></p>
     <p><strong>Delivery:</strong> 4-5 Days</p>
   </div>
+  <div class="max-w-7xl mx-auto mt-6 space-y-6">
+
+  <!-- TOP FEATURES -->
+  <div class="bg-gray-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between text-center md:text-left gap-6">
+
+    <!-- ITEM 1 -->
+    <div class="flex items-center gap-3">
+      <div class="bg-white p-3 rounded-full shadow">
+        <span class="text-2xl">🛍️</span>
+      </div>
+      <p class="font-semibold text-gray-700">Lowest Price</p>
+    </div>
+
+    <div class="hidden md:block h-10 w-px bg-gray-400"></div>
+
+    <!-- ITEM 2 -->
+    <div class="flex items-center gap-3">
+      <div class="bg-white p-3 rounded-full shadow">
+        <span class="text-2xl">💰</span>
+      </div>
+      <p class="font-semibold text-gray-700">Cash on Delivery</p>
+    </div>
+
+    <div class="hidden md:block h-10 w-px bg-gray-400"></div>
+
+    <!-- ITEM 3 -->
+    <!-- <div class="flex items-center gap-3">
+      <div class="bg-white p-3 rounded-full shadow">
+        <span class="text-2xl">📦</span>
+      </div>
+      <p class="font-semibold text-gray-700">7-day Returns</p>
+    </div> -->
+
+  </div>
+
+  <!-- TRUST SECTION -->
+  <div class="border rounded-2xl p-6 flex items-center gap-4 bg-white shadow-sm">
+
+    <!-- ICON -->
+    <div class="flex items-center gap-2 bg-purple-100 px-3 py-1 rounded-full">
+      <span class="bg-purple-600 text-white w-6 h-6 flex items-center justify-center rounded-full text-sm font-bold">
+        E
+      </span>
+      <span class="text-purple-700 font-semibold text-sm">Trusted</span>
+    </div>
+
+    <!-- TEXT -->
+    <h2 class="text-gray-600 font-semibold text-lg">
+      Best quality products from trusted suppliers
+    </h2>
+
+  </div>
+
+</div>
 
 </div>
 

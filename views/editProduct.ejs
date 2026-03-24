@@ -11,6 +11,8 @@
 <select name="category" class="w-full border p-2 mb-3">
   <option <%= product.category=="electronics"?"selected":"" %>>electronics</option>
   <option <%= product.category=="fashion"?"selected":"" %>>fashion</option>
+  <option <%= product.category=="jewellery"?"selected":"" %>>jewellery</option>
+  <option <%= product.category=="beauty"?"selected":"" %>>beauty</option>
 </select>
 
 <img src="<%= product.image %>" class="w-32 mb-3">
