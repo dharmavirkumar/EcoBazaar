@@ -21,7 +21,7 @@
     <div class="flex flex-col gap-3">
 
       <% if(product.images && product.images.length > 0){ %>
-        <% product.images.slice(0,3).forEach(function(img, index){ %>
+        <% product.images.slice(0,4).forEach(function(img, index){ %>
           <img 
             src="<%= img %>" 
             onclick="changeImage('<%= img %>')"
@@ -40,10 +40,12 @@
       <img 
         id="mainImage"
         src="<%= product.images?.[0] || product.image %>" 
-        class="w-full h-[400px] object-cover rounded">
+        class="w-full h-[500px] object-cover rounded">
     </div>
+    
 
   </div>
+  
 
   <!-- RIGHT SIDE -->
   <div>
@@ -112,9 +114,38 @@
     </p>
 
     <!-- INFO -->
-    <div class="bg-gray-100 p-4 rounded">
+    <div class="bg-gray-100 p-4 rounded-2xl mb-6">
       <p><strong>Price:</strong> ₹ <%= product.price %></p>
       <p><strong>Delivery:</strong> 4-5 Days</p>
+    </div>
+
+    <div class="mt-6">
+      <div class="bg-gray-200 rounded-2xl p-6 max-w-5xl mx-auto">
+  
+  <div class="flex items-center justify-between text-center">
+
+    <!-- ITEM 1 -->
+    <div class="flex-1 flex flex-col items-center">
+      <div class="bg-gray-100 w-16 h-16 flex items-center justify-center rounded-full mb-3">
+        <img src="https://cdn-icons-png.flaticon.com/512/3523/3523887.png" class="w-8">
+      </div>
+      <p class="font-semibold text-gray-700">Lowest Price</p>
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="w-px h-16 bg-gray-400 opacity-40"></div>
+
+    <!-- ITEM 2 -->
+    <div class="flex-1 flex flex-col items-center">
+      <div class="bg-gray-100 w-16 h-16 flex items-center justify-center rounded-full mb-3">
+        <img src="https://cdn-icons-png.flaticon.com/512/2331/2331941.png" class="w-8">
+      </div>
+      <p class="font-semibold text-gray-700">Cash on Delivery</p>
+    </div>
+
+  </div>
+
+</div>
     </div>
 
   </div>

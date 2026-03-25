@@ -17,8 +17,12 @@
     <h2 class="text-2xl font-bold mb-4 border-b pb-2">🛒 Order Summary</h2>
 
     <div class="overflow-hidden rounded-xl">
-      <img src="<%= product.image %>" 
-      class="w-full h-72 object-cover hover:scale-105 transition duration-300">
+      <img 
+src="<%= product.images && product.images.length > 0 
+        ? product.images[0] 
+        : (product.image ? '/uploads/' + product.image : '/default.png') %>" 
+onerror="this.src='/default.png'"
+class="w-full h-72 object-cover hover:scale-105 transition duration-300">
     </div>
 
     <h3 class="text-xl font-semibold mt-5">

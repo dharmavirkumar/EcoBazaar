@@ -109,7 +109,7 @@ class="flex-1 text-center bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
 View
 </a>
 
-<button onclick="addToCartPopup()"
+<button onclick="addToCart('<%= product._id %>')"
 class="flex-1 bg-pink-500 text-white py-2 rounded hover:bg-pink-600">
 Cart
 </button>
@@ -134,7 +134,9 @@ Cart
 
 <!-- JS -->
 <script>
-function addToCartPopup(){
+async function addToCart(id){
+  await fetch('/add-to-cart/' + id);
+
   const popup = document.getElementById("popup");
   popup.classList.remove("hidden");
 
