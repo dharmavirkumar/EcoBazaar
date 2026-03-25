@@ -9,158 +9,140 @@
 
 <%- include("partial/nav") %>
 
-<!-- 🔥 HERO SECTION -->
-<div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-12 sm:py-16">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col-reverse md:flex-row items-center justify-between gap-10">
+<!-- 🔥 HERO -->
+<div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-12">
+  <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-10">
 
-    <!-- TEXT -->
-    <div class="text-center md:text-left">
-      <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 leading-tight">
+    <div>
+      <h1 class="text-3xl md:text-4xl font-bold mb-4">
         Shop Smart, Live Better 🛒
       </h1>
-
-      <p class="text-sm sm:text-base md:text-lg mb-6">
-        Best deals on electronics, fashion & more
-      </p>
+      <p class="mb-6">Best deals on electronics, fashion & more</p>
 
       <a href="/electronics"
-        class="inline-block bg-white text-blue-600 px-6 py-2 sm:py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
+        class="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-200">
         Shop Now
       </a>
     </div>
 
-    <!-- IMAGE -->
-    <img 
-      src="https://cdn-icons-png.flaticon.com/512/3144/3144456.png"
-      class="w-40 sm:w-56 md:w-72"
-    >
+    <img src="https://cdn-icons-png.flaticon.com/512/3144/3144456.png"
+      class="w-56 md:w-72">
   </div>
 </div>
 
+<!-- 🔥 PRODUCTS -->
+<div class="max-w-7xl mx-auto px-4 mt-12">
 
-<!-- 🧩 CATEGORIES -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 mt-8 sm:mt-10">
+<h2 class="text-2xl font-bold mb-6">🔥 Trending Products</h2>
 
-  <h2 class="text-xl sm:text-2xl font-bold mb-6 text-center md:text-left">
-    Shop by Category
-  </h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+<% products.forEach(product => { %>
 
-    <a href="/electronics" class="bg-white p-4 sm:p-6 rounded-xl shadow hover:shadow-lg text-center transition">
-      <div class="text-2xl sm:text-3xl">📱</div>
-      <p class="mt-2 font-semibold text-sm sm:text-base">Electronics</p>
-    </a>
+<div class="bg-white rounded-xl shadow hover:shadow-xl transition overflow-hidden group relative">
 
-    <a href="/men" class="bg-white p-4 sm:p-6 rounded-xl shadow hover:shadow-lg text-center transition">
-      <div class="text-2xl sm:text-3xl">👕</div>
-      <p class="mt-2 font-semibold text-sm sm:text-base">Fashion</p>
-    </a>
+<!-- ❤️ WISHLIST -->
+<button class="absolute top-2 right-2 bg-white p-2 rounded-full shadow hover:bg-red-100">
+  ❤️
+</button>
 
-    <a href="/beauty" class="bg-white p-4 sm:p-6 rounded-xl shadow hover:shadow-lg text-center transition">
-      <div class="text-2xl sm:text-3xl">💄</div>
-      <p class="mt-2 font-semibold text-sm sm:text-base">Beauty</p>
-    </a>
+<!-- 🏷 SALE BADGE -->
+<% if(product.discountType && product.discountType !== "none"){ %>
+<span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+  SALE
+</span>
+<% } %>
 
-    <a href="/jewellery" class="bg-white p-4 sm:p-6 rounded-xl shadow hover:shadow-lg text-center transition">
-      <div class="text-2xl sm:text-3xl">💍</div>
-      <p class="mt-2 font-semibold text-sm sm:text-base">Accessories</p>
-    </a>
+<!-- IMAGE -->
+<div class="relative overflow-hidden">
 
-  </div>
+<img 
+src="<%= product.images && product.images.length > 0 
+        ? product.images[0] 
+        : '/uploads/' + product.image %>" 
+class="w-full h-48 object-cover transition duration-500 group-hover:opacity-0">
+
+<% if(product.images && product.images.length > 1){ %>
+<img 
+src="<%= product.images[1] %>" 
+class="w-full h-48 object-cover absolute top-0 left-0 opacity-0 group-hover:opacity-100 transition duration-500">
+<% } %>
 
 </div>
 
+<!-- CONTENT -->
+<div class="p-4">
 
-<!-- 🔥 TRENDING PRODUCTS -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 mt-10 sm:mt-12">
+<h3 class="font-semibold truncate"><%= product.name %></h3>
 
-  <h2 class="text-xl sm:text-2xl font-bold mb-6 text-center md:text-left">
-    🔥 Trending Products
-  </h2>
+<p class="font-bold mt-2">
 
-  <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
+<% if(product.discountType && product.discountType !== "none"){ %>
 
-  <% products.forEach(product => { %>
+<span class="line-through text-gray-400">
+₹ <%= product.price %>
+</span>
 
-    <div class="bg-white rounded-xl shadow hover:shadow-xl transition overflow-hidden group flex flex-col">
+<span class="text-green-600 ml-2">
+₹ <%= product.finalPrice %>
+</span>
 
-      <!-- IMAGE -->
-      <div class="overflow-hidden">
-        <img 
-          src="<%= product.image %>" 
-          onerror="this.src='https://via.placeholder.com/300'"
-          class="w-full h-44 sm:h-48 object-cover group-hover:scale-110 transition duration-300"
-        >
-      </div>
+<% } else { %>
 
-      <!-- CONTENT -->
-      <div class="p-4 flex flex-col flex-grow">
+₹ <%= product.price %>
 
-        <h3 class="font-semibold text-sm sm:text-base truncate">
-          <%= product.name %>
-        </h3>
-
-        <p class="font-bold">
-
-  <% if(product.discount > 0){ %>
-
-    <span class="line-through text-gray-400">
-      ₹ <%= product.price %>
-    </span>
-
-    <span class="text-green-600 ml-2">
-      ₹ <%= product.finalPrice %>
-    </span>
-
-  <% } else { %>
-
-    ₹ <%= product.price %>
-
-  <% } %>
+<% } %>
 
 </p>
 
-        <p class="text-gray-500 text-xs sm:text-sm mt-2 line-clamp-2">
-          <%= product.description ? product.description.substring(0, 60) : "" %>...
-        </p>
+<p class="text-gray-500 text-sm mt-2">
+<%= product.description 
+? product.description.substring(0, 50) 
+: "No description" %>...
+</p>
 
-        <!-- BUTTONS -->
-        <div class="flex gap-2 sm:gap-3 mt-4 mt-auto">
+<!-- BUTTONS -->
+<div class="flex gap-2 mt-4">
 
-          <a href="/product/<%= product._id %>"
-            class="flex-1 text-center bg-blue-500 text-white py-2 text-sm rounded-lg hover:bg-blue-600 transition">
-            View
-          </a>
+<a href="/product/<%= product._id %>"
+class="flex-1 text-center bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+View
+</a>
 
-          <a href="/add-to-cart/<%= product._id %>"
-            class="flex-1 text-center bg-pink-500 text-white py-2 text-sm rounded-lg hover:bg-pink-600 transition">
-            Cart
-          </a>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  <% }) %>
-
-  </div>
+<button onclick="addToCartPopup()"
+class="flex-1 bg-pink-500 text-white py-2 rounded hover:bg-pink-600">
+Cart
+</button>
 
 </div>
 
-
-<!-- 💎 OFFER BANNER -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 mt-10 sm:mt-12">
-  <div class="bg-yellow-400 p-4 sm:p-6 rounded-xl text-center font-semibold text-sm sm:text-lg">
-    🎉 Big Sale! Get up to 50% OFF on selected items
-  </div>
 </div>
 
+</div>
 
-<!-- FOOTER -->
+<% }) %>
+
+</div>
+</div>
+
+<!-- ✅ POPUP -->
+<div id="popup" class="fixed bottom-5 right-5 bg-green-500 text-white px-4 py-2 rounded shadow hidden">
+  ✅ Added to cart
+</div>
+
 <%- include("partial/footer") %>
+
+<!-- JS -->
+<script>
+function addToCartPopup(){
+  const popup = document.getElementById("popup");
+  popup.classList.remove("hidden");
+
+  setTimeout(()=>{
+    popup.classList.add("hidden");
+  },2000);
+}
+</script>
 
 </body>
 </html>

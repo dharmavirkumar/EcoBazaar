@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Cart</title>
-<script src="https://cdn.tailwindcss.com"></script>
+  <title>Cart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-100">
@@ -13,56 +13,102 @@
 
 <h1 class="text-3xl font-bold mb-6">Your Cart 🛒</h1>
 
-<% if(cart.length > 0){ %>
+<% if(cart && cart.length > 0){ %>
 
-<div class="space-y-4">
+<div class="grid md:grid-cols-3 gap-6">
 
-<% cart.forEach(item => { %>
+  <!-- 🛒 ITEMS -->
+  <div class="md:col-span-2 space-y-4">
 
-<div class="bg-white p-4 rounded shadow flex items-center justify-between">
+    <% cart.forEach(item => { %>
 
-<div class="flex items-center gap-4">
+    <div class="bg-white p-4 rounded-xl shadow flex gap-4 items-center">
 
-<img src="<%= item.image %>" class="w-full h-40 object-cover">
+      <!-- ✅ IMAGE FINAL FIX -->
+     <img 
+  src="<%= item.image.startsWith('http') ? item.image : '/' + item.image %>"
+  onerror="this.src='/default.png'"
+  class="w-24 h-24 object-cover rounded-lg border">
+      <!-- DETAILS -->
+      <div class="flex-1">
 
-<div>
-<h2 class="font-semibold"><%= item.name %></h2>
-<p>₹ <%= item.price %></p>
-<p>Qty: <%= item.qty %></p>
-</div>
+        <h2 class="font-semibold text-lg">
+          <%= item.name %>
+        </h2>
 
-</div>
+        <p class="text-green-600 font-bold">
+          ₹ <%= item.price %>
+        </p>
 
-<a href="/remove-from-cart/<%= item._id %>" 
-class="bg-red-500 text-white px-4 py-2 rounded">
-Remove
-</a>
+        <p class="text-gray-500 text-sm">
+          Subtotal: ₹ <%= item.price * item.qty %>
+        </p>
 
-</div>
+        <!-- 🔢 QTY -->
+        <div class="flex items-center gap-2 mt-2">
 
-<% }) %>
+          <a href="/decrease-qty/<%= item._id %>" 
+            class="px-3 py-1 bg-gray-200 rounded">-</a>
 
-</div>
+          <span class="px-3"><%= item.qty %></span>
 
-<!-- TOTAL -->
-<div class="mt-6 bg-white p-6 rounded shadow">
+          <a href="/increase-qty/<%= item._id %>" 
+            class="px-3 py-1 bg-gray-200 rounded">+</a>
 
-<h2 class="text-xl font-bold">Total: ₹ <%= total %></h2>
+        </div>
 
-<a href="/checkout" 
-class="mt-4 inline-block bg-green-500 text-white px-6 py-2 rounded">
-Checkout
-</a>
+      </div>
+
+      <!-- REMOVE -->
+      <a href="/remove-from-cart/<%= item._id %>" 
+        class="text-red-500 font-bold text-xl">✖</a>
+
+    </div>
+
+    <% }) %>
+
+  </div>
+
+  <!-- 💰 SUMMARY -->
+  <div class="bg-white p-6 rounded-xl shadow">
+
+    <h2 class="text-xl font-bold mb-4">Order Summary</h2>
+
+    <div class="flex justify-between mb-2">
+      <span>Total Items</span>
+      <span><%= cart.length %></span>
+    </div>
+
+    <div class="flex justify-between mb-2">
+      <span>Total Price</span>
+      <span class="font-bold text-green-600">₹ <%= total %></span>
+    </div>
+
+    <hr class="my-4">
+
+    <a href="/checkout" 
+      class="block text-center bg-green-500 text-white py-3 rounded-lg">
+      Checkout
+    </a>
+
+  </div>
 
 </div>
 
 <% } else { %>
 
-<p>Your cart is empty 😢</p>
+<div class="text-center mt-20">
+  <h2 class="text-2xl">Cart Empty 😢</h2>
+  <a href="/" class="bg-blue-500 text-white px-6 py-3 rounded mt-4 inline-block">
+    Shop Now
+  </a>
+</div>
 
 <% } %>
 
 </div>
+
+<%- include("partial/footer") %>
 
 </body>
 </html>

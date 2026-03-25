@@ -247,28 +247,37 @@ res.render("Jewellery", { products });
 // ================= ADD PRODUCT =================
 
 
-router.post('/add-product', upload.single("image"), async (req, res) => {
+router.post('/add-product', upload.array("images", 5), async (req, res) => {
 
-  const { name, price, description, category, discount } = req.body;
+  const { name, price, description, category, discountType, discountValue } = req.body;
 
-  const image = req.file ? req.file.path : "";
+  // ✅ MULTIPLE IMAGES ARRAY
+  const images = req.files.map(file => file.path);
 
-  // ✅ discount calculation
-  const finalPrice = price - (price * (discount || 0) / 100);
+  let finalPrice = price;
+
+  // ✅ DISCOUNT LOGIC
+  if (discountType === "percentage") {
+    finalPrice = price - (price * discountValue / 100);
+  } 
+  else if (discountType === "flat") {
+    finalPrice = price - discountValue;
+  }
 
   const newProduct = new Product({
     name,
     price,
     description,
     category,
-    image,
-    discount,
+    images,
+    discountType,
+    discountValue,
     finalPrice
   });
 
   await newProduct.save();
 
-  res.redirect('/');
+  res.redirect('/admin');
 });
 
 // ================= PRODUCT DETAILS =================
@@ -335,15 +344,16 @@ router.get("/search", async (req, res) => {
 
 // ================= CART =================
 router.get("/add-to-cart/:id", async (req, res) => {
+
   const product = await Product.findById(req.params.id);
 
-  if (!req.session.cart) req.session.cart = [];
+  if (!req.session.cart) {
+    req.session.cart = [];
+  }
 
-  const cart = req.session.cart;
+  let cart = req.session.cart;
 
- const existing = cart.find(
-  (item) => item._id.toString() === req.params.id
-);
+  let existing = cart.find(item => item._id == product._id);
 
   if (existing) {
     existing.qty += 1;
@@ -352,9 +362,10 @@ router.get("/add-to-cart/:id", async (req, res) => {
       _id: product._id,
       name: product.name,
       price: product.price,
-      image: product.image,
-      size: product.category === "fashion" ? product.size : null,
       qty: 1,
+
+      // ✅ FINAL IMAGE FIX
+      image: product.images?.[0] || product.image || "default.png"
     });
   }
 
@@ -362,14 +373,15 @@ router.get("/add-to-cart/:id", async (req, res) => {
 });
 
 router.get("/cart", (req, res) => {
-  const cart = req.session.cart || [];
 
-  const total = cart.reduce(
-    (sum, item) => sum + item.price * item.qty,
-    0
-  );
+  let cart = req.session.cart || [];
+
+  let total = cart.reduce((sum, item) => {
+    return sum + item.price * item.qty;
+  }, 0);
 
   res.render("cart", { cart, total });
+
 });
 
 
