@@ -19,8 +19,8 @@
       <!-- IMAGE -->
       <div class="w-full md:w-32 flex-shrink-0">
         <img 
-          src="<%= order.productId?.image || '/default.png' %>" 
-          class="w-full h-32 object-cover rounded-lg border">
+  src="<%= order.productId?.images?.[0] || '/default.png' %>" 
+  class="w-full h-32 object-cover rounded-lg border">
       </div>
 
       <!-- DETAILS -->
@@ -47,44 +47,41 @@
       </div>
 
       <!-- STATUS + ACTION -->
-      <div class="flex flex-col justify-between items-end">
+    <!-- STATUS + ACTION -->
+<div class="flex flex-col justify-between items-end">
 
-        <!-- STATUS BADGE -->
-        <span class="px-3 py-1 text-sm rounded-full font-medium
-          <%= order.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 
-              order.status === 'Delivered' ? 'bg-green-100 text-green-700' : 
-              order.status === 'Cancelled' ? 'bg-red-100 text-red-600' :
-              'bg-blue-100 text-blue-600' %>">
-          <%= order.status %>
-        </span>
-   
-        <!-- BUTTON -->
-        <div class="mt-4">
+  <!-- STATUS BADGE -->
+  <span class="px-3 py-1 text-sm rounded-full font-medium
+    <%= order.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 
+        order.status === 'Delivered' ? 'bg-green-100 text-green-700' : 
+        order.status === 'Cancelled' ? 'bg-red-100 text-red-600' :
+        'bg-blue-100 text-blue-600' %>">
+    <%= order.status %>
+  </span>
 
-          <% if(order.status !== "Cancelled" && order.status !== "Delivered") { %>
+  <!-- BUTTONS -->
+  <div class="mt-4 flex flex-col gap-2 items-end">
 
-            <a href="/cancel-order/<%= order._id %>"
-              class="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm transition">
-              Cancel ❌
-            </a>
+    <% if(order.status !== "Cancelled" && order.status !== "Delivered") { %>
+      <a href="/cancel-order/<%= order._id %>"
+        class="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm transition">
+        Cancel ❌
+      </a>
+    <% } else { %>
+      <span class="text-gray-400 text-sm">
+        Not Allowed
+      </span>
+    <% } %>
 
-          <% } else { %>
+    <!-- DOWNLOAD INVOICE -->
+    <a href="/download-invoice/<%= order._id %>"
+      class="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-md text-sm transition">
+      Download Invoice 🧾
+    </a>
 
-            <span class="text-gray-400 text-sm">
-              Not Allowed
-            </span>
+  </div>
 
-          <% } %>
-                  
-
-        </div> <a href="/download-invoice/<%= order._id %>"
-   class="bg-green-500 text-white px-3 py-1 rounded">
-   Download Invoice 🧾
-</a>
-
-      </div>
-
-    </div>
+</div>
 
   <% }) %>
 
