@@ -1,4 +1,4 @@
-<div class="max-w-3xl mx-auto mt-10 bg-white p-6 rounded shadow">
+<!-- <div class="max-w-3xl mx-auto mt-10 bg-white p-6 rounded shadow">
 
 <h1 class="text-2xl font-bold mb-4">✏️ Edit Product</h1>
 
@@ -13,6 +13,7 @@
   <option <%= product.category=="fashion"?"selected":"" %>>fashion</option>
   <option <%= product.category=="jewellery"?"selected":"" %>>jewellery</option>
   <option <%= product.category=="beauty"?"selected":"" %>>beauty</option>
+  
 </select>
 
 <img src="<%= product.image %>" class="w-32 mb-3">
@@ -28,4 +29,137 @@ Update
 </button>
 
 </form>
+</div> -->
+
+
+<div class="max-w-6xl mx-auto mt-10 bg-white p-8 rounded-2xl shadow-lg">
+
+  <h1 class="text-3xl font-bold mb-6">✏️ Edit Product</h1>
+
+  <form action="/admin/edit-product/<%= product._id %>" method="POST" enctype="multipart/form-data">
+
+    <div class="grid md:grid-cols-2 gap-6">
+
+      <!-- LEFT SIDE -->
+      <div>
+
+        <input type="text" name="name" value="<%= product.name %>"
+          class="w-full border p-3 mb-3 rounded" placeholder="Product Name">
+
+        <input type="number" name="price" value="<%= product.price %>"
+          class="w-full border p-3 mb-3 rounded" placeholder="Price">
+
+        <textarea name="description"
+          class="w-full border p-3 mb-3 rounded"
+          placeholder="Description"><%= product.description %></textarea>
+
+        <!-- CATEGORY -->
+        <select name="category" class="w-full border p-3 mb-3 rounded">
+          <option <%= product.category=="fashion"?"selected":"" %>>fashion</option>
+          <option <%= product.category=="electronics"?"selected":"" %>>electronics</option>
+          <option <%= product.category=="beauty"?"selected":"" %>>beauty</option>
+          <option <%= product.category=="jewellery"?"selected":"" %>>jewellery</option>
+        </select>
+
+        <!-- MAIN CATEGORY -->
+        <select name="mainCategory" class="w-full border p-3 mb-3 rounded">
+          <option <%= product.mainCategory=="Top Wear"?"selected":"" %>>Top Wear</option>
+          <option <%= product.mainCategory=="Bottom Wear"?"selected":"" %>>Bottom Wear</option>
+          <option <%= product.mainCategory=="Ethnic Wear"?"selected":"" %>>Ethnic Wear</option>
+          <option <%= product.mainCategory=="Footwear"?"selected":"" %>>Footwear</option>
+          <option <%= product.mainCategory=="Accessories"?"selected":"" %>>Accessories</option>
+          <option <%= product.mainCategory=="Beauty"?"selected":"" %>>Beauty</option>
+          <option <%= product.mainCategory=="Electronics"?"selected":"" %>>Electronics</option>
+        </select>
+
+        <!-- SUB CATEGORY -->
+        <select name="subCategory" class="w-full border p-3 mb-3 rounded">
+
+          <option <%= product.subCategory=="Shirts"?"selected":"" %>>Shirts</option>
+          <option <%= product.subCategory=="T-Shirts"?"selected":"" %>>T-Shirts</option>
+          <option <%= product.subCategory=="Jeans"?"selected":"" %>>Jeans</option>
+          <option <%= product.subCategory=="Trousers"?"selected":"" %>>Trousers</option>
+
+          <option <%= product.subCategory=="Kurtas"?"selected":"" %>>Kurtas</option>
+          <option <%= product.subCategory=="Kurta Sets"?"selected":"" %>>Kurta Sets</option>
+
+          <option <%= product.subCategory=="Casual Shoes"?"selected":"" %>>Casual Shoes</option>
+          <option <%= product.subCategory=="Sports Shoes"?"selected":"" %>>Sports Shoes</option>
+
+          <option <%= product.subCategory=="Watches"?"selected":"" %>>Watches</option>
+          <option <%= product.subCategory=="Wallets"?"selected":"" %>>Wallets</option>
+          <option <%= product.subCategory=="Jewellery"?"selected":"" %>>Jewellery</option>
+          <option <%= product.subCategory=="Sunglasses"?"selected":"" %>>Sunglasses</option>
+          <option <%= product.subCategory=="Belts"?"selected":"" %>>Belts</option>
+
+          <option <%= product.subCategory=="Hair Oil"?"selected":"" %>>Hair Oil</option>
+          <option <%= product.subCategory=="Shampoo"?"selected":"" %>>Shampoo</option>
+          <option <%= product.subCategory=="Conditioner"?"selected":"" %>>Conditioner</option>
+          <option <%= product.subCategory=="Hair Wax"?"selected":"" %>>Hair Wax</option>
+          <option <%= product.subCategory=="Hair Spray"?"selected":"" %>>Hair Spray</option>
+
+          <option <%= product.subCategory=="Neckband"?"selected":"" %>>Neckband</option>
+          <option <%= product.subCategory=="Speakers"?"selected":"" %>>Speakers</option>
+          <option <%= product.subCategory=="Power Banks"?"selected":"" %>>Power Banks</option>
+          <option <%= product.subCategory=="Microphone"?"selected":"" %>>Microphone</option>
+
+        </select>
+
+        <!-- DISCOUNT -->
+        <select name="discountType" class="w-full border p-3 mb-3 rounded">
+          <option <%= product.discountType=="none"?"selected":"" %>>none</option>
+          <option <%= product.discountType=="percentage"?"selected":"" %>>percentage</option>
+          <option <%= product.discountType=="flat"?"selected":"" %>>flat</option>
+        </select>
+
+        <input type="number" name="discountValue"
+          value="<%= product.discountValue %>"
+          class="w-full border p-3 mb-3 rounded"
+          placeholder="Discount Value">
+
+      </div>
+
+      <!-- RIGHT SIDE -->
+      <div>
+
+        <!-- EXISTING IMAGES -->
+        <h3 class="font-semibold mb-2">Current Images</h3>
+
+        <div class="flex gap-3 flex-wrap mb-4">
+          <% if(product.images && product.images.length > 0){ %>
+            <% product.images.forEach((img, index) => { %>
+
+              <div class="relative">
+                <img src="<%= img %>" class="w-24 h-24 object-cover rounded border">
+
+                
+
+                <input type="hidden" name="existingImages" value="<%= img %>">
+
+              </div>
+
+            <% }) %>
+          <% } %>
+        </div>
+
+        <!-- DRAG DROP -->
+        <div id="dropArea"
+          class="border-2 border-dashed border-gray-400 p-6 text-center rounded cursor-pointer hover:bg-gray-50">
+
+          <p>📂 Drag & Drop New Images OR Click</p>
+          <input type="file" id="imageInput" name="images" multiple class="hidden">
+        </div>
+
+        <div id="previewContainer" class="flex gap-3 flex-wrap mt-4"></div>
+
+        <button class="w-full bg-blue-600 text-white py-3 mt-6 rounded-xl">
+          🚀 Update Product
+        </button>
+
+      </div>
+
+    </div>
+
+  </form>
 </div>
+

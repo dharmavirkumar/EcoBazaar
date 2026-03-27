@@ -233,7 +233,9 @@ router.get("/men", async (req, res) => {
 });
 
 router.get("/beauty", async (req, res) => {
-  const products = await Product.find({ category: "Beauty" });
+  const products = await Product.find({
+    category: { $regex: "beauty", $options: "i" }
+  });
   res.render("Beauty", { products });
 });
 
@@ -282,12 +284,14 @@ router.post('/add-product', upload.array("images", 5), async (req, res) => {
   res.redirect('/admin');
 });
 
+
+
 router.get("/category/:main/:sub", async (req, res) => {
   const { main, sub } = req.params;
 
   const products = await Product.find({
     mainCategory: main,
-    subCategory: sub
+    subCategory: { $regex: sub, $options: "i" } // 🔥 FIX
   });
 
   res.render("categoryPage", { products, main, sub });
@@ -477,7 +481,7 @@ router.post("/checkout", isLoggedIn, async (req, res) => {
           <h3>${firstProduct.name}</h3>
           <p>₹${firstProduct.price}</p>
 
-          <img src="${firstProduct.image}" width="200"/>
+          <img src="${firstProduct.images[0]}" width="200"/>
 
           <p>📦 Delivery within 3-5 days</p>
         `
@@ -564,7 +568,7 @@ router.get("/buy-now/:id", isLoggedIn, async (req, res) => {
           <h3>${product.name}</h3>
           <p>₹${product.price}</p>
 
-          <img src="${product.image}" width="200"/>
+          <img src="${product.images[0]}" width="200"/>
 
           <p>📦 Delivery within 3-5 days</p>
         `,
@@ -689,30 +693,63 @@ router.get("/admin/edit-product/:id", async (req, res) => {
 
 
 // ================= UPDATE PRODUCT =================
-router.post("/admin/edit-product/:id", upload.single("image"), async (req, res) => {
+router.post("/admin/edit-product/:id", upload.array("images", 5), async (req, res) => {
   try {
     const id = req.params.id;
 
-    // 🔥 IMPORTANT FIX
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.send("Invalid Product ID");
     }
 
-    const { name, price, description, category } = req.body;
-
-    const updateData = {
+    const {
       name,
       price,
       description,
-      category
-    };
+      category,
+      mainCategory,
+      subCategory,
+      discountType,
+      discountValue
+    } = req.body;
 
-    // ✅ Image update only if uploaded
-    if (req.file) {
-      updateData.image = req.file.path;
+    let images = [];
+
+    // ✅ OLD IMAGES (जो user ने delete नहीं की)
+    if (req.body.existingImages) {
+      if (Array.isArray(req.body.existingImages)) {
+        images = req.body.existingImages;
+      } else {
+        images = [req.body.existingImages];
+      }
     }
 
-    await Product.findByIdAndUpdate(id, updateData);
+    // ✅ NEW IMAGES ADD
+    if (req.files && req.files.length > 0) {
+      const newImages = req.files.map(file => file.path);
+      images = images.concat(newImages);
+    }
+
+    // ✅ DISCOUNT CALCULATION
+    let finalPrice = price;
+
+    if (discountType === "percentage") {
+      finalPrice = price - (price * discountValue / 100);
+    } else if (discountType === "flat") {
+      finalPrice = price - discountValue;
+    }
+
+    await Product.findByIdAndUpdate(id, {
+      name,
+      price,
+      description,
+      category,
+      mainCategory,
+      subCategory,
+      discountType,
+      discountValue,
+      finalPrice,
+      images
+    });
 
     res.redirect("/admin/products");
 
