@@ -11,43 +11,79 @@
 
 <div class="max-w-7xl mx-auto p-6">
 
-<h1 class="text-2xl font-bold mb-6">
+<h1 class="text-3xl font-bold mb-6">
   <%= main %> / <%= sub %>
 </h1>
 
 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
 
-<% if(products.length > 0){ %>
+<% if(products && products.length > 0){ %>
 
-  <% products.forEach(product => { %>
+  <% products.forEach(function(product){ %>
 
-    <div class="bg-white p-4 rounded shadow">
+  <div class="bg-white p-4 rounded shadow hover:shadow-lg transition">
 
-      <img src="<%= product.images[0] %>" 
-           class="w-full h-40 object-cover rounded">
+    <!-- ✅ IMAGE SAFE -->
+    <img 
+    src="<%= product.images && product.images.length > 0 
+            ? (product.images[0].startsWith('http') 
+                ? product.images[0] 
+                : '/uploads/' + product.images[0]) 
+            : (product.image && product.image.startsWith('http') 
+                ? product.image 
+                : '/uploads/' + product.image) %>" 
+    onerror="this.src='/default.png'"
+    class="w-full h-40 object-cover rounded">
 
-      <h2 class="font-semibold mt-2"><%= product.name %></h2>
+    <!-- NAME -->
+    <h2 class="text-lg font-semibold mt-3">
+      <%= product.name ? product.name.substring(0, 22) : "No Name" %>
+    </h2>
 
-      <p class="text-gray-700">₹ <%= product.price %></p>
+    <!-- PRICE -->
+    <p class="text-gray-600 font-bold">₹ <%= product.price || 0 %></p>
 
-      <a href="/product/<%= product._id %>" 
-         class="block mt-2 bg-blue-500 text-white text-center py-1 rounded">
-         View
-      </a>
+    <!-- DELIVERY -->
+    <p class="text-sm text-green-600">🚚 Free Delivery</p>
 
-    </div>
+    <!-- RATING -->
+    <p class="mb-2 text-yellow-500 text-sm">
+    ⭐ Average Rating: 
+    <%= (typeof product.avgRating !== "undefined" && product.avgRating !== null) 
+        ? product.avgRating.toFixed(1) 
+        : "No rating" %>
+    </p>
+
+    <!-- DESCRIPTION -->
+    <p class="text-gray-600 text-sm">
+    <%= product.description 
+    ? product.description.substring(0, 60) 
+    : "No description available" %>...
+    </p>
+
+    <!-- BUTTON -->
+    <a href="/product/<%= product._id %>" 
+    class="block mt-3 bg-blue-500 text-white text-center py-2 rounded hover:bg-blue-600 transition">
+    View Details
+    </a>
+
+  </div>
 
   <% }) %>
 
 <% } else { %>
 
-  <p>No products found 😔</p>
+  <div class="col-span-full text-center">
+    <p class="text-xl text-gray-500">No products found 😔</p>
+  </div>
 
 <% } %>
 
 </div>
 
 </div>
+
+<%- include("partial/footer") %>
 
 </body>
 </html>
