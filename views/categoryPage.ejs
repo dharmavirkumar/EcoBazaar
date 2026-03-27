@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Category</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+<%- include("partial/nav") %>
+
+<div class="max-w-7xl mx-auto p-6">
+
+<h1 class="text-2xl font-bold mb-6">
+  <%= main %> / <%= sub %>
+</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+
+<% if(products.length > 0){ %>
+
+  <% products.forEach(product => { %>
+
+    <div class="bg-white p-4 rounded shadow">
+
+      <img src="<%= product.images[0] %>" 
+           class="w-full h-40 object-cover rounded">
+
+      <h2 class="font-semibold mt-2"><%= product.name %></h2>
+
+      <p class="text-gray-700">₹ <%= product.price %></p>
+
+      <a href="/product/<%= product._id %>" 
+         class="block mt-2 bg-blue-500 text-white text-center py-1 rounded">
+         View
+      </a>
+
+    </div>
+
+  <% }) %>
+
+<% } else { %>
+
+  <p>No products found 😔</p>
+
+<% } %>
+
+</div>
+
+</div>
+
+</body>
+</html>

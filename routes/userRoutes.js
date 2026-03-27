@@ -249,7 +249,7 @@ res.render("Jewellery", { products });
 
 router.post('/add-product', upload.array("images", 5), async (req, res) => {
 
-  const { name, price, description, category, discountType, discountValue } = req.body;
+  const { name, price, description, category, discountType, discountValue,mainCategory, subCategory } = req.body;
 
   // ✅ MULTIPLE IMAGES ARRAY
   const images = req.files.map(file => file.path);
@@ -272,12 +272,25 @@ router.post('/add-product', upload.array("images", 5), async (req, res) => {
     images,
     discountType,
     discountValue,
+    mainCategory,
+    subCategory,
     finalPrice
   });
 
   await newProduct.save();
 
   res.redirect('/admin');
+});
+
+router.get("/category/:main/:sub", async (req, res) => {
+  const { main, sub } = req.params;
+
+  const products = await Product.find({
+    mainCategory: main,
+    subCategory: sub
+  });
+
+  res.render("categoryPage", { products, main, sub });
 });
 
 // ================= PRODUCT DETAILS =================

@@ -1,30 +1,16 @@
-// const mongoose = require("mongoose");
-// const productSchema = new mongoose.Schema({
-//   name: String,
-//   price: Number,
-//   description: String,
-//   category: String,
-//   image: String,
-//   // ✅ NEW FIELDS
-//   discount: {
-//     type: Number, // percentage
-//     default: 0
-//   },
-//   finalPrice: {
-//     type: Number
-//   }
-// }, { timestamps: true });
-
-// module.exports = mongoose.model("Product", productSchema);
-
-
 const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema({
   name: String,
   price: Number,
   description: String,
+
+  // ❌ OLD (optional rakh sakte ho)
   category: String,
+
+  // ✅ NEW (IMPORTANT FOR MENU)
+  mainCategory: String,   // Top Wear, Bottom Wear
+  subCategory: String,    // Shirts, Jeans
 
   // ✅ MULTIPLE IMAGES
   images: [String],
