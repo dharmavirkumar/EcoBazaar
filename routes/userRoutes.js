@@ -286,12 +286,24 @@ router.post('/add-product', upload.array("images", 5), async (req, res) => {
 
 
 
+// router.get("/category/:main/:sub", async (req, res) => {
+//   const { main, sub } = req.params;
+
+//   const products = await Product.find({
+//     mainCategory: main,
+//     subCategory: { $regex: sub, $options: "i" } // 🔥 FIX
+//   });
+
+//   res.render("categoryPage", { products, main, sub });
+// });
+
+
 router.get("/category/:main/:sub", async (req, res) => {
   const { main, sub } = req.params;
 
   const products = await Product.find({
-    mainCategory: main,
-    subCategory: { $regex: sub, $options: "i" } // 🔥 FIX
+    mainCategory: { $regex: `^${main}$`, $options: "i" },
+    subCategory: { $regex: sub, $options: "i" }
   });
 
   res.render("categoryPage", { products, main, sub });
