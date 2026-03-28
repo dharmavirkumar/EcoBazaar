@@ -8,6 +8,7 @@
 <body class="bg-gray-100">
 
 <!-- NAVBAR -->
+<%- include("partial/nav") %>
 
 <div class="max-w-7xl mx-auto mt-6 grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white p-4 md:p-6 rounded shadow">
 
@@ -135,6 +136,8 @@
     <p>No reviews yet</p>
   <% } %>
 </div>
+
+  <%- include("partial/footer") %>
 
 <script>
 function changeImage(src){
