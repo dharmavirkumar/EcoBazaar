@@ -1,109 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width, initial-scale=1.0">
-    <title>my Orders</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <%- include("partial/nav") %>
-    <% if(orders.length > 0){ %>
 
-  <div class="space-y-6">
+<body class="bg-gray-100">
 
-  <% orders.forEach(order => { %>
+<%- include("partial/nav") %>
 
-    <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition p-5 flex flex-col md:flex-row gap-5">
+<div class="max-w-6xl mx-auto px-3 sm:px-5 md:px-6 py-4">
 
-      <!-- IMAGE -->
-      <div class="w-full md:w-32 flex-shrink-0">
-        <img 
-  src="<%= order.productId?.images?.[0] || '/default.png' %>" 
-  class="w-full h-32 object-cover rounded-lg border">
-      </div>
+<h1 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
+  My Orders
+</h1>
 
-      <!-- DETAILS -->
-      <div class="flex-1">
+<% if(orders.length > 0){ %>
 
-        <h2 class="text-lg font-semibold text-gray-800">
-          <%= order.productId?.name %>
-        </h2>
+<div class="space-y-4 sm:space-y-6">
 
-        <p class="text-gray-600 mt-1">
-          ₹ <%= order.productId?.price %>
-        </p>
+<% orders.forEach(order => { %>
 
-        <% if(order.size){ %>
-          <p class="text-sm text-gray-500 mt-1">
-            Size: <span class="font-medium"><%= order.size %></span>
-          </p>
-        <% } %>
+<div class="bg-white rounded-xl shadow-sm hover:shadow-md transition p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-5">
 
-        <p class="text-sm text-gray-400 mt-2">
-          Ordered on: <%= new Date(order.createdAt).toDateString() %>
-        </p>
+  <!-- IMAGE -->
+  <div class="w-full sm:w-28 md:w-32 flex-shrink-0">
+    <img 
+      src="<%= order.productId?.images?.[0] || '/default.png' %>" 
+      class="w-full h-40 sm:h-28 md:h-32 object-cover rounded-lg border">
+  </div>
 
-      </div>
+  <!-- DETAILS -->
+  <div class="flex-1">
 
-      <!-- STATUS + ACTION -->
-    <!-- STATUS + ACTION -->
-<div class="flex flex-col justify-between items-end">
+    <h2 class="text-base sm:text-lg font-semibold text-gray-800 line-clamp-2">
+      <%= order.productId?.name %>
+    </h2>
 
-  <!-- STATUS BADGE -->
-  <span class="px-3 py-1 text-sm rounded-full font-medium
-    <%= order.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 
-        order.status === 'Delivered' ? 'bg-green-100 text-green-700' : 
-        order.status === 'Cancelled' ? 'bg-red-100 text-red-600' :
-        'bg-blue-100 text-blue-600' %>">
-    <%= order.status %>
-  </span>
+    <p class="text-gray-700 font-medium mt-1">
+      ₹ <%= order.productId?.price %>
+    </p>
 
-  <!-- BUTTONS -->
-  <div class="mt-4 flex flex-col gap-2 items-end">
-
-    <% if(order.status !== "Cancelled" && order.status !== "Delivered") { %>
-      <a href="/cancel-order/<%= order._id %>"
-        class="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm transition">
-        Cancel ❌
-      </a>
-    <% } else { %>
-      <span class="text-gray-400 text-sm">
-        Not Allowed
-      </span>
+    <% if(order.size){ %>
+      <p class="text-xs sm:text-sm text-gray-500 mt-1">
+        Size: <span class="font-medium"><%= order.size %></span>
+      </p>
     <% } %>
 
-    <!-- DOWNLOAD INVOICE -->
-    <a href="/download-invoice/<%= order._id %>"
-      class="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-md text-sm transition">
-      Download Invoice 🧾
-    </a>
+    <p class="text-xs sm:text-sm text-gray-400 mt-2">
+      Ordered on: <%= new Date(order.createdAt).toDateString() %>
+    </p>
+
+  </div>
+
+  <!-- STATUS + ACTION -->
+  <div class="flex flex-row sm:flex-col justify-between items-center sm:items-end gap-3 sm:gap-4">
+
+    <!-- STATUS -->
+    <span class="px-3 py-1 text-xs sm:text-sm rounded-full font-medium whitespace-nowrap
+      <%= order.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 
+          order.status === 'Delivered' ? 'bg-green-100 text-green-700' : 
+          order.status === 'Cancelled' ? 'bg-red-100 text-red-600' :
+          'bg-blue-100 text-blue-600' %>">
+      <%= order.status %>
+    </span>
+
+    <!-- BUTTONS -->
+    <div class="flex flex-row sm:flex-col gap-2 sm:gap-2">
+
+      <% if(order.status !== "Cancelled" && order.status !== "Delivered") { %>
+        <a href="/cancel-order/<%= order._id %>"
+          class="bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm text-center">
+          Cancel
+        </a>
+      <% } else { %>
+        <span class="text-gray-400 text-xs sm:text-sm">
+          Not Allowed
+        </span>
+      <% } %>
+
+      <a href="/download-invoice/<%= order._id %>"
+        class="bg-green-500 hover:bg-green-600 text-white px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm text-center">
+        Invoice
+      </a>
+
+    </div>
 
   </div>
 
 </div>
 
-  <% }) %>
+<% }) %>
 
-  </div>
+</div>
 
 <% } else { %>
 
-  <!-- EMPTY STATE -->
-  <div class="text-center mt-20">
-    <h2 class="text-xl font-semibold text-gray-700">No orders yet 😔</h2>
-    <p class="text-gray-500 mt-2">Start shopping and place your first order!</p>
+<!-- EMPTY STATE -->
+<div class="text-center mt-16 sm:mt-20 px-4">
+  <h2 class="text-lg sm:text-xl font-semibold text-gray-700">
+    No orders yet 😔
+  </h2>
 
-    <a href="/" 
-      class="inline-block mt-4 bg-yellow-400 hover:bg-yellow-500 px-5 py-2 rounded font-medium">
-      Shop Now 🛍️
-    </a>
-  </div>
+  <p class="text-gray-500 mt-2 text-sm sm:text-base">
+    Start shopping and place your first order!
+  </p>
+
+  <a href="/" 
+    class="inline-block mt-4 bg-yellow-400 hover:bg-yellow-500 px-5 py-2 rounded font-medium text-sm sm:text-base">
+    Shop Now 🛍️
+  </a>
+</div>
 
 <% } %>
 
-
+</div>
 
 <%- include("partial/footer") %>
+
 </body>
 </html>

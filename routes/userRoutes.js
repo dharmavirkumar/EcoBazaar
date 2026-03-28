@@ -15,6 +15,7 @@ const User = require("../models/User");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
+const razorpay = require("../config/razorpay");
 
 
 function isLoggedIn(req, res, next) {
@@ -132,69 +133,111 @@ router.get("/logout", (req, res) => {
 
 
 
-function generateInvoice(order, product) {
-  const filePath = path.join(__dirname, `../invoices/invoice_${Date.now()}.pdf`);
-
-  const doc = new PDFDocument();
-
-  doc.pipe(fs.createWriteStream(filePath));
-
-  // Title
-  doc.fontSize(20).text("INVOICE", { align: "center" });
-
-  doc.moveDown();
-
-  // Customer
-  doc.fontSize(12).text(`Name: ${order.name}`);
-  doc.text(`Email: ${order.email}`);
-  doc.text(`Phone: ${order.phone}`);
-
-  doc.moveDown();
-
-  // Product
-  doc.text(`Product: ${product.name}`);
-  doc.text(`Price: ₹${product.price}`);
-  doc.text(`Size: ${order.size || "N/A"}`);
-
-  doc.moveDown();
-
-  doc.text(`Address: ${order.address}`);
-
-  doc.moveDown();
-  doc.text("Thank you for your purchase ❤️");
-
-  doc.end();
-
-  return filePath;
-}
-
 
 router.get("/download-invoice/:id", isLoggedIn, async (req, res) => {
   const order = await Order.findById(req.params.id).populate("productId");
 
   if (!order) return res.send("Order not found");
 
-  const doc = new PDFDocument();
+  const doc = new PDFDocument({ margin: 50 });
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", "attachment; filename=invoice.pdf");
 
   doc.pipe(res);
 
-  doc.fontSize(20).text("INVOICE", { align: "center" });
+  // 🟡 HEADER
+  doc
+    .fontSize(22)
+    .fillColor("#2874f0")
+    .text("LioKart", 50, 50);
 
-  doc.moveDown();
-  doc.text(`Name: ${order.name}`);
-  doc.text(`Email: ${order.email}`);
-  doc.text(`Phone: ${order.phone}`);
+  doc
+    .fontSize(10)
+    .fillColor("black")
+    .text("Invoice", 450, 50);
 
-  doc.moveDown();
-  doc.text(`Product: ${order.productId.name}`);
-  doc.text(`Price: ₹${order.productId.price}`);
+  doc.moveDown(2);
+
+  // 🧾 ORDER INFO
+  doc.fontSize(10);
+  doc.text(`Order ID: ${order._id}`);
+  doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`);
   doc.text(`Status: ${order.status}`);
 
   doc.moveDown();
+
+  // 👤 CUSTOMER INFO
+  doc
+    .fontSize(12)
+    .text("Billing Details", { underline: true });
+
+  doc.fontSize(10);
+  doc.text(`Name: ${order.name}`);
+  doc.text(`Email: ${order.email}`);
+  doc.text(`Phone: ${order.phone}`);
   doc.text(`Address: ${order.address}`);
+
+  doc.moveDown();
+
+  // 📦 TABLE HEADER
+  doc
+    .fontSize(12)
+    .text("Product Details", { underline: true });
+
+  doc.moveDown(0.5);
+
+  const tableTop = doc.y;
+
+  doc.fontSize(10).text("Product", 50, tableTop);
+  doc.text("Price", 300, tableTop);
+  doc.text("Qty", 370, tableTop);
+  doc.text("Total", 430, tableTop);
+
+  doc.moveTo(50, tableTop + 15)
+     .lineTo(550, tableTop + 15)
+     .stroke();
+
+  // 📦 PRODUCT ROW
+  const product = order.productId;
+
+  const qty = order.quantity || 1;
+  const total = product.price * qty;
+
+  const rowY = tableTop + 25;
+
+  doc.text(product.name, 50, rowY);
+  doc.text(`₹${product.price}`, 300, rowY);
+  doc.text(qty, 370, rowY);
+  doc.text(`₹${total}`, 430, rowY);
+
+  doc.moveTo(50, rowY + 15)
+     .lineTo(550, rowY + 15)
+     .stroke();
+
+  doc.moveDown(3);
+
+  // 💰 TOTAL SECTION
+  doc.fontSize(12);
+
+  doc.text(`Subtotal: ₹${total}`, { align: "right" });
+  doc.text(`Delivery: ₹0`, { align: "right" });
+
+  doc
+    .fontSize(14)
+    .fillColor("green")
+    .text(`Grand Total: ₹${total}`, { align: "right" });
+
+  doc.fillColor("black");
+
+  doc.moveDown(2);
+
+  // 📝 FOOTER
+  doc
+    .fontSize(10)
+    .text("Thank you for shopping with LioKart ❤️", {
+      align: "center",
+    });
 
   doc.end();
 });
@@ -848,6 +891,33 @@ router.get("/admin", isAdmin, async (req, res) => {
     revenue
   });
 });
+
+
+// routes/payment.js
+
+
+
+
+router.post("/create-order", async (req, res) => {
+  try {
+    const { amount } = req.body;
+
+    const options = {
+      amount: amount * 100, // paise
+      currency: "INR",
+      receipt: "order_rcptid_" + Date.now()
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    res.json(order);
+
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+module.exports = router;
 
 
 
