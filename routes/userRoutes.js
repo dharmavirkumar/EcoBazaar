@@ -15,7 +15,7 @@ const User = require("../models/User");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
-const razorpay = require("../config/razorpay");
+
 
 
 function isLoggedIn(req, res, next) {
@@ -329,18 +329,6 @@ router.post('/add-product', upload.array("images", 5), async (req, res) => {
 
 
 
-// router.get("/category/:main/:sub", async (req, res) => {
-//   const { main, sub } = req.params;
-
-//   const products = await Product.find({
-//     mainCategory: main,
-//     subCategory: { $regex: sub, $options: "i" } // 🔥 FIX
-//   });
-
-//   res.render("categoryPage", { products, main, sub });
-// });
-
-
 router.get("/category/:main/:sub", async (req, res) => {
   const { main, sub } = req.params;
 
@@ -649,11 +637,7 @@ router.get("/cancel-order/:id", isLoggedIn, async (req, res) => {
   res.redirect("/my-orders");
 });
 
-// ================= ADMIN =================
-// router.get("/admin/orders", async (req, res) => {
-//   const orders = await Order.find().populate("productId");
-//   res.render("adminOrders", { orders });
-// });
+
 
 // ================= REVIEW =================
 router.post("/add-review", async (req, res) => {
@@ -917,7 +901,46 @@ router.post("/create-order", async (req, res) => {
   }
 });
 
-module.exports = router;
+// INCREASE QTY
+router.get("/increase-qty/:id", (req, res) => {
+  const id = req.params.id;
+
+  const cart = req.session.cart || [];
+
+  const item = cart.find(p => p._id == id);
+
+  if (item) {
+    item.qty += 1;
+  }
+
+  req.session.cart = cart;
+
+  res.redirect("/cart");
+});
+
+
+// DECREASE QTY
+router.get("/decrease-qty/:id", (req, res) => {
+  const id = req.params.id;
+
+  let cart = req.session.cart || [];
+
+  const item = cart.find(p => p._id == id);
+
+  if (item) {
+    item.qty -= 1;
+
+    // ❌ Remove item if qty becomes 0
+    if (item.qty <= 0) {
+      cart = cart.filter(p => p._id != id);
+    }
+  }
+
+  req.session.cart = cart;
+
+  res.redirect("/cart");
+});
+
 
 
 
