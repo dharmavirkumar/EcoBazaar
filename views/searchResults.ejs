@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Search Results</title>
-<script src="https://cdn.tailwindcss.com"></script>
+  <title>Search Results</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-100">
@@ -11,45 +11,161 @@
 
 <div class="max-w-7xl mx-auto p-6">
 
-<h1 class="text-2xl font-bold mb-6">
-  🔍 Results for "<%= query %>"
-</h1>
+  <!-- 🔍 SEARCH BAR -->
+  <form action="/search" method="GET" class="mb-6 flex gap-2">
+    <input 
+      type="text" 
+      name="q"
+      value="<%= query %>"
+      placeholder="Search products..."
+      class="flex-1 px-4 py-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+    >
+    <button class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition">
+      🔍 Search
+    </button>
+  </form>
 
-<% if(products.length === 0){ %>
-  <p class="text-gray-500">No products found 😢</p>
-<% } %>
+  <!-- 🤖 TYPO SUGGESTION -->
+  <% if(typeof suggestion !== "undefined"){ %>
+    <div class="mb-4 text-sm bg-yellow-100 p-3 rounded-lg">
+      Did you mean: 
+      <a href="/search?q=<%= suggestion %>" class="text-blue-600 font-semibold">
+        <%= suggestion %>
+      </a> ?
+    </div>
+  <% } %>
 
-<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+  <!-- HEADER -->
+  <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-3">
 
-<% products.forEach(product => { %>
+    <h1 class="text-2xl font-bold">
+      🔍 Results for "<%= query %>"
+      <span class="text-gray-500 text-lg">(<%= products.length %>)</span>
+    </h1>
 
-<div class="bg-white p-4 rounded-xl shadow hover:shadow-lg transition">
+    <!-- SORT -->
+    <form method="GET" action="/search">
+      <input type="hidden" name="q" value="<%= query %>">
 
-  <img src="<%= product.images[0] %>" 
-       class="w-full h-40 object-cover rounded">
+      <select name="sort" onchange="this.form.submit()"
+        class="border px-4 py-2 rounded-lg shadow-sm">
+        <option value="">Sort By</option>
+        <option value="low">💰 Price: Low → High</option>
+        <option value="high">💎 Price: High → Low</option>
+      </select>
+    </form>
+  </div>
 
-  <h2 class="text-lg font-semibold mt-3">
-    <%= product.name %>
-  </h2>
+  <% if(products.length === 0){ %>
 
-  <p class="text-green-600 font-bold">₹ <%= product.price %></p>
+    <!-- 😢 EMPTY STATE -->
+    <div class="text-center mt-20 bg-white p-10 rounded-xl shadow">
+      <img src="/empty.png" class="w-40 mx-auto mb-4">
 
-  <p class="text-gray-600 text-sm">
-    <%= product.description.substring(0, 50) %>...
-  </p>
+      <h2 class="text-2xl font-semibold mb-2">No products found</h2>
+      <p class="text-gray-500">Try searching something else</p>
 
-  <a href="/product/<%= product._id %>"
-    class="block mt-3 bg-blue-500 text-white text-center py-2 rounded hover:bg-blue-600">
-    View Details
-  </a>
+      <a href="/" 
+        class="inline-block mt-5 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+        🛍 Continue Shopping
+      </a>
+    </div>
+
+  <% } else { %>
+
+  <!-- 🛍 GRID -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+
+    <% products.forEach(product => { %>
+
+    <div class="bg-white p-4 rounded-xl shadow hover:shadow-2xl transition duration-300 flex flex-col group relative">
+
+      <!-- 🔥 BADGE -->
+      <% if(product.discountType && product.discountType !== "none"){ %>
+        <span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+          SALE
+        </span>
+      <% } %>
+
+      <!-- IMAGE -->
+      <div class="overflow-hidden rounded-lg bg-gray-50">
+        <img 
+          src="<%= product.images?.[0] || '/default.png' %>" 
+          class="w-full h-48 object-contain group-hover:scale-110 transition duration-300"
+        >
+      </div>
+
+      <!-- DETAILS -->
+      <div class="flex-1 mt-3">
+
+        <h2 class="text-md font-semibold line-clamp-2 group-hover:text-blue-600 transition">
+          <%= product.name %>
+        </h2>
+
+        <!-- ⭐ RATING -->
+        <p class="text-yellow-500 text-sm mt-1">
+          ⭐ 
+          <%= product.avgRating ? product.avgRating.toFixed(1) : "No rating" %>
+        </p>
+
+        <!-- 💰 PRICE -->
+        <div class="mt-1">
+
+          <% if(product.discountType && product.discountType !== "none"){ %>
+
+            <span class="line-through text-gray-400 text-sm">
+              ₹<%= product.price %>
+            </span>
+
+            <span class="text-green-600 font-bold ml-2 text-lg">
+              ₹<%= product.finalPrice %>
+            </span>
+
+          <% } else { %>
+
+            <span class="text-green-600 font-bold text-lg">
+              ₹<%= product.price %>
+            </span>
+
+          <% } %>
+
+        </div>
+
+        <p class="text-gray-500 text-sm line-clamp-2 mt-1">
+          <%= product.description %>
+        </p>
+
+      </div>
+
+      <!-- 🚚 DELIVERY -->
+      <p class="text-xs text-green-600 mt-1">Free Delivery</p>
+
+      <!-- BUTTONS -->
+      <div class="mt-4 space-y-2">
+
+        <a href="/product/<%= product._id %>"
+          class="block text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+          View Details
+        </a>
+
+        <a href="/add-to-cart/<%= product._id %>"
+          class="block text-center bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition">
+          Add to Cart
+        </a>
+
+      </div>
+
+    </div>
+
+    <% }) %>
+
+  </div>
+
+  <% } %>
 
 </div>
 
-<% }) %>
-
-</div>
-
-</div>
+<%- include("partial/footer") %>
 
 </body>
 </html>

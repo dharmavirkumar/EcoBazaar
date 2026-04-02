@@ -5,17 +5,13 @@ const productSchema = new mongoose.Schema({
   price: Number,
   description: String,
 
-  // ❌ OLD (optional rakh sakte ho)
   category: String,
 
-  // ✅ NEW (IMPORTANT FOR MENU)
-  mainCategory: String,   // Top Wear, Bottom Wear
-  subCategory: String,    // Shirts, Jeans
+  mainCategory: String,
+  subCategory: String,
 
-  // ✅ MULTIPLE IMAGES
   images: [String],
 
-  // ✅ DISCOUNT SYSTEM
   discountType: {
     type: String,
     enum: ["none", "percentage", "flat"],
@@ -27,7 +23,19 @@ const productSchema = new mongoose.Schema({
     default: 0
   },
 
-  finalPrice: Number
+  finalPrice: Number,
+
+  // 🔥 NEW (IMPORTANT)
+  sizes: [
+    {
+      size: String,
+      price: Number,
+      stock: {
+        type: Number,
+        default: 10
+      }
+    }
+  ]
 
 }, { timestamps: true });
 

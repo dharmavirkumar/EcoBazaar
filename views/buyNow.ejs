@@ -100,27 +100,38 @@ class="w-full h-72 object-cover hover:scale-105 transition duration-300">
         class="w-full border p-3 rounded-lg mt-3 focus:ring-2 focus:ring-pink-400 outline-none">
       </div>
 
-      <!-- SIZE -->
-      <% if(product.category === "fashion"){ %>
+   
+     <!-- SIZE -->
+      <%= JSON.stringify(product.sizes) %>
+<% if(product.sizes && product.sizes.length > 0){ %>
 
-      <div>
-        <h2 class="font-semibold mb-3 text-gray-700">Select Size</h2>
+<div>
+  <h2 class="font-semibold mb-3 text-gray-700">Select Size</h2>
 
-        <div class="flex gap-3 flex-wrap">
-          <% ["S","M","L","XL","XXL"].forEach(size => { %>
-            <label>
-              <input type="radio" name="size" value="<%= size %>" class="hidden peer" required>
-              <span class="px-5 py-2 border rounded-full cursor-pointer 
-              peer-checked:bg-pink-600 peer-checked:text-white 
-              hover:bg-pink-100 transition">
-                <%= size %>
-              </span>
-            </label>
-          <% }) %>
+  <div class="flex gap-4 flex-wrap">
+
+    <% product.sizes.forEach(item => { %>
+
+      <label class="cursor-pointer">
+        <input type="radio" name="size" value="<%= item.size %>" class="hidden peer" required>
+
+        <div class="w-20 h-20 flex flex-col items-center justify-center 
+        border-2 border-gray-400 rounded-full 
+        peer-checked:border-black peer-checked:bg-gray-200 
+        hover:bg-gray-100 transition">
+
+          <p class="text-lg font-bold"><%= item.size %></p>
+         
+
         </div>
-      </div>
+      </label>
 
-      <% } %>
+    <% }) %>
+
+  </div>
+</div>
+
+<% } %>
 
       <!-- BUTTON -->
       <button class="w-full bg-gradient-to-r from-pink-500 to-purple-600 

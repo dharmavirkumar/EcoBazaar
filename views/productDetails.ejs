@@ -18,7 +18,7 @@
     <div class="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible">
       <% product.images?.forEach((img,i)=>{ %>
         <img src="<%= img %>" onclick="changeImage('<%= img %>')"
-        class="w-16 h-16 md:w-20 md:h-20 object-cover rounded border cursor-pointer hover:border-blue-500">
+        class="w-16 h-18 md:w-20 md:h-20 object-cover rounded border cursor-pointer hover:border-blue-500">
       <% }) %>
     </div>
 
@@ -103,20 +103,75 @@
   </div>
 </div>
 
-<!-- SIMILAR PRODUCTS (Flipkart grid) -->
-<div class="max-w-7xl mx-auto mt-10 px-4">
-  <h2 class="text-xl font-bold mb-4">Similar Products 🔥</h2>
+<!-- SIMILAR PRODUCTS -->
+<div class="max-w-7xl mx-auto mt-12 px-4">
+  
+  <!-- Heading -->
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="text-2xl font-bold text-gray-800">
+      Similar Products 🔥
+    </h2>
+  </div>
 
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+  <!-- Grid -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+
     <% similarProducts.forEach(item => { %>
-      <div class="bg-white p-3 rounded shadow hover:shadow-lg transition">
-        <a href="/product/<%= item._id %>">
-          <img src="<%= item.images?.[0] %>" class="w-full h-36 object-cover rounded">
-        </a>
-        <p class="text-sm mt-2"><%= item.name.substring(0,35) %></p>
-        <p class="text-green-600 font-bold">₹ <%= item.price %></p>
+      
+      <div class="bg-white rounded-xl shadow-sm hover:shadow-xl transition duration-300 group overflow-hidden">
+
+        <!-- Image -->
+        <div class="relative overflow-hidden">
+          <a href="/product/<%= item._id %>">
+            <img 
+              src="<%= item.images?.[0] %>" 
+              class="w-full h-44 object-cover group-hover:scale-105 transition duration-300"
+            >
+          </a>
+
+          <!-- Discount badge (optional) -->
+          <% if(item.discount){ %>
+            <span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+              <%= item.discount %>% OFF
+            </span>
+          <% } %>
+        </div>
+
+        <!-- Content -->
+        <div class="p-3">
+
+          <!-- Title -->
+          <p class="text-sm text-gray-700 font-medium line-clamp-2 h-10">
+            <%= item.name %>
+          </p>
+
+          <!-- Rating -->
+          <!-- <div class="flex items-center gap-1 mt-1">
+            <span class="bg-green-600 text-white text-xs px-1.5 py-0.5 rounded">
+              ★ 4.3
+            </span>
+            <span class="text-xs text-gray-500">(120)</span>
+          </div> -->
+
+          <!-- Price -->
+          <div class="mt-2 flex items-center gap-2">
+            <span class="text-green-600 font-bold text-base">
+              ₹ <%= item.price %>
+            </span>
+
+            <% if(item.oldPrice){ %>
+              <span class="text-gray-400 text-sm line-through">
+                ₹ <%= item.oldPrice %>
+              </span>
+            <% } %>
+          </div>
+
+        </div>
+
       </div>
+
     <% }) %>
+
   </div>
 </div>
 

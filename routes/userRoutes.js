@@ -15,6 +15,7 @@ const User = require("../models/User");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
+const QRCode = require("qrcode");
 
 
 
@@ -134,110 +135,119 @@ router.get("/logout", (req, res) => {
 
 
 
-router.get("/download-invoice/:id", isLoggedIn, async (req, res) => {
-  const order = await Order.findById(req.params.id).populate("productId");
+// invoice
 
+
+router.get("/download-invoice/:id", isLoggedIn, async (req, res) => {
+
+  const order = await Order.findById(req.params.id).populate("productId");
   if (!order) return res.send("Order not found");
 
-  const doc = new PDFDocument({ margin: 50 });
+  const doc = new PDFDocument({ margin: 40 });
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", "attachment; filename=invoice.pdf");
 
   doc.pipe(res);
 
-  // 🟡 HEADER
-  doc
-    .fontSize(22)
-    .fillColor("#2874f0")
-    .text("LioKart", 50, 50);
+  // 🟡 LOGO
+  const logoPath = path.join(__dirname, "../public/logo.png");
 
-  doc
-    .fontSize(10)
-    .fillColor("black")
-    .text("Invoice", 450, 50);
+  try {
+    doc.image(logoPath, 40, 30, { width: 100 });
+  } catch {
+    doc.fontSize(22).text("LioKart", 40, 40);
+  }
 
-  doc.moveDown(2);
+  // 🧾 TITLE
+  doc.fontSize(18).text("INVOICE", 450, 40);
 
   // 🧾 ORDER INFO
   doc.fontSize(10);
-  doc.text(`Order ID: ${order._id}`);
-  doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`);
-  doc.text(`Status: ${order.status}`);
+  doc.text(`Order ID: ${order._id}`, 350, 80);
+  doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, 350, 95);
+  doc.text(`Status: ${order.status}`, 350, 110);
 
-  doc.moveDown();
-
-  // 👤 CUSTOMER INFO
-  doc
-    .fontSize(12)
-    .text("Billing Details", { underline: true });
-
+  // 👤 BILLING
+  doc.fontSize(12).text("Billing Details", 40, 110);
   doc.fontSize(10);
-  doc.text(`Name: ${order.name}`);
-  doc.text(`Email: ${order.email}`);
-  doc.text(`Phone: ${order.phone}`);
-  doc.text(`Address: ${order.address}`);
 
-  doc.moveDown();
+  doc.text(order.name, 40, 125);
+  doc.text(order.email, 40, 140);
+  doc.text(order.phone, 40, 155);
+  doc.text(order.address, 40, 170);
 
   // 📦 TABLE HEADER
-  doc
-    .fontSize(12)
-    .text("Product Details", { underline: true });
+  const tableTop = 230;
 
-  doc.moveDown(0.5);
-
-  const tableTop = doc.y;
-
-  doc.fontSize(10).text("Product", 50, tableTop);
+  doc.font("Helvetica-Bold");
+  doc.text("Product", 40, tableTop);
   doc.text("Price", 300, tableTop);
   doc.text("Qty", 370, tableTop);
-  doc.text("Total", 430, tableTop);
+  doc.text("Total", 440, tableTop);
 
-  doc.moveTo(50, tableTop + 15)
-     .lineTo(550, tableTop + 15)
-     .stroke();
+  doc.moveTo(40, tableTop + 15).lineTo(550, tableTop + 15).stroke();
 
-  // 📦 PRODUCT ROW
+  doc.font("Helvetica");
+
+  // 📦 PRODUCT
   const product = order.productId;
+  const qty = 1;
+  const total = product.price;
 
-  const qty = order.quantity || 1;
-  const total = product.price * qty;
+  const nameHeight = doc.heightOfString(product.name, { width: 240 });
 
   const rowY = tableTop + 25;
 
-  doc.text(product.name, 50, rowY);
+  doc.text(product.name, 40, rowY, { width: 240 });
   doc.text(`₹${product.price}`, 300, rowY);
   doc.text(qty, 370, rowY);
-  doc.text(`₹${total}`, 430, rowY);
+  doc.text(`₹${total}`, 440, rowY);
 
-  doc.moveTo(50, rowY + 15)
-     .lineTo(550, rowY + 15)
+  doc.moveTo(40, rowY + nameHeight + 10)
+     .lineTo(550, rowY + nameHeight + 10)
      .stroke();
 
-  doc.moveDown(3);
+  // 💰 TOTAL BOX
+  const boxY = rowY + nameHeight + 30;
 
-  // 💰 TOTAL SECTION
-  doc.fontSize(12);
+  doc.rect(300, boxY, 250, 90).stroke();
 
-  doc.text(`Subtotal: ₹${total}`, { align: "right" });
-  doc.text(`Delivery: ₹0`, { align: "right" });
+  doc.text("Subtotal:", 310, boxY + 10);
+  doc.text(`₹${total}`, 480, boxY + 10);
+
+  doc.text("Delivery:", 310, boxY + 30);
+  doc.text("₹0", 480, boxY + 30);
 
   doc
-    .fontSize(14)
+    .fontSize(13)
     .fillColor("green")
-    .text(`Grand Total: ₹${total}`, { align: "right" });
+    .text("Grand Total:", 310, boxY + 60);
+
+  doc.text(`₹${total}`, 480, boxY + 60);
 
   doc.fillColor("black");
 
-  doc.moveDown(2);
+  // 🔲 QR CODE (ORDER TRACK LINK)
+  const qrData = `https://liokart.shop/order/${order._id}`;
+
+  const qrImage = await QRCode.toDataURL(qrData);
+
+  const qrBase64 = qrImage.replace(/^data:image\/png;base64,/, "");
+  const qrBuffer = Buffer.from(qrBase64, "base64");
+
+  doc.image(qrBuffer, 40, boxY, { width: 100 });
+
+  doc.fontSize(8).text("Scan to track order", 40, boxY + 105);
 
   // 📝 FOOTER
-  doc
-    .fontSize(10)
-    .text("Thank you for shopping with LioKart ❤️", {
-      align: "center",
-    });
+  doc.moveTo(40, boxY + 130)
+     .lineTo(550, boxY + 130)
+     .stroke();
+
+  doc.fontSize(10).text("Thank you for shopping with LioKart ❤️", 40, boxY + 140, {
+    align: "center",
+  });
 
   doc.end();
 });
@@ -256,7 +266,7 @@ const upload = multer({ storage: storage });
 
 // ================= HOME =================
 router.get("/", async (req, res) => {
-  const products = await Product.find().limit(8);
+  const products = await Product.find().limit(20);
   res.render("index", {
   products,
   user: req.session.user,
@@ -294,13 +304,38 @@ res.render("Jewellery", { products });
 
 router.post('/add-product', upload.array("images", 5), async (req, res) => {
 
-  const { name, price, description, category, discountType, discountValue,mainCategory, subCategory } = req.body;
+  const { name, price, description, category, discountType, discountValue,mainCategory, subCategory} = req.body;
 
   // ✅ MULTIPLE IMAGES ARRAY
   const images = req.files.map(file => file.path);
 
   let finalPrice = price;
 
+  let sizes = [];
+
+if (subCategory === "Jeans") {
+  sizes = [
+    { size: "26", price: 309 },
+    { size: "28", price: 324 },
+    { size: "30", price: 339 }
+  ];
+}
+
+if (subCategory === "Shoes") {
+  sizes = [
+    { size: "7", price: 799 },
+    { size: "8", price: 849 },
+    { size: "9", price: 899 }
+  ];
+}
+
+if (subCategory === "Shirts") {
+  sizes = [
+    { size: "S", price: 499 },
+    { size: "M", price: 499 },
+    { size: "L", price: 499 }
+  ];
+}
   // ✅ DISCOUNT LOGIC
   if (discountType === "percentage") {
     finalPrice = price - (price * discountValue / 100);
@@ -319,7 +354,8 @@ router.post('/add-product', upload.array("images", 5), async (req, res) => {
     discountValue,
     mainCategory,
     subCategory,
-    finalPrice
+    finalPrice,
+    sizes
   });
 
   await newProduct.save();
@@ -329,17 +365,45 @@ router.post('/add-product', upload.array("images", 5), async (req, res) => {
 
 
 
+// router.get("/category/:main/:sub", async (req, res) => {
+//   const { main, sub } = req.params;
+
+//   const products = await Product.find({
+//     mainCategory: { $regex: `^${main}$`, $options: "i" },
+//     subCategory: { $regex: sub, $options: "i" }
+//   });
+
+//   res.render("categoryPage", { products, main, sub });
+// });
+
+
+
 router.get("/category/:main/:sub", async (req, res) => {
   const { main, sub } = req.params;
 
-  const products = await Product.find({
-    mainCategory: { $regex: `^${main}$`, $options: "i" },
-    subCategory: { $regex: sub, $options: "i" }
+  let filter = {
+    mainCategory: { $regex: `^${main}$`, $options: "i" }
+  };
+
+  // ✅ Agar "All" hai to sirf mainCategory filter karo
+  if (sub !== "All") {
+    filter.subCategory = { $regex: sub, $options: "i" };
+  }
+
+  const products = await Product.find(filter);
+
+  // ✅ Dynamic subcategories fetch karo
+  const subCategories = await Product.distinct("subCategory", {
+    mainCategory: { $regex: `^${main}$`, $options: "i" }
   });
 
-  res.render("categoryPage", { products, main, sub });
+  res.render("categoryPage", {
+    products,
+    main,
+    sub,
+    subCategories
+  });
 });
-
 // ================= PRODUCT DETAILS =================
 router.get("/product/:id", async (req, res) => {
   try {
@@ -380,25 +444,108 @@ router.get("/product/:id", async (req, res) => {
 // ================= SEARCH =================
 router.get("/search", async (req, res) => {
   try {
-    const query = req.query.q;
+    let query = req.query.q?.toLowerCase().trim();
 
-    if (!query) {
-      return res.redirect("/");
-    }
+    if (!query) return res.redirect("/");
 
-    const products = await Product.find({
-      $or: [
-        { name: { $regex: query, $options: "i" } },
-        { category: { $regex: query, $options: "i" } },
-        { description: { $regex: query, $options: "i" } }
-      ]
+    let products = await Product.find({
+      name: { $regex: query, $options: "i" }
     });
+
+    // 🤖 TYPO FIX (if no results)
+    if (products.length === 0) {
+      const allNames = await Product.find().select("name");
+
+      let closest = null;
+      let minDist = Infinity;
+
+      allNames.forEach(p => {
+        const dist = levenshtein(query, p.name.toLowerCase());
+        if (dist < minDist) {
+          minDist = dist;
+          closest = p.name;
+        }
+      });
+
+      if (closest) {
+        products = await Product.find({
+          name: { $regex: closest, $options: "i" }
+        });
+
+        return res.render("searchResults", {
+          products,
+          query,
+          suggestion: closest
+        });
+      }
+    }
 
     res.render("searchResults", { products, query });
 
   } catch (err) {
-    console.log(err);
     res.send("Search failed");
+  }
+});
+
+router.get("/api/search", async (req, res) => {
+  try {
+    const query = req.query.q?.trim();
+
+    if (!query) return res.json([]);
+
+    const products = await Product.find({
+      name: { $regex: query, $options: "i" }
+    })
+    .limit(8)
+    .select("name price finalPrice images");
+
+    res.json(products);
+
+  } catch (err) {
+    console.log(err);
+    res.json([]);
+  }
+});
+
+// 🔥 HELPER FUNCTION
+function levenshtein(a, b) {
+  const matrix = [];
+
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      matrix[i][j] = b[i - 1] === a[j - 1]
+        ? matrix[i - 1][j - 1]
+        : Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+    }
+  }
+
+  return matrix[b.length][a.length];
+}
+// 🔥 SUGGESTIONS API
+router.get("/api/suggestions", async (req, res) => {
+  try {
+    const keywords = await Product.aggregate([
+      {
+        $group: {
+          _id: "$subCategory",
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 8 }
+    ]);
+
+    res.json(keywords.map(k => k._id));
+
+  } catch (err) {
+    res.json([]);
   }
 });
 
@@ -613,7 +760,7 @@ router.get("/buy-now/:id", isLoggedIn, async (req, res) => {
 
           <img src="${product.images[0]}" width="200"/>
 
-          <p>📦 Delivery within 3-5 days</p>
+          <p>📦 Delivery within 4-5 days</p>
         `,
       });
     } catch (emailErr) {
