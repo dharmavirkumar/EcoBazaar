@@ -17,7 +17,7 @@
 
       <div class="md:col-span-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-6 rounded-xl flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold">Big Billion Sale 🎉</h1>
+          <h1 class="text-3xl font-bold">Big Billion Sale Comming Soon 🎉</h1>
           <p class="mt-2">Up to 70% OFF</p>
         </div>
         <img src="https://cdn-icons-png.flaticon.com/512/3144/3144456.png" class="w-32">
@@ -34,33 +34,40 @@
 </div>
 
 <!-- 🔥 CATEGORY BAR -->
-<div class="bg-white mt-3 shadow-sm">
-  <div class=" max-w-7xl mx-auto px-4 py-4 overflow-x-auto flex justify-center gap-20">
+<div class="bg-white shadow-sm border-b sticky top-16 z-40">
 
-    <% const categories = [
-      {name: "Fashion", main: "fashion", sub: "all"},
-      {name: "Accessories", main: "accessories", sub: "all"},
-      {name: "Beauty", main: "beauty", sub: "all"},
-      {name: "Electronics", main: "electronics", sub: "all"},
-      
-    ]; %>
+  <div class="max-w-7xl mx-auto px-4">
 
-    <% categories.forEach(cat => { %>
+    <div id="catBar"
+         class="flex gap-10 overflow-x-auto scrollbar-hide py-3 relative">
 
-      <a href="/category/<%= cat.main %>/<%= cat.sub %>"
-         class="flex flex-col items-center min-w-[80px] hover:text-blue-600">
+      <% const categories = [
+        {name: "Fashion", main: "fashion"},
+        {name: "Accessories", main: "accessories"},
+        {name: "Beauty", main: "beauty"},
+        {name: "Electronics", main: "electronics"}
+        
+      ]; %>
 
-        <img src="https://cdn-icons-png.flaticon.com/512/892/892458.png"
-             class="w-10 h-10 mb-1">
+      <% categories.forEach(cat => { %>
 
-        <span class="text-sm font-medium"><%= cat.name %></span>
-      </a>
+        <a href="/category/<%= cat.main %>/All"
+           class="cat-item relative whitespace-nowrap text-sm font-medium text-gray-600 hover:text-blue-600 transition">
 
-    <% }) %>
+          <span class="cat-text"><%= cat.name %></span>
+
+          <!-- UNDERLINE -->
+          <span class="underline-bar absolute left-0 -bottom-1 h-[2px] w-0 bg-blue-600 transition-all duration-300"></span>
+
+        </a>
+
+      <% }) %>
+
+    </div>
 
   </div>
-</div>
 
+</div>
 <!-- 🔥 PRODUCTS SECTION -->
 <div class="max-w-7xl mx-auto px-4 mt-6">
 
@@ -148,6 +155,65 @@ async function addToCart(id){
     popup.classList.add("hidden");
   },2000);
 }
+</script>
+<script>
+const path = window.location.pathname.toLowerCase();
+
+document.querySelectorAll(".cat-item").forEach(item => {
+
+  const href = item.getAttribute("href").toLowerCase();
+
+  if (path.includes(href.split("/")[2])) {
+
+    // active text
+    item.classList.add("text-blue-600", "font-semibold");
+
+    // underline full
+    const bar = item.querySelector(".underline-bar");
+    bar.style.width = "100%";
+  }
+
+  // hover animation
+  item.addEventListener("mouseenter", () => {
+    item.querySelector(".underline-bar").style.width = "100%";
+  });
+
+  item.addEventListener("mouseleave", () => {
+    if (!item.classList.contains("text-blue-600")) {
+      item.querySelector(".underline-bar").style.width = "0";
+    }
+  });
+
+});
+</script>
+<script>
+const catBar = document.getElementById("catBar");
+
+let isDown = false;
+let startX;
+let scrollLeft;
+
+catBar.addEventListener("mousedown", (e) => {
+  isDown = true;
+  startX = e.pageX - catBar.offsetLeft;
+  scrollLeft = catBar.scrollLeft;
+});
+
+catBar.addEventListener("mouseleave", () => {
+  isDown = false;
+});
+
+catBar.addEventListener("mouseup", () => {
+  isDown = false;
+});
+
+catBar.addEventListener("mousemove", (e) => {
+  if (!isDown) return;
+  e.preventDefault();
+  const x = e.pageX - catBar.offsetLeft;
+  const walk = (x - startX) * 2;
+  catBar.scrollLeft = scrollLeft - walk;
+});
 </script>
 
 </body>
