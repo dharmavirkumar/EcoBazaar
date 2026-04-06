@@ -48,7 +48,11 @@ router.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
   const existing = await User.findOne({ email });
-  if (existing) return res.send("User exists");
+ if (existing) {
+  return res.render("login", {
+    error: "⚠️ User already exists. Please login instead."
+  });
+}
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -158,7 +162,7 @@ router.get("/download-invoice/:id", isLoggedIn, async (req, res) => {
   doc.pipe(res);
 
   // ================= LOGO =================
-  const logoPath = path.join(__dirname, "../public/logo.png"); // 🔥 add your logo
+  const logoPath = path.join(__dirname, "/logo.png"); // 🔥 add your logo
   try {
     doc.image(logoPath, 40, 30, { width: 80 });
   } catch (e) {}
@@ -500,34 +504,64 @@ router.get("/product/:id", async (req, res) => {
   try {
     const id = req.params.id;
 
+    // ✅ VALIDATION
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.send("Invalid Product ID");
     }
 
+    // ✅ PRODUCT FETCH
     const product = await Product.findById(id);
     if (!product) return res.send("Product not found");
 
-    const similarProducts = await Product.find({
-      category: product.category,
+    // 🔥 STEP 1: SAME SUBCATEGORY + PRICE RANGE
+    let similarProducts = await Product.find({
       _id: { $ne: product._id },
-    }).limit(4);
+      subCategory: product.subCategory,
+      price: {
+        $gte: product.price * 0.5,
+        $lte: product.price * 1.5
+      }
+    }).limit(6);
 
+    // 🔥 STEP 2: FALLBACK → SAME MAIN CATEGORY
+    if (similarProducts.length < 6) {
+      const moreProducts = await Product.find({
+        _id: { $ne: product._id },
+        mainCategory: product.mainCategory
+      }).limit(6 - similarProducts.length);
+
+      similarProducts = [...similarProducts, ...moreProducts];
+    }
+
+    // 🔥 STEP 3: FINAL FALLBACK (JUST IN CASE)
+    if (similarProducts.length < 6) {
+      const randomProducts = await Product.find({
+        _id: { $ne: product._id }
+      }).limit(6 - similarProducts.length);
+
+      similarProducts = [...similarProducts, ...randomProducts];
+    }
+
+    // ✅ REVIEWS
     const reviews = await Review.find({ productId: product._id });
 
+    // ✅ AVG RATING
     let avgRating = 0;
     if (reviews.length > 0) {
       avgRating =
         reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
     }
 
+    // ✅ RENDER
     res.render("productDetails", {
       product,
       similarProducts,
       reviews,
-      avgRating,
+      avgRating
     });
+
   } catch (err) {
-    console.log(err);
+    console.log("Product Page Error:", err);
     res.send("Error loading product");
   }
 });
