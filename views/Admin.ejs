@@ -1,53 +1,204 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin Orders</title>
-<script src="https://cdn.tailwindcss.com"></script>
+  <title>LioKart Premium Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gray-100 flex">
 
-<div class="max-w-7xl mx-auto p-6">
+<!-- ================= SIDEBAR ================= -->
+<div class="w-64 bg-gradient-to-b from-gray-900 to-gray-800 text-white min-h-screen p-5">
 
-<h1 class="text-3xl font-bold mb-6">Admin Orders</h1>
+  <h1 class="text-2xl font-bold mb-6">⚡ LioKart Admin</h1>
 
-<table class="w-full bg-white rounded shadow">
+  <button onclick="showTab('dashboard')" class="block w-full text-left py-2 hover:bg-gray-700 rounded">📊 Dashboard</button>
+  <button onclick="showTab('products')" class="block w-full text-left py-2 hover:bg-gray-700 rounded">📦 Products</button>
+  <button onclick="showTab('orders')" class="block w-full text-left py-2 hover:bg-gray-700 rounded">🧾 Orders</button>
 
-<thead class="bg-gray-200">
-<tr>
-<th class="p-3">Product</th>
-<th class="p-3">Name</th>
-<th class="p-3">Phone</th>
-<th class="p-3">Address</th>
-<th class="p-3">Payment</th>
-</tr>
-</thead>
+  <a href="/logout" class="block bg-red-500 text-center py-2 rounded mt-6">Logout</a>
+</div>
 
-<tbody>
+<!-- ================= MAIN ================= -->
+<div class="flex-1 p-6">
 
-<% orders.forEach(order => { %>
+<!-- HEADER -->
+<div class="flex justify-between mb-6">
+  <h2 class="text-2xl font-bold">Admin Panel</h2>
+  <a href="/" class="bg-yellow-400 px-4 py-2 rounded">Back</a>
+</div>
 
-<tr class="border-t">
+<!-- ================= DASHBOARD ================= -->
+<div id="dashboard" class="tab-content">
 
-<td class="p-3">
-<img src="<%= product.image %>" class="w-full h-40 object-cover">
-<p><%= order.productId.name %></p>
-</td>
+<div class="grid md:grid-cols-3 gap-6">
 
-<td class="p-3"><%= order.name %></td>
-<td class="p-3"><%= order.phone %></td>
-<td class="p-3"><%= order.address %></td>
-<td class="p-3"><%= order.payment %></td>
+  <div class="bg-white p-6 rounded shadow text-center">
+    <p>Total Products</p>
+    <h2 class="text-3xl text-blue-500"><%= totalProducts %></h2>
+  </div>
 
-</tr>
+  <div class="bg-white p-6 rounded shadow text-center">
+    <p>Total Orders</p>
+    <h2 class="text-3xl text-green-500"><%= totalOrders %></h2>
+  </div>
+
+  <div class="bg-white p-6 rounded shadow text-center">
+    <p>Revenue</p>
+    <h2 class="text-3xl text-purple-500">₹ <%= revenue %></h2>
+  </div>
+
+</div>
+</div>
+
+<!-- ================= PRODUCTS ================= -->
+
+<a href="/add-product" class="bg-blue-500 text-white px-4 py-2 rounded">
+  ➕ Add Product
+</a>
+
+
+
+<!-- SEARCH -->
+<input type="text" id="search" placeholder="🔍 Search product..."
+ class="border p-3 mb-4 w-full rounded">
+
+<!-- PRODUCT LIST -->
+<div class="grid md:grid-cols-3 gap-4" id="productList">
+
+<% products.forEach(p => { %>
+
+<div class="bg-white p-4 rounded shadow product-card">
+
+<img src="<%= p.images?.[0] || '/default.png' %>"
+ class="w-full h-40 object-cover">
+
+<h3 class="mt-2 font-bold"><%= p.name %></h3>
+
+<p class="text-gray-400 line-through">₹ <%= p.price %></p>
+<p class="text-green-600 font-bold">₹ <%= p.finalPrice || p.price %></p>
+
+<p class="text-xs text-gray-500">
+<%= p.mainCategory %> / <%= p.subCategory %>
+</p>
+
+<div class="flex gap-2 mt-3">
+
+<a href="/admin/edit-product/<%= p._id %>"
+ class="bg-yellow-400 flex-1 text-center py-1 rounded">Edit</a>
+
+<button onclick="confirmDelete('<%= p._id %>')"
+ class="bg-red-500 text-white flex-1 py-1 rounded">Delete</button>
+
+</div>
+
+</div>
 
 <% }) %>
 
-</tbody>
-
-</table>
+</div>
 
 </div>
+
+<!-- ================= ORDERS ================= -->
+<div id="orders" class="tab-content hidden">
+
+<input type="text" id="orderSearch" placeholder="🔍 Search orders..."
+ class="border p-3 mb-4 w-full rounded">
+
+<div class="space-y-4" id="orderList">
+
+<% orders.forEach(o => { %>
+
+<div class="bg-white p-4 rounded shadow order-card">
+
+<div class="flex justify-between border-b pb-2">
+
+<div>
+<p class="font-bold">Order: <%= o._id %></p>
+<p class="text-xs"><%= new Date(o.createdAt).toDateString() %></p>
+</div>
+
+<span class="text-xs px-3 py-1 rounded-full
+<%= o.status==='Delivered'?'bg-green-100 text-green-600':
+o.status==='Cancelled'?'bg-red-100 text-red-600':
+o.status==='Shipped'?'bg-blue-100 text-blue-600':
+'bg-yellow-100 text-yellow-600' %>">
+<%= o.status %>
+</span>
+
+</div>
+
+<!-- ITEMS -->
+<div class="mt-2">
+<% o.items.forEach(i => { %>
+
+<div class="flex justify-between text-sm">
+<span><%= i.name %> (x<%= i.quantity %>)</span>
+<span>₹ <%= i.price * i.quantity %></span>
+</div>
+
+<% }) %>
+</div>
+
+<!-- STATUS UPDATE -->
+<form action="/admin/update-status/<%= o._id %>" method="POST" class="mt-2 flex gap-2">
+
+<select name="status" class="border p-1">
+<option <%= o.status==='Placed'?'selected':'' %>>Placed</option>
+<option <%= o.status==='Shipped'?'selected':'' %>>Shipped</option>
+<option <%= o.status==='Out for Delivery'?'selected':'' %>>Out for Delivery</option>
+<option <%= o.status==='Delivered'?'selected':'' %>>Delivered</option>
+<option <%= o.status==='Cancelled'?'selected':'' %>>Cancelled</option>
+</select>
+
+<button class="bg-blue-500 text-white px-2">Update</button>
+
+</form>
+
+</div>
+
+<% }) %>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= SCRIPTS ================= -->
+<script>
+
+// TAB SWITCH
+function showTab(tab){
+document.querySelectorAll(".tab-content").forEach(el=>el.classList.add("hidden"));
+document.getElementById(tab).classList.remove("hidden");
+}
+
+// PRODUCT SEARCH
+document.getElementById("search")?.addEventListener("input", function(){
+let val = this.value.toLowerCase();
+document.querySelectorAll(".product-card").forEach(card=>{
+card.style.display = card.innerText.toLowerCase().includes(val) ? "block":"none";
+});
+});
+
+// ORDER SEARCH
+document.getElementById("orderSearch")?.addEventListener("input", function(){
+let val = this.value.toLowerCase();
+document.querySelectorAll(".order-card").forEach(card=>{
+card.style.display = card.innerText.toLowerCase().includes(val) ? "block":"none";
+});
+});
+
+// DELETE CONFIRM
+function confirmDelete(id){
+if(confirm("Delete product?")){
+window.location.href="/admin/delete-product/"+id;
+}
+}
+
+</script>
 
 </body>
 </html>

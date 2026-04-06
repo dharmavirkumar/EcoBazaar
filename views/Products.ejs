@@ -1,87 +1,268 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Add Product</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
+  <title>Add Product</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
 
 <%- include("partial/nav") %>
 
-<div class="max-w-2xl mx-auto mt-10 bg-white p-8 rounded shadow">
+<div class="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-2xl shadow-lg">
 
-<h1 class="text-2xl font-bold mb-6 text-center">Add New Product</h1>
+  <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">
+    ➕ Add New Product
+  </h1>
 
-<form action="/add-product" method="POST" enctype="multipart/form-data">
+  <form action="/add-product" method="POST" enctype="multipart/form-data" class="space-y-5">
 
-<!-- Product Name -->
-<div class="mb-4">
-<label class="block text-gray-700">Product Name</label>
-<input type="text" name="name" 
-class="w-full border p-2 rounded mt-1">
+    <!-- Product Name -->
+    <div>
+      <label class="block text-gray-600 font-medium">Product Name</label>
+      <input type="text" name="name" required
+        class="w-full border p-3 rounded-lg mt-1 focus:ring-2 focus:ring-blue-400 outline-none">
+    </div>
+
+    <!-- Price -->
+    <div>
+      <label class="block text-gray-600 font-medium">Price (₹)</label>
+      <input type="number" name="price" required
+        class="w-full border p-3 rounded-lg mt-1 focus:ring-2 focus:ring-green-400 outline-none">
+    </div>
+
+    <!-- Category -->
+    <div>
+      <label class="block text-gray-600 font-medium">Category</label>
+      <select name="mainCategory"
+        class="w-full border p-3 rounded-lg mt-1 focus:ring-2 focus:ring-purple-400 outline-none">
+
+        <option value="electronics">📱 Electronics</option>
+        <option value="fashion">👕 Fashion</option>
+        <option value="Jewellery">💍 Jewellery</option>
+        <option value="Beauty">💄 Beauty</option>
+
+      </select>
+    </div>
+
+     <div>
+      <label class="block text-gray-600 font-medium">Sub-Category</label>
+      <select name="subCategory"
+        class="w-full border p-3 rounded-lg mt-1 focus:ring-2 focus:ring-purple-400 outline-none">
+
+        <option value="shirts">Shirts</option>
+        <option value="t-shirts">T-Shirts</option>
+        <option value="bottom-wear">Bottom Wear</option>
+        <option value="jeans">Jeans</option>
+        <option value="trousers">Trousers</option>
+        <option value="ethnic-wear">Ethnic Wear</option>
+        <option value="kurtas">Kurtas</option>
+        <option value="kurta-sets">Kurta Sets</option>
+        <option value="footwear">Footwear</option>
+        <option value="casual-shoes">Casual Shoes</option>
+        <option value="sports-shoes">Sports Shoes</option>
+        <option value="formal-shoes">Formal Shoes</option>
+        <option value="watches">Watches</option>
+        <option value="smart-watches">Smart Watches</option>
+        <option value="analog-watches">Analog Watches</option>
+        <option value="necklaces">Necklaces</option>
+        <option value="earrings">Earrings</option>
+        <option value="rings">Rings</option>
+        <option value="bracelets">Bracelets</option>
+        <option value="makeup">Makeup</option>
+        <option value="skincare">Skincare</option>
+        <option value="haircare">Haircare</option>
+        <option value="belts">Belts</option>
+        <option value="sunglasses">Sunglasses</option>
+        <option value="wallets">Wallets</option>
+        <option value="haircare">Hair Care</option>
+        <option value="hair-oil">Hair Oil</option>
+        <option value="shampoo">Shampoo</option>
+        <option value="conditioner">Conditioner</option>
+        <option value="hair-styling">Hair Styling</option>
+        <option value="hair-wax">Hair Wax</option>
+        <option value="hair-spray">Hair Spray</option>
+        <option value="trimmers">Trimmers</option>
+        <option value="face-body">Face & Body</option>
+        <option value="face-wash">Face Wash</option>
+        <option value="body-lotion">Body Lotion</option>
+        <option value="face-cream">Face Cream</option>
+        <option value="grooming-kits">Grooming Kits</option>
+            <option value="headphones">Headphones</option>
+            <option value="speakers">Speakers</option>
+            <option value="cases-covers">Cases & Covers</option>
+            <option value="bluetooth-earbuds">Bluetooth Earbuds</option>
+            <option value="wired-earphone">Wired Earphone</option>
+            <option value="accessories">Accessories</option>
+            <option value="mobile-holders">Mobile Holders</option>
+            <option value="mobile-chargers-cables">Mobile Chargers & Cables</option>
+            <option value="power-banks">Power Banks</option>
+            <option value="microphone">Microphone</option>
+            <option value="selfie-stick-ringlight">Selfie Stick & Ringlight</option>
+            <option value="tripod-monopod">Tripod & Monopod</option>
+            <option value="extension-cord">Extension Cord</option>
+            <option value="home-kitchen">Home & Kitchen</option>
+            <option value="mixer-grinder">Mixer Grinder</option>
+            <option value="dinnerware-sets">Dinnerware Sets</option>
+
+
+
+      
+
+
+      </select>
+    </div>
+
+    <!-- // Highlights -->
+    <div>
+  <label class="font-medium">Highlights</label>
+
+  <input name="highlights[]" placeholder="Highlight 1" class="input">
+  <input name="highlights[]" placeholder="Highlight 2" class="input mt-2">
+  <input name="highlights[]" placeholder="Highlight 3" class="input mt-2">
 </div>
 
-<!-- Price -->
-<div class="mb-4">
-<label class="block text-gray-700">Price</label>
-<input type="number" name="price" 
-class="w-full border p-2 rounded mt-1">
-</div>
+<!-- Specifications -->
+<div>
+  <label class="font-medium">Specifications</label>
 
-<!-- Category -->
-<div class="mb-4">
-<label class="block text-gray-700">Category</label>
+  <div class="flex gap-2 mt-2">
+    <input name="specKey[]" placeholder="Key (e.g. Brand)" class="input">
+    <input name="specValue[]" placeholder="Value (e.g. Nike)" class="input">
+  </div>
 
-<select name="category" class="w-full border p-2 rounded mt-1">
-
-<option value="electronics">Electronics</option>
-<option value="fashion">Fashion</option>
-<option value="Jewellery">Jewellery</option>
-<option value="Beauty">Beauty</option>
-
-</select>
-
-</div>
-
-<!-- Image -->
-<div class="mb-4">
-<label class="block text-gray-700">Product Image</label>
-
-<input type="file" name="image"
-class="w-full border p-2 rounded mt-1">
-
+  <div class="flex gap-2 mt-2">
+    <input name="specKey[]" placeholder="Material" class="input">
+    <input name="specValue[]" placeholder="Cotton" class="input">
+  </div>
 </div>
 
 
-<!-- Description -->
-<div class="mb-4">
-<label class="block text-gray-700">Description</label>
 
-<textarea name="description"
-class="w-full border p-2 rounded mt-1"></textarea>
+
+    <!-- Image Upload -->
+   <div>
+  <label class="block text-gray-600 font-medium mb-2">Product Images</label>
+
+  <!-- DROP AREA -->
+  <div id="dropArea"
+    class="border-2 border-dashed border-gray-400 p-6 rounded-lg text-center cursor-pointer bg-gray-50 hover:bg-gray-100">
+
+    <p class="text-gray-500">📂 Drag & Drop Images Here</p>
+    <p class="text-sm text-gray-400">or click to upload</p>
+
+    <input type="file" name="images" id="imageInput" multiple >
+  </div>
+
+  <!-- PREVIEW -->
+  <div id="previewContainer" class="flex gap-3 mt-4 flex-wrap"></div>
 
 </div>
 
-<!-- Button -->
-<div class="text-center">
+    <!-- Description -->
+    <div>
+      <label class="block text-gray-600 font-medium">Description</label>
+      <textarea name="description" rows="4"
+        class="w-full border p-3 rounded-lg mt-1 focus:ring-2 focus:ring-indigo-400 outline-none"></textarea>
+    </div>
 
-<button type="submit"
-class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+    <!-- Button -->
+    <div class="text-center pt-4">
+      <button type="submit"
+        class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg shadow hover:scale-105 transition duration-200">
+        🚀 Add Product
+      </button>
+    </div>
 
-Add Product
-
-</button>
-
-</div>
-
-</form>
+  </form>
 
 </div>
 
 <%- include("partial/footer") %>
 
+<script>
+const dropArea = document.getElementById("dropArea");
+const input = document.getElementById("imageInput");
+const previewContainer = document.getElementById("previewContainer");
+
+// ✅ STORE ALL IMAGES
+let allFiles = [];
+
+// CLICK
+dropArea.addEventListener("click", () => input.click());
+
+// DRAG OVER
+dropArea.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  dropArea.classList.add("bg-blue-50");
+});
+
+// DRAG LEAVE
+dropArea.addEventListener("dragleave", () => {
+  dropArea.classList.remove("bg-blue-50");
+});
+
+// DROP
+dropArea.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropArea.classList.remove("bg-blue-50");
+
+  addFiles(e.dataTransfer.files);
+});
+
+// SELECT
+input.addEventListener("change", () => {
+  addFiles(input.files);
+});
+
+// ✅ ADD FILES (APPEND LOGIC)
+function addFiles(files) {
+  const newFiles = Array.from(files);
+
+  // append
+  allFiles = allFiles.concat(newFiles);
+
+  updateInput();
+  renderPreview();
+}
+
+// ✅ UPDATE INPUT FILES
+function updateInput() {
+  const dataTransfer = new DataTransfer();
+
+  allFiles.forEach(file => dataTransfer.items.add(file));
+
+  input.files = dataTransfer.files;
+}
+
+// ✅ PREVIEW
+function renderPreview() {
+  previewContainer.innerHTML = "";
+
+  allFiles.forEach((file, index) => {
+    const div = document.createElement("div");
+    div.className = "relative";
+
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.className = "w-24 h-24 object-cover rounded border shadow";
+
+    // ❌ remove button
+    const btn = document.createElement("button");
+    btn.innerText = "✕";
+    btn.className = "absolute top-1 right-1 bg-red-600 text-white text-xs px-2 rounded";
+
+    btn.onclick = () => {
+      allFiles.splice(index, 1);
+      updateInput();
+      renderPreview();
+    };
+
+    div.appendChild(img);
+    div.appendChild(btn);
+    previewContainer.appendChild(div);
+  });
+}
+</script>
 </body>
 </html>

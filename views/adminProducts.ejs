@@ -2,46 +2,122 @@
 
 <h1 class="text-3xl font-bold mb-6">📦 Products</h1>
 
-<input type="text" id="search" placeholder="Search product..."
-class="border p-2 mb-4 w-full rounded">
+<!-- 🔍 SEARCH -->
 
-<div class="grid md:grid-cols-3 gap-6" id="productList">
+<div class="relative mb-6">
+  <input type="text" id="search" placeholder="Search product..."
+    class="border p-3 w-full rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+</div>
+
+<!-- 📦 PRODUCT GRID -->
+
+<div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6" id="productList">
 
 <% products.forEach(p => { %>
-<div class="bg-white p-4 rounded shadow product-card">
 
-  <img src="<%= p.image %>" class="w-full h-40 object-cover rounded">
+<div class="bg-white p-4 rounded-xl shadow hover:shadow-xl transition product-card">
 
-  <h2 class="font-bold mt-2"><%= p.name %></h2>
-  <p>₹ <%= p.price %></p>
+  <!-- IMAGE -->
 
-  <div class="flex gap-2 mt-3">
-    <a href="/admin/edit-product/<%= p._id %>"
-      class="bg-blue-500 text-white px-3 py-1 rounded">Edit</a>
+<img src="<%= p.images?.[0] || '/default.png' %>"
+ class="w-full h-44 object-cover rounded-lg">
 
-    <button onclick="confirmDelete('<%= p._id %>')"
-      class="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+  <!-- NAME -->
+
+  <h2 class="font-semibold mt-3 text-lg"><%= p.name %></h2>
+
+  <!-- CATEGORY -->
+
+  <p class="text-xs text-gray-500">
+    <%= p.mainCategory %> / <%= p.subCategory %>
+  </p>
+
+  <!-- PRICE -->
+
+  <div class="mt-2">
+    <p class="text-gray-400 line-through text-sm">₹ <%= p.price %></p>
+
+
+<p class="text-green-600 font-bold text-lg">
+  ₹ <%= p.finalPrice || p.price %>
+</p>
+
+<% if(p.discountValue){ %>
+  <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
+    <%= p.discountType === 'percentage'
+      ? p.discountValue + '% OFF'
+      : '₹ ' + p.discountValue + ' OFF' %>
+  </span>
+<% } %>
+
+
+  </div>
+
+  <!-- ACTIONS -->
+
+  <div class="flex gap-2 mt-4">
+
+
+<a href="/admin/edit-product/<%= p._id %>"
+  class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-center py-2 rounded-lg">
+  Edit
+</a>
+
+<button onclick="confirmDelete('<%= p._id %>')"
+  class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg">
+  Delete
+</button>
+
   </div>
 
 </div>
 <% }) %>
 
 </div>
+
 </div>
 
 <script>
-// 🔍 Search filter
-document.getElementById("search").addEventListener("keyup", function(){
+// 🔍 LIVE SEARCH (SMOOTH)
+document.getElementById("search").addEventListener("input", function(){
   let val = this.value.toLowerCase();
+
   document.querySelectorAll(".product-card").forEach(card => {
-    card.style.display = card.innerText.toLowerCase().includes(val) ? "block" : "none";
+    const text = card.innerText.toLowerCase();
+
+    if(text.includes(val)){
+      card.style.display = "block";
+    } else {
+      card.style.display = "none";
+    }
   });
 });
 
-// 🗑 Delete modal
+// 🗑 MODERN DELETE CONFIRM
 function confirmDelete(id){
-  if(confirm("Are you sure to delete this product?")){
-    window.location.href = "/admin/delete-product/" + id;
-  }
+  const confirmBox = document.createElement("div");
+
+  confirmBox.innerHTML = `
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white p-6 rounded-xl shadow-xl text-center w-80">
+        <h2 class="text-lg font-bold mb-3">Delete Product?</h2>
+        <p class="text-sm text-gray-500 mb-4">This action cannot be undone.</p>
+
+        <div class="flex gap-3">
+          <button onclick="deleteProduct('${id}')"
+            class="flex-1 bg-red-500 text-white py-2 rounded">Yes</button>
+
+          <button onclick="this.closest('.fixed').remove()"
+            class="flex-1 bg-gray-300 py-2 rounded">Cancel</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(confirmBox);
+}
+
+function deleteProduct(id){
+  window.location.href = "/admin/delete-product/" + id;
 }
 </script>

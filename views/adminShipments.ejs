@@ -1,0 +1,30 @@
+<h2>📦 All Shipments</h2>
+
+<table border="1">
+  <tr>
+    <th>Order ID</th>
+    <th>Status</th>
+    <th>Tracking ID</th>
+    <th>Update</th>
+  </tr>
+
+  <% orders.forEach(order => { %>
+    <tr>
+      <td><%= order._id %></td>
+      <td><%= order.status %></td>
+      <td><%= order.trackingId %></td>
+      <td>
+        <form action="/admin/update-status" method="POST">
+          <input type="hidden" name="id" value="<%= order._id %>">
+          <select name="status">
+            <option>Placed</option>
+            <option>Shipped</option>
+            <option>Out for Delivery</option>
+            <option>Delivered</option>
+          </select>
+          <button>Update</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+</table>

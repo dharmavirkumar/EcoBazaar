@@ -25,6 +25,12 @@ const productSchema = new mongoose.Schema({
 
   finalPrice: Number,
 
+ // 🔥 NEW PRO FIELDS
+  highlights: [String],   // bullet points
+  description: String,   // full description (HTML allowed)
+  specifications: {
+  type: Object
+},
   // 🔥 NEW (IMPORTANT)
   sizes: [
     {

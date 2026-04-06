@@ -1,146 +1,146 @@
 <!DOCTYPE html>
+
 <html>
 <head>
-  <title>Buy Now</title>
+  <title>Checkout - LioKart</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 
 <body class="bg-gray-100">
 
 <%- include("partial/nav") %>
 
-<div class="max-w-7xl mx-auto mt-10 grid md:grid-cols-2 gap-8 px-4">
+<div class="max-w-7xl mx-auto mt-6 grid lg:grid-cols-3 gap-6 px-4">
 
-  <!-- 🛒 LEFT: PRODUCT CARD -->
-  <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition">
+  <!-- ================= LEFT ================= -->
 
-    <h2 class="text-2xl font-bold mb-4 border-b pb-2">🛒 Order Summary</h2>
+  <div class="lg:col-span-2 space-y-5">
 
-    <div class="overflow-hidden rounded-xl">
-      <img 
-src="<%= product.images && product.images.length > 0 
-        ? product.images[0] 
-        : (product.image ? '/uploads/' + product.image : '/default.png') %>" 
-onerror="this.src='/default.png'"
-class="w-full h-72 object-cover hover:scale-105 transition duration-300">
-    </div>
 
-    <h3 class="text-xl font-semibold mt-5">
-      <%= product.name %>
-    </h3>
+<!-- STEP HEADER -->
+<div class="bg-white p-4 rounded shadow flex items-center gap-3">
+  <span class="bg-blue-500 text-white px-3 py-1 rounded">1</span>
+  <h2 class="font-semibold">Product Details</h2>
+</div>
 
-    <p class="text-green-600 text-2xl font-bold mt-2">
+<!-- PRODUCT CARD -->
+<div class="bg-white p-5 rounded-xl shadow flex gap-5">
+
+  <img 
+    src="<%= product.images?.[0] || '/default.png' %>"
+    class="w-32 h-32 object-cover rounded-lg border"
+  >
+
+  <div class="flex-1">
+    <h2 class="text-lg font-semibold"><img 
+  src="<%= product.images?.[0] || '/default.png' %>" 
+  onerror="this.src='/default.png'"
+  class="w-32 h-32 object-cover rounded-lg border"
+/></h2>
+
+    <p class="text-green-600 text-xl font-bold mt-2">
       ₹ <%= product.price %>
     </p>
 
-    <p class="text-gray-500 mt-3 text-sm leading-relaxed">
+    <p class="text-gray-500 text-sm mt-2 line-clamp-2">
       <%= product.description %>
     </p>
 
-    <div class="mt-4 text-green-600 font-semibold">
-      🚚 Free Delivery | 4-5 Days
-    </div>
-
+    <p class="text-green-600 text-sm mt-2 font-semibold">
+      ✔ In Stock | Free Delivery
+    </p>
   </div>
 
-
-  <!-- 📦 RIGHT: ADDRESS FORM -->
-  <div class="bg-white p-8 rounded-2xl shadow-lg">
-
-    <!-- HEADER -->
-    <h1 class="text-2xl font-bold mb-6 border-b pb-2">
-      📍 Add Delivery Address
-    </h1>
-
-    <form action="/place-order" method="POST" class="space-y-5">
-
-      <input type="hidden" name="productId" value="<%= product._id %>">
-
-      <!-- CONTACT -->
-      <div>
-        <h2 class="font-semibold mb-3 text-gray-700">Contact Details</h2>
-
-        <input type="text" name="name" placeholder="Full Name"
-        class="w-full border p-3 rounded-lg mb-3 focus:ring-2 focus:ring-pink-400 outline-none" required>
-
-        <input type="text" name="phone" placeholder="Phone Number"
-        class="w-full border p-3 rounded-lg mb-3 focus:ring-2 focus:ring-pink-400 outline-none" required>
-
-        <input type="text" name="phone2" placeholder="Alternate Number (optional)"
-        class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-pink-400 outline-none">
-
-        <input type="email" name="email" placeholder="Email Address"
-        class="w-full border p-3 rounded-lg mt-3 focus:ring-2 focus:ring-pink-400 outline-none" required>
-
-      </div>
-    
-
-      <!-- ADDRESS -->
-      <div>
-        <h2 class="font-semibold mb-2 text-gray-700">Address</h2>
-
-        <input type="text" name="house" placeholder="House No / Building"
-        class="w-full border p-3 rounded-lg mb-3 focus:ring-2 focus:ring-pink-400 outline-none" required>
-
-        <input type="text" name="area" placeholder="Road / Area / Colony"
-        class="w-full border p-3 rounded-lg mb-3 focus:ring-2 focus:ring-pink-400 outline-none" required>
-
-        <input type="text" name="pincode" placeholder="Pincode"
-        class="w-full border p-3 rounded-lg mb-3 focus:ring-2 focus:ring-pink-400 outline-none" required>
-
-        <div class="flex gap-2">
-          <input type="text" name="city" placeholder="City"
-          class="w-1/2 border p-3 rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" required>
-
-          <input type="text" name="state" placeholder="State"
-          class="w-1/2 border p-3 rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" required>
-        </div>
-
-        <input type="text" name="landmark" placeholder="Nearby Landmark (optional)"
-        class="w-full border p-3 rounded-lg mt-3 focus:ring-2 focus:ring-pink-400 outline-none">
-      </div>
-
-   
-     <!-- SIZE -->
-      <%= JSON.stringify(product.sizes) %>
-<% if(product.sizes && product.sizes.length > 0){ %>
-
-<div>
-  <h2 class="font-semibold mb-3 text-gray-700">Select Size</h2>
-
-  <div class="flex gap-4 flex-wrap">
-
-    <% product.sizes.forEach(item => { %>
-
-      <label class="cursor-pointer">
-        <input type="radio" name="size" value="<%= item.size %>" class="hidden peer" required>
-
-        <div class="w-20 h-20 flex flex-col items-center justify-center 
-        border-2 border-gray-400 rounded-full 
-        peer-checked:border-black peer-checked:bg-gray-200 
-        hover:bg-gray-100 transition">
-
-          <p class="text-lg font-bold"><%= item.size %></p>
-         
-
-        </div>
-      </label>
-
-    <% }) %>
-
-  </div>
 </div>
 
-<% } %>
+<!-- ADDRESS -->
+<div class="bg-white p-5 rounded-xl shadow">
 
-      <!-- BUTTON -->
-      <button class="w-full bg-gradient-to-r from-pink-500 to-purple-600 
-      text-white py-3 rounded-xl text-lg font-semibold 
-      hover:scale-105 transition transform shadow-md">
-        🚀 Save Address & Place Order
-      </button>
+  <div class="flex items-center gap-3 mb-4">
+    <span class="bg-blue-500 text-white px-3 py-1 rounded">2</span>
+    <h2 class="font-semibold">Delivery Address</h2>
+  </div>
 
-    </form>
+  <form id="orderForm" class="grid md:grid-cols-2 gap-4">
+
+    <input type="hidden" name="productId" value="<%= product._id %>">
+
+    <input name="name" placeholder="Full Name" class="border p-3 rounded focus:ring-2 focus:ring-blue-400" required>
+    <input name="phone" placeholder="Phone Number" class="border p-3 rounded" required>
+  <!-- ADD THIS FIELD -->
+<input name="state" placeholder="State" class="border p-3 rounded" required>
+
+<!-- FIX THIS -->
+<input name="phone2" placeholder="Alternate Phone Number" class="border p-3 rounded">
+
+    <input name="email" placeholder="Email Address" class="border p-3 rounded" required>
+
+    <input name="house" placeholder="  House No." class="border p-3 rounded" required>
+    <input name="city" placeholder="City" class="border p-3 rounded" required>
+    <input name="area" placeholder="Street / Area" class="border p-3 rounded" required>
+    <input name="pincode" placeholder="Pincode" class="border p-3 rounded" required>
+
+  </form>
+
+</div>
+
+
+  </div>
+
+  <!-- ================= RIGHT ================= -->
+
+  <div class="bg-white p-5 rounded-xl shadow h-fit sticky top-20">
+
+
+<h2 class="text-lg font-semibold border-b pb-2 mb-4">
+  PRICE DETAILS
+</h2>
+
+<div class="space-y-3 text-sm">
+
+  <div class="flex justify-between">
+    <span>Price</span>
+    <span>₹ <%= product.price %></span>
+  </div>
+
+  <div class="flex justify-between">
+    <span>Delivery Charges</span>
+    <span class="text-green-600 font-semibold">FREE</span>
+  </div>
+
+  <div class="flex justify-between">
+    <span>GST (10%)</span>
+    <span>₹ <%= Math.round(product.price * 0.10) %></span>
+  </div>
+
+  <hr>
+
+  <div class="flex justify-between font-bold text-lg">
+    <span>Total Amount</span>
+    <span class="text-green-600">
+      ₹ <%= product.price + Math.round(product.price * 0.10) %>
+    </span>
+  </div>
+
+  <p class="text-green-600 text-sm font-semibold">
+    🎉 You saved ₹ <%= Math.round(product.price * 0.10) %> on this order
+  </p>
+
+</div>
+
+<!-- BUTTON -->
+<button onclick="payNow()" 
+  class="mt-6 w-full bg-yellow-400 hover:bg-yellow-500 py-3 rounded-lg font-semibold text-lg shadow">
+  PLACE ORDER
+</button>
+
+<!-- TRUST -->
+<div class="mt-5 text-xs text-gray-500 space-y-1">
+  <p>🔒 100% Secure Payments</p>
+  <p>📦 Easy Returns</p>
+  <p>🚚 Fast Delivery</p>
+</div>
 
   </div>
 
@@ -148,5 +148,113 @@ class="w-full h-72 object-cover hover:scale-105 transition duration-300">
 
 <%- include("partial/footer") %>
 
+
+
+ 
 </body>
+<script>
+window.payNow = async function () {
+  try {
+
+    const btn = document.querySelector("button");
+    btn.disabled = true;
+    btn.innerText = "Processing...";
+
+    const form = document.getElementById("orderForm");
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    // ✅ VALIDATION
+    if (!data.name || !data.phone || !data.email || !data.house || !data.city || !data.state || !data.pincode) {
+      alert("Please fill all required fields");
+      btn.disabled = false;
+      btn.innerText = "PLACE ORDER";
+      return;
+    }
+
+    const totalAmount = <%= product.price + Math.round(product.price * 0.10) %>;
+
+    // ✅ CREATE ORDER
+    const res = await fetch("/create-order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ amount: totalAmount })
+    });
+
+    const order = await res.json();
+
+    if (!order.id) {
+      alert("❌ Order creation failed");
+      btn.disabled = false;
+      btn.innerText = "PLACE ORDER";
+      return;
+    }
+
+    // ✅ RAZORPAY OPTIONS
+    const options = {
+      key: "rzp_test_SZWDMTwNZYsa0a",
+      amount: order.amount,
+      currency: "INR",
+      name: "LioKart",
+      description: "Secure Payment",
+      order_id: order.id,
+
+      handler: async function (response) {
+        try {
+          const verify = await fetch("/verify-payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+
+              productId: "<%= product._id %>",
+              totalAmount: totalAmount,
+              orderData: data
+            })
+          });
+
+          const result = await verify.json();
+
+          if (result.success) {
+            window.location.href = "/my-orders";
+          } else {
+            alert("❌ Payment verification failed");
+            btn.disabled = false;
+            btn.innerText = "PLACE ORDER";
+          }
+
+        } catch (err) {
+          console.log(err);
+          btn.disabled = false;
+          btn.innerText = "PLACE ORDER";
+        }
+      },
+
+      prefill: {
+        name: data.name,
+        email: data.email,
+        contact: data.phone
+      },
+
+      theme: {
+        color: "#2874F0"
+      }
+    };
+
+    // ✅ OPEN RAZORPAY
+    const rzp = new Razorpay(options);
+    rzp.open();
+
+  } catch (err) {
+    console.log(err);
+    alert("Something went wrong");
+  }
+};
+</script>
 </html>

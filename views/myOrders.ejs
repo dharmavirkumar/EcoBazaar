@@ -11,80 +11,168 @@
 
 <%- include("partial/nav") %>
 
-<div class="max-w-6xl mx-auto px-3 sm:px-5 md:px-6 py-4">
+<div class="max-w-6xl mx-auto px-4 py-6">
 
-<h1 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
-  My Orders
-</h1>
+<h1 class="text-2xl font-bold mb-6">My Orders</h1>
 
 <% if(orders.length > 0){ %>
 
-<div class="space-y-4 sm:space-y-6">
+<div class="space-y-6">
 
 <% orders.forEach(order => { %>
 
-<div class="bg-white rounded-xl shadow-sm hover:shadow-md transition p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-5">
+<div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition p-5 border">
 
-  <!-- IMAGE -->
-  <div class="w-full sm:w-28 md:w-32 flex-shrink-0">
-    <img 
-      src="<%= order.productId?.images?.[0] || '/default.png' %>" 
-      class="w-full h-40 sm:h-28 md:h-32 object-cover rounded-lg border">
+  <!-- HEADER -->
+  <div class="flex flex-col md:flex-row justify-between gap-4 border-b pb-4">
+
+    <div>
+      <p class="text-xs text-gray-500">ORDER ID</p>
+      <p class="font-semibold text-gray-800"><%= order._id %></p>
+    </div>
+
+    <div>
+      <p class="text-xs text-gray-500">DATE</p>
+      <p class="font-medium"><%= new Date(order.createdAt).toDateString() %></p>
+    </div>
+
+    <div>
+      <p class="text-xs text-gray-500">TOTAL</p>
+      <p class="font-bold text-lg text-gray-900">₹ <%= order.totalAmount %></p>
+    </div>
+
   </div>
 
-  <!-- DETAILS -->
-  <div class="flex-1">
+  <!-- ITEMS -->
+  <div class="mt-4 space-y-4">
 
-    <h2 class="text-base sm:text-lg font-semibold text-gray-800 line-clamp-2">
-      <%= order.productId?.name %>
-    </h2>
+  <% order.items.forEach(item => { %>
 
-    <p class="text-gray-700 font-medium mt-1">
-      ₹ <%= order.productId?.price %>
-    </p>
+  <div class="flex gap-4 border rounded-lg p-3 hover:bg-gray-50 transition">
 
-    <% if(order.size){ %>
-      <p class="text-xs sm:text-sm text-gray-500 mt-1">
-        Size: <span class="font-medium"><%= order.size %></span>
+   <img 
+  src="<%= item.image ? item.image : '/default.png' %>" 
+  onerror="this.src='/default.png'"
+  class="w-24 h-24 object-cover rounded border"
+/>
+
+    <div class="flex-1">
+
+      <h2 class="font-semibold text-gray-800">
+        <%= item.name %>
+      </h2>
+
+      <p class="text-sm text-gray-600 mt-1">
+        ₹ <%= item.price %> × <%= item.quantity %>
       </p>
-    <% } %>
 
-    <p class="text-xs sm:text-sm text-gray-400 mt-2">
-      Ordered on: <%= new Date(order.createdAt).toDateString() %>
-    </p>
+      <% if(item.size){ %>
+      <span class="inline-block mt-1 text-xs bg-gray-200 px-2 py-0.5 rounded">
+        Size: <%= item.size %>
+      </span>
+      <% } %>
+
+    </div>
 
   </div>
 
-  <!-- STATUS + ACTION -->
-  <div class="flex flex-row sm:flex-col justify-between items-center sm:items-end gap-3 sm:gap-4">
+  <% }) %>
 
-    <!-- STATUS -->
-    <span class="px-3 py-1 text-xs sm:text-sm rounded-full font-medium whitespace-nowrap
-      <%= order.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 
+  </div>
+<a href="/track-order/<%= order._id %>" class="btn">
+  Track Order
+</a>
+  <!-- STATUS + ACTION -->
+  <div class="flex flex-col md:flex-row justify-between items-center mt-5 gap-4">
+
+    <!-- STATUS BADGE -->
+    <span class="px-4 py-1 rounded-full text-sm font-semibold
+      <%= order.status === 'Placed' ? 'bg-yellow-100 text-yellow-700' : 
+          order.status === 'Shipped' ? 'bg-blue-100 text-blue-700' :
+          order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-700' :
           order.status === 'Delivered' ? 'bg-green-100 text-green-700' : 
-          order.status === 'Cancelled' ? 'bg-red-100 text-red-600' :
-          'bg-blue-100 text-blue-600' %>">
+          'bg-red-100 text-red-600' %>">
       <%= order.status %>
     </span>
 
     <!-- BUTTONS -->
-    <div class="flex flex-row sm:flex-col gap-2 sm:gap-2">
+    <div class="flex gap-3">
 
       <% if(order.status !== "Cancelled" && order.status !== "Delivered") { %>
-        <a href="/cancel-order/<%= order._id %>"
-          class="bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm text-center">
-          Cancel
-        </a>
-      <% } else { %>
-        <span class="text-gray-400 text-xs sm:text-sm">
-          Not Allowed
-        </span>
+      <a href="/cancel-order/<%= order._id %>"
+        class="px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm rounded">
+        Cancel
+      </a>
       <% } %>
 
       <a href="/download-invoice/<%= order._id %>"
-        class="bg-green-500 hover:bg-green-600 text-white px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm text-center">
+        class="px-4 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm rounded">
         Invoice
       </a>
+
+    </div>
+
+  </div>
+
+  <!-- PAYMENT -->
+  <div class="mt-3 text-sm">
+    Payment:
+    <span class="font-medium">
+      <%= order.paymentMethod %> 
+      <span class="text-gray-500">(<%= order.paymentStatus %>)</span>
+    </span>
+  </div>
+
+  <!-- ADDRESS -->
+  <div class="mt-4 text-sm bg-gray-50 p-3 rounded border">
+
+    <p class="font-semibold mb-1">Delivery Address</p>
+
+    <p>
+      <%= order.address?.house %>, <%= order.address?.area %>, 
+      <%= order.address?.city %>, <%= order.address?.state %> - <%= order.address?.pincode %>
+    </p>
+
+    <% if(order.address?.landmark){ %>
+    <p class="text-gray-500">Landmark: <%= order.address.landmark %></p>
+    <% } %>
+
+  </div>
+
+  <!-- TRACKING -->
+
+  <div class="mt-5">
+
+    <p class="text-sm font-semibold mb-3">Order Status</p>
+
+    <% const steps = ["Placed", "Shipped", "Out for Delivery", "Delivered"]; %>
+
+    <div class="flex justify-between items-center">
+
+    <% steps.forEach((step, i) => { %>
+
+      <div class="flex-1 text-center relative">
+
+        <!-- LINE -->
+        <% if(i !== steps.length - 1){ %>
+        <div class="absolute top-3 left-1/2 w-full h-1
+          <%= steps.indexOf(order.status) > i ? 'bg-green-500' : 'bg-gray-300' %>">
+        </div>
+        <% } %>
+
+        <!-- DOT -->
+        <div class="w-6 h-6 mx-auto rounded-full flex items-center justify-center text-xs
+          <%= steps.indexOf(order.status) >= i 
+              ? 'bg-green-500 text-white' 
+              : 'bg-gray-300' %>">
+          ✓
+        </div>
+
+        <p class="text-xs mt-1"><%= step %></p>
+
+      </div>
+
+    <% }) %>
 
     </div>
 
@@ -99,19 +187,19 @@
 <% } else { %>
 
 <!-- EMPTY STATE -->
-<div class="text-center mt-16 sm:mt-20 px-4">
-  <h2 class="text-lg sm:text-xl font-semibold text-gray-700">
-    No orders yet 😔
-  </h2>
+<div class="text-center mt-20">
 
-  <p class="text-gray-500 mt-2 text-sm sm:text-base">
-    Start shopping and place your first order!
-  </p>
+  <img src="/empty.png" class="w-40 mx-auto mb-4 opacity-80">
+
+  <h2 class="text-xl font-semibold text-gray-700">No orders yet 😔</h2>
+
+  <p class="text-gray-500 mt-2">Looks like you haven't placed any order</p>
 
   <a href="/" 
-    class="inline-block mt-4 bg-yellow-400 hover:bg-yellow-500 px-5 py-2 rounded font-medium text-sm sm:text-base">
+    class="inline-block mt-5 bg-yellow-400 hover:bg-yellow-500 px-6 py-2 rounded font-medium shadow">
     Shop Now 🛍️
   </a>
+
 </div>
 
 <% } %>

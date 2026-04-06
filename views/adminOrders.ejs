@@ -12,7 +12,7 @@
   <!-- HEADER -->
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-3xl font-bold text-gray-800">
-      Admin Orders 📦
+      📦 Admin Orders
     </h1>
 
     <span class="text-sm text-gray-500">
@@ -20,153 +20,170 @@
     </span>
   </div>
 
-  <% if(orders.length > 0){ %>
+  <!-- SEARCH -->
+  <input 
+    type="text" 
+    id="orderSearch" 
+    placeholder="🔍 Search orders..." 
+    class="border p-3 mb-6 w-full rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+  >
 
-  <div class="overflow-x-auto bg-white rounded-xl shadow">
+  <% if(orders && orders.length > 0){ %>
 
-    <table class="w-full text-sm">
+  <div class="space-y-6" id="orderList">
 
-      <!-- HEADER -->
-      <thead class="bg-gray-50 text-gray-600 uppercase text-xs sticky top-0">
-        <tr>
-          <th class="p-4 text-left">Product</th>
-          <th class="p-4 text-center">Customer</th>
-          <th class="p-4 text-center">Contact</th>
-          <th class="p-4 text-left">Address</th>
-          <th class="p-4 text-center">Payment</th>
-          <th class="p-4 text-center">Size</th>
-          <th class="p-4 text-center">Status</th>
-          <th class="p-4 text-center">Action</th>
-        </tr>
-      </thead>
+  <% orders.forEach(o => { %>
 
-      <!-- BODY -->
-      <tbody class="divide-y">
+  <div class="bg-white rounded-xl shadow p-5 hover:shadow-lg transition order-card">
 
-      <% orders.forEach(order => { %>
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row justify-between gap-3 border-b pb-3 mb-3">
 
-        <tr class="hover:bg-gray-50 transition">
+      <div>
+        <p class="font-bold text-lg">Order ID: <%= o._id %></p>
+        <p class="text-xs text-gray-500">
+          <%= new Date(o.createdAt).toDateString() %>
+        </p>
+      </div>
 
-          <!-- PRODUCT -->
-          <td class="p-4">
-            <% if(order.productId){ %>
+      <!-- STATUS BADGE -->
+      <span class="text-xs px-3 py-1 rounded-full font-semibold w-fit
+        <%= o.status==='Delivered' ? 'bg-green-100 text-green-600' :
+            o.status==='Cancelled' ? 'bg-red-100 text-red-600' :
+            o.status==='Shipped' ? 'bg-blue-100 text-blue-600' :
+            'bg-yellow-100 text-yellow-600' %>">
+        <%= o.status %>
+      </span>
 
-              <div class="flex items-center gap-3">
+    </div>
 
-                <img 
-                  src="<%= order.productId?.images?.[0] || '/default.png' %>" 
-                  class="w-16 h-16 object-cover rounded-lg border">
+    <!-- PRODUCTS -->
+    <div class="space-y-3">
 
-                <div>
-                  <p class="font-semibold text-gray-800">
-                    <%= order.productId.name %>
-                  </p>
-                  <p class="text-gray-500 text-xs">
-                    ₹ <%= order.productId.price %>
-                  </p>
-                </div>
+      <% o.items.forEach(item => { %>
 
-              </div>
+      <div class="flex gap-4 items-center border rounded-lg p-3">
 
-            <% } else { %>
-              <p class="text-red-500 font-medium">Product Deleted</p>
-            <% } %>
-          </td>
+        <img 
+          src="<%= item.image || '/default.png' %>" 
+          onerror="this.src='/default.png'"
+          class="w-16 h-16 object-cover rounded"
+        >
 
-          <!-- CUSTOMER -->
-          <td class="p-4 text-center">
-            <p class="font-medium text-gray-700">
-              <%= order.name %>
-            </p>
-          </td>
+        <div class="flex-1">
+          <p class="font-semibold"><%= item.name %></p>
+          <p class="text-xs text-gray-500">
+            Qty: <%= item.quantity %> | ₹ <%= item.price %>
+          </p>
+        </div>
 
-          <!-- CONTACT -->
-          <td class="p-4 text-center text-xs text-gray-600">
-            <p><%= order.phone %></p>
-            <p class="text-gray-400"><%= order.email %></p>
-          </td>
+        <p class="font-bold text-green-600">
+          ₹ <%= item.price * item.quantity %>
+        </p>
 
-          <!-- ADDRESS -->
-          <td class="p-4 text-xs text-gray-600 max-w-xs">
-            <%= order.address %>
-          </td>
-
-          <!-- PAYMENT -->
-          <td class="p-4 text-center text-xs text-gray-700">
-            <%= order.payment %>
-          </td>
-
-          <!-- SIZE -->
-          <td class="p-4 text-center">
-            <span class="bg-gray-100 px-2 py-1 rounded text-xs">
-              <%= order.size || "N/A" %>
-            </span>
-          </td>
-
-          <!-- STATUS -->
-          <td class="p-4 text-center">
-
-            <span class="px-3 py-1 rounded-full text-xs font-medium
-              <%= order.status === 'Placed' ? 'bg-yellow-100 text-yellow-700' : 
-                  order.status === 'Shipped' ? 'bg-blue-100 text-blue-700' :
-                  order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-700' :
-                  order.status === 'Delivered' ? 'bg-green-100 text-green-700' :
-                  order.status === 'Cancelled' ? 'bg-red-100 text-red-600' :
-                  'bg-gray-100 text-gray-600' %>">
-
-              <%= order.status %>
-
-            </span>
-
-          </td>
-
-          <!-- ACTION -->
-          <td class="p-4 text-center">
-
-            <form action="/admin/update-status/<%= order._id %>" method="POST" class="flex flex-col gap-2 items-center">
-
-              <select name="status" 
-                class="border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-                <option <%= order.status === 'Placed' ? 'selected' : '' %>>Placed</option>
-                <option <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                <option <%= order.status === 'Out for Delivery' ? 'selected' : '' %>>Out for Delivery</option>
-                <option <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                <option <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-
-              </select>
-
-              <button 
-                class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs transition">
-                Update
-              </button>
-
-            </form>
-
-          </td>
-
-        </tr>
+      </div>
 
       <% }) %>
 
-      </tbody>
+    </div>
 
-    </table>
+    <!-- DETAILS -->
+    <div class="grid md:grid-cols-3 gap-4 mt-4 text-sm">
+
+      <!-- ADDRESS -->
+      <div>
+        <p class="font-semibold mb-1">📍 Address</p>
+        <p class="text-gray-600 text-xs">
+          <%= o.address?.house %>, <%= o.address?.area %>,<br>
+          <%= o.address?.city %>, <%= o.address?.state %> - <%= o.address?.pincode %>
+        </p>
+      </div>
+
+      <!-- PAYMENT -->
+      <div>
+        <p class="font-semibold mb-1">💳 Payment</p>
+        <p class="text-xs">
+          Method: <%= o.paymentMethod %><br>
+          Status: <span class="font-semibold"><%= o.paymentStatus %></span>
+        </p>
+      </div>
+
+      <!-- TOTAL -->
+      <div>
+        <p class="font-semibold mb-1">💰 Total</p>
+        <p class="text-green-600 font-bold text-lg">
+          ₹ <%= o.totalAmount %>
+        </p>
+      </div>
+
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="flex flex-wrap gap-3 mt-4 items-center">
+
+      <!-- STATUS UPDATE -->
+      <form action="/admin/update-status/<%= o._id %>" method="POST" class="flex gap-2">
+
+        <select name="status" class="border p-2 rounded">
+          <option <%= o.status==='Placed'?'selected':'' %>>Placed</option>
+          <option <%= o.status==='Shipped'?'selected':'' %>>Shipped</option>
+          <option <%= o.status==='Out for Delivery'?'selected':'' %>>Out for Delivery</option>
+          <option <%= o.status==='Delivered'?'selected':'' %>>Delivered</option>
+          <option <%= o.status==='Cancelled'?'selected':'' %>>Cancelled</option>
+        </select>
+
+        <button class="bg-blue-500 hover:bg-blue-600 text-white px-3 rounded">
+          Update
+        </button>
+
+      </form>
+
+      <!-- INVOICE -->
+      <a href="/download-invoice/<%= o._id %>"
+        class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded">
+        📄 Invoice
+      </a>
+
+    </div>
+
+  </div>
+
+  <% }) %>
 
   </div>
 
   <% } else { %>
 
-    <!-- EMPTY STATE -->
-    <div class="text-center mt-20">
-      <h2 class="text-xl font-semibold text-gray-700">
-        No orders found 😔
-      </h2>
-    </div>
+  <!-- EMPTY STATE -->
+  <div class="text-center mt-20">
+
+    <img src="/empty.png" class="w-40 mx-auto mb-4 opacity-80">
+
+    <h2 class="text-xl font-semibold text-gray-700">
+      No Orders Found 😔
+    </h2>
+
+    <p class="text-gray-500 mt-2">
+      No orders available in the system
+    </p>
+
+  </div>
 
   <% } %>
 
 </div>
+
+<!-- SEARCH SCRIPT -->
+<script>
+document.getElementById("orderSearch").addEventListener("input", function(){
+  let val = this.value.toLowerCase();
+
+  document.querySelectorAll(".order-card").forEach(card => {
+    let text = card.innerText.toLowerCase();
+    card.style.display = text.includes(val) ? "block" : "none";
+  });
+});
+</script>
 
 </body>
 </html>

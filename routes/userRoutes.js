@@ -16,6 +16,7 @@ const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
 const QRCode = require("qrcode");
+const crypto = require("crypto"); 
 
 
 
@@ -28,10 +29,9 @@ function isLoggedIn(req, res, next) {
 
 // ✅ My Orders Page
 router.get("/my-orders", isLoggedIn, async (req, res) => {
-
-  const orders = await Order.find({
-    userId: req.session.user._id
-  }).populate("productId").sort({ createdAt: -1 });
+  const orders = await Order.find({ userId: req.session.user._id })
+    .populate("items.productId")
+    .sort({ createdAt: -1 });
 
   res.render("myOrders", { orders });
 });
@@ -138,116 +138,173 @@ router.get("/logout", (req, res) => {
 // invoice
 
 
+
+
 router.get("/download-invoice/:id", isLoggedIn, async (req, res) => {
 
-  const order = await Order.findById(req.params.id).populate("productId");
+  const order = await Order.findById(req.params.id)
+    .populate("items.productId");
+
   if (!order) return res.send("Order not found");
+
+  // ✅ CREATE UNIQUE INVOICE NUMBER
+  const invoiceNo = "INV-" + Date.now();
 
   const doc = new PDFDocument({ margin: 40 });
 
   res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", "attachment; filename=invoice.pdf");
+  res.setHeader("Content-Disposition", `attachment; filename=${invoiceNo}.pdf`);
 
   doc.pipe(res);
 
-  // 🟡 LOGO
-  const logoPath = path.join(__dirname, "../public/logo.png");
-
+  // ================= LOGO =================
+  const logoPath = path.join(__dirname, "../public/logo.png"); // 🔥 add your logo
   try {
-    doc.image(logoPath, 40, 30, { width: 100 });
-  } catch {
-    doc.fontSize(22).text("LioKart", 40, 40);
-  }
+    doc.image(logoPath, 40, 30, { width: 80 });
+  } catch (e) {}
 
-  // 🧾 TITLE
-  doc.fontSize(18).text("INVOICE", 450, 40);
-
-  // 🧾 ORDER INFO
-  doc.fontSize(10);
-  doc.text(`Order ID: ${order._id}`, 350, 80);
-  doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, 350, 95);
-  doc.text(`Status: ${order.status}`, 350, 110);
-
-  // 👤 BILLING
-  doc.fontSize(12).text("Billing Details", 40, 110);
-  doc.fontSize(10);
-
-  doc.text(order.name, 40, 125);
-  doc.text(order.email, 40, 140);
-  doc.text(order.phone, 40, 155);
-  doc.text(order.address, 40, 170);
-
-  // 📦 TABLE HEADER
-  const tableTop = 230;
-
-  doc.font("Helvetica-Bold");
-  doc.text("Product", 40, tableTop);
-  doc.text("Price", 300, tableTop);
-  doc.text("Qty", 370, tableTop);
-  doc.text("Total", 440, tableTop);
-
-  doc.moveTo(40, tableTop + 15).lineTo(550, tableTop + 15).stroke();
-
-  doc.font("Helvetica");
-
-  // 📦 PRODUCT
-  const product = order.productId;
-  const qty = 1;
-  const total = product.price;
-
-  const nameHeight = doc.heightOfString(product.name, { width: 240 });
-
-  const rowY = tableTop + 25;
-
-  doc.text(product.name, 40, rowY, { width: 240 });
-  doc.text(`₹${product.price}`, 300, rowY);
-  doc.text(qty, 370, rowY);
-  doc.text(`₹${total}`, 440, rowY);
-
-  doc.moveTo(40, rowY + nameHeight + 10)
-     .lineTo(550, rowY + nameHeight + 10)
-     .stroke();
-
-  // 💰 TOTAL BOX
-  const boxY = rowY + nameHeight + 30;
-
-  doc.rect(300, boxY, 250, 90).stroke();
-
-  doc.text("Subtotal:", 310, boxY + 10);
-  doc.text(`₹${total}`, 480, boxY + 10);
-
-  doc.text("Delivery:", 310, boxY + 30);
-  doc.text("₹0", 480, boxY + 30);
+  // ================= COMPANY NAME =================
+  doc
+    .fontSize(20)
+    .fillColor("#2874F0")
+    .text("LioKart", 130, 40);
 
   doc
-    .fontSize(13)
-    .fillColor("green")
-    .text("Grand Total:", 310, boxY + 60);
+    .fontSize(10)
+    .fillColor("gray")
+    .text("India's Trusted Shopping Platform", 130, 65);
 
-  doc.text(`₹${total}`, 480, boxY + 60);
+  // ================= INVOICE TITLE =================
+  doc
+    .fontSize(18)
+    .fillColor("black")
+    .text("INVOICE", 400, 40);
 
+  doc
+    .fontSize(10)
+    .text(`Invoice No: ${invoiceNo}`, 400, 65);
+
+  doc.moveDown(3);
+
+  // ================= ORDER INFO =================
+  doc
+    .fontSize(10)
+    .text(`Order ID: ${order._id}`)
+    .text(`Date: ${new Date(order.createdAt).toDateString()}`)
+    .text(`Status: ${order.status}`);
+
+  doc.moveDown();
+
+  // ================= CUSTOMER + ADDRESS =================
+  doc
+    .fontSize(12)
+    .text("Billing & Shipping Address", { underline: true });
+
+  doc
+    .fontSize(10)
+    .text(order.name)
+    .text(order.email)
+    .text(order.phone)
+    .text(
+      `${order.address?.house}, ${order.address?.area}, ${order.address?.city}, ${order.address?.state} - ${order.address?.pincode}`
+    );
+
+  if (order.address?.landmark) {
+    doc.text(`Landmark: ${order.address.landmark}`);
+  }
+
+  doc.moveDown();
+
+  // ================= TABLE HEADER =================
+  const tableTop = doc.y;
+
+  doc.rect(40, tableTop, 520, 20).fill("#2874F0");
+
+  doc
+    .fillColor("white")
+    .fontSize(10)
+    .text("Image", 50, tableTop + 5)
+    .text("Product", 110, tableTop + 5)
+    .text("Price", 300, tableTop + 5)
+    .text("Qty", 370, tableTop + 5)
+    .text("Total", 430, tableTop + 5);
+
+  let y = tableTop + 30;
+
+  // ================= ITEMS =================
   doc.fillColor("black");
 
-  // 🔲 QR CODE (ORDER TRACK LINK)
-  const qrData = `https://liokart.shop/order/${order._id}`;
+  const fs = require("fs");
 
-  const qrImage = await QRCode.toDataURL(qrData);
+order.items.forEach(item => {
 
-  const qrBase64 = qrImage.replace(/^data:image\/png;base64,/, "");
-  const qrBuffer = Buffer.from(qrBase64, "base64");
+  const product = item.productId;
 
-  doc.image(qrBuffer, 40, boxY, { width: 100 });
+  let imgPath = path.join(
+    process.cwd(),
+    "public/uploads",
+    item.image
+  );
 
-  doc.fontSize(8).text("Scan to track order", 40, boxY + 105);
+  if (fs.existsSync(imgPath)) {
+    doc.image(imgPath, 50, y, { width: 40, height: 40 });
+  }
 
-  // 📝 FOOTER
-  doc.moveTo(40, boxY + 130)
-     .lineTo(550, boxY + 130)
-     .stroke();
+  doc
+    .fontSize(10)
+    .text(product?.name || item.name, 110, y)
+    .text(`₹${product?.price || item.price}`, 300, y)
+    .text(item.quantity, 370, y)
+    .text(`₹${(product?.price || item.price) * item.quantity}`, 430, y);
 
-  doc.fontSize(10).text("Thank you for shopping with LioKart ❤️", 40, boxY + 140, {
-    align: "center",
-  });
+  y += 50;
+});
+
+  // ================= PRICE BREAKDOWN =================
+  let shipping = 0;
+  let gst = Math.round(order.totalAmount * 0.10); // 10% GST
+
+  y += 10;
+
+  doc.moveTo(300, y).lineTo(550, y).stroke();
+
+  y += 10;
+
+  doc.text("Subtotal:", 350, y);
+  doc.text(`₹${order.totalAmount - gst}`, 450, y);
+
+  y += 15;
+
+  doc.text("GST (10%):", 350, y);
+  doc.text(`₹${gst}`, 450, y);
+
+  y += 15;
+
+  doc.text("Shipping:", 350, y);
+  doc.text(shipping === 0 ? "FREE" : `₹${shipping}`, 450, y);
+
+  y += 15;
+
+  doc.fontSize(12).text("Total Amount:", 350, y);
+  doc.text(`₹${order.totalAmount}`, 450, y);
+
+  // ================= PAYMENT =================
+  doc.moveDown(2);
+
+  doc
+    .fontSize(10)
+    .text(`Payment Method: ${order.paymentMethod}`)
+    .text(`Payment Status: ${order.paymentStatus}`);
+
+  // ================= FOOTER =================
+  doc.moveDown(3);
+
+  doc
+    .fontSize(10)
+    .fillColor("gray")
+    .text("Thank you for shopping with LioKart ❤️", {
+      align: "center"
+    });
 
   doc.end();
 });
@@ -300,82 +357,116 @@ res.render("Jewellery", { products });
 });
 
 // ================= ADD PRODUCT =================
-
-
-router.post('/add-product', upload.array("images", 5), async (req, res) => {
-
-  const { name, price, description, category, discountType, discountValue,mainCategory, subCategory} = req.body;
-
-  // ✅ MULTIPLE IMAGES ARRAY
-  const images = req.files.map(file => file.path);
-
-  let finalPrice = price;
-
-  let sizes = [];
-
-if (subCategory === "Jeans") {
-  sizes = [
-    { size: "26", price: 309 },
-    { size: "28", price: 324 },
-    { size: "30", price: 339 }
-  ];
-}
-
-if (subCategory === "Shoes") {
-  sizes = [
-    { size: "7", price: 799 },
-    { size: "8", price: 849 },
-    { size: "9", price: 899 }
-  ];
-}
-
-if (subCategory === "Shirts") {
-  sizes = [
-    { size: "S", price: 499 },
-    { size: "M", price: 499 },
-    { size: "L", price: 499 }
-  ];
-}
-  // ✅ DISCOUNT LOGIC
-  if (discountType === "percentage") {
-    finalPrice = price - (price * discountValue / 100);
-  } 
-  else if (discountType === "flat") {
-    finalPrice = price - discountValue;
-  }
-
-  const newProduct = new Product({
-    name,
-    price,
-    description,
-    category,
-    images,
-    discountType,
-    discountValue,
-    mainCategory,
-    subCategory,
-    finalPrice,
-    sizes
-  });
-
-  await newProduct.save();
-
-  res.redirect('/admin');
+router.get('/add-product', (req, res) => {
+  res.render('Products');
 });
+router.post('/add-product', upload.array("images", 5), async (req, res) => {
+  
+  try {
+    
+
+    let {
+      name,
+      price,
+      description,
+      category,
+      discountType,
+      discountValue,
+      mainCategory,
+      subCategory,
+       
+    } = req.body;
+
+    
+    // ✅ FIX: convert to number
+    price = Number(price);
+    discountValue = Number(discountValue) || 0;
+
+   // ✅ SAFE IMAGE HANDLING
+const images = req.files ? req.files.map(file => file.path) : [];
 
 
+// 🔥 ADD HERE 👇👇
 
-// router.get("/category/:main/:sub", async (req, res) => {
-//   const { main, sub } = req.params;
+// ✅ HIGHLIGHTS ARRAY
+const highlights = req.body.highlights || [];
 
-//   const products = await Product.find({
-//     mainCategory: { $regex: `^${main}$`, $options: "i" },
-//     subCategory: { $regex: sub, $options: "i" }
-//   });
+// ✅ SPECIFICATIONS MAP
+let specifications = {};
 
-//   res.render("categoryPage", { products, main, sub });
-// });
+if (req.body.specKey && req.body.specValue) {
+  req.body.specKey.forEach((key, index) => {
+    if (key && req.body.specValue[index]) {
+      specifications[key] = req.body.specValue[index];
+    }
+  });
+}
 
+    let finalPrice = price;
+
+    // ✅ DISCOUNT LOGIC (SAFE)
+    if (discountType === "percentage") {
+      finalPrice = price - (price * discountValue / 100);
+    } 
+    else if (discountType === "flat") {
+      finalPrice = price - discountValue;
+    }
+
+    // ❗ NEVER GO BELOW 0
+    if (finalPrice < 0) finalPrice = 0;
+
+    // ✅ DYNAMIC SIZE SYSTEM
+    let sizes = [];
+
+    const sizeMap = {
+      Jeans: [
+        { size: "26" },
+        { size: "28" },
+        { size: "30" }
+      ],
+      Shoes: [
+        { size: "7" },
+        { size: "8" },
+        { size: "9" }
+      ],
+      Shirts: [
+        { size: "S" },
+        { size: "M"},
+        { size: "L" }
+      ]
+    };
+
+    if (sizeMap[subCategory]) {
+      sizes = sizeMap[subCategory];
+    }
+
+    // ✅ CREATE PRODUCT
+    const newProduct = new Product({
+      name,
+      price,
+      description,
+      category,
+      images,
+      discountType,
+      discountValue,
+      mainCategory,
+      subCategory,
+
+  highlights,
+  specifications,
+      finalPrice,
+      sizes
+    });
+
+    await newProduct.save();
+
+    res.redirect('/admin');
+
+  } catch (err) {
+    console.log("ADD PRODUCT ERROR:", err);
+    res.status(500).send("Something went wrong");
+  }
+});
 
 
 router.get("/category/:main/:sub", async (req, res) => {
@@ -595,10 +686,16 @@ router.get("/cart", (req, res) => {
 // ================= CHECKOUT =================
 router.get("/checkout", isLoggedIn, (req, res) => { 
   const cart = req.session.cart || []; 
-  const total = cart.reduce( (sum, item) => sum + item.price * item.qty, 0 ); 
+  const total = cart.reduce(
+    (sum, item) => sum + item.price * item.qty, 0
+  ); 
 
-  res.render("checkout", { cart, total }); });
-
+ res.render("checkout", {
+  cart,
+  total,
+  razorpayKey: process.env.RAZORPAY_KEY_ID
+});
+});
   
 router.post("/checkout", isLoggedIn, async (req, res) => {
   try {
@@ -612,7 +709,8 @@ router.post("/checkout", isLoggedIn, async (req, res) => {
       city,
       state,
       pincode,
-      landmark
+      landmark,
+      paymentMethod // 🔥 new field
     } = req.body;
 
     const cart = req.session.cart || [];
@@ -621,44 +719,73 @@ router.post("/checkout", isLoggedIn, async (req, res) => {
       return res.send("Cart is empty");
     }
 
-    // 🔥 Address combine (same as Buy Now)
-    const address = `
-      ${house}, ${area},
-      ${city}, ${state} - ${pincode}
-      ${landmark ? "Landmark: " + landmark : ""}
-    `;
-
-    let firstOrder = null;
     let firstProduct = null;
+    let totalAmount = 0;
+    let items = [];
 
+    // 🔥 LOOP CART
     for (let item of cart) {
 
       const product = await Product.findById(item._id);
-
       if (!product) continue;
 
-      const newOrder = new Order({
-        name,
-        email,
-        phone,
-        phone2,
-        address,
-        productId: item._id,
-        userId: req.session.user._id,
-        size: item.size || null,
-        payment: `Ordered ${product.name} x ${item.qty}`
+      items.push({
+        productId: product._id,
+        name: product.name,
+        price: product.price,
+        quantity: item.qty,
+        image: product.images?.[0] || "/default.png"
       });
 
-      await newOrder.save();
+      totalAmount += product.price * item.qty;
 
-      // ✅ Save first order (for email/invoice)
-      if (!firstOrder) {
-        firstOrder = newOrder;
+      if (!firstProduct) {
         firstProduct = product;
       }
     }
 
-    // ✅ EMAIL (same clean logic as Buy Now)
+    // 🔥 PAYMENT LOGIC
+    let paymentStatus = "Pending";
+
+   if (paymentMethod?.toUpperCase() === "ONLINE") {
+  paymentStatus = "Paid"; // only after verification (already handled)
+} else {
+  paymentStatus = "Pending";
+}
+
+    // 🔥 CREATE ORDER
+    const newOrder = new Order({
+      userId: req.session.user._id,
+
+      name,
+      email,
+      phone,
+      phone2,
+
+      address: {
+        fullName: name,
+        mobile: phone,
+        house,
+        area,
+        city,
+        state,
+        pincode,
+        landmark
+      },
+
+      items,
+      totalAmount,
+
+      paymentMethod: paymentMethod || "COD",
+      paymentStatus,
+
+      status: "Placed",
+      timeline: [{ status: "Placed" }]
+    });
+
+    await newOrder.save();
+
+    // ✅ EMAIL
     try {
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
@@ -668,10 +795,14 @@ router.post("/checkout", isLoggedIn, async (req, res) => {
           <h2>Thanks ${name}! 🎉</h2>
           <p>Your order has been placed successfully.</p>
 
-          <h3>${firstProduct.name}</h3>
-          <p>₹${firstProduct.price}</p>
+          <h3>${firstProduct?.name}</h3>
+          <p>₹${firstProduct?.price}</p>
 
-          <img src="${firstProduct.images[0]}" width="200"/>
+          <img src="${firstProduct?.images?.[0]}" width="200"/>
+
+          <p><b>Total Amount:</b> ₹${totalAmount}</p>
+
+          <p><b>Payment:</b> ${paymentMethod}</p>
 
           <p>📦 Delivery within 3-5 days</p>
         `
@@ -700,8 +831,7 @@ router.get("/buy-now/:id", isLoggedIn, async (req, res) => {
 
 // ================= SINGLE ORDER =================
 
-
-   router.post("/place-order",isLoggedIn, async (req, res) => {
+router.post("/place-order", isLoggedIn, async (req, res) => {
   try {
     const {
       name,
@@ -718,34 +848,69 @@ router.get("/buy-now/:id", isLoggedIn, async (req, res) => {
       size
     } = req.body;
 
-    // 🔥 Address combine
-    const address = `
-    ${house}, ${area},
-    ${city}, ${state} - ${pincode}
-    ${landmark ? "Landmark: " + landmark : ""}
-    `;
-
-    const product = await Product.findById(productId);
-
-    if (!product) {
-      return res.send("Product not found");
+    // ✅ BASIC VALIDATION
+    if (!name || !phone || !house || !area || !city || !state || !pincode) {
+      return res.send("All required fields missing");
     }
 
+    // ✅ PRODUCT FETCH
+   const product = await Product.findById(productId);
+
+if (!product) {
+  console.log("❌ Product not found:", productId);
+  return res.json({ success: false, message: "Product not found" });
+}
+
+const productImage =
+  product.images?.[0] || product.image || "/default.png";
+
+    // ✅ CREATE ORDER (FLIPKART STYLE)
     const newOrder = new Order({
+      userId: req.session.user._id,
+
       name,
       email,
       phone,
       phone2,
-      address,
-      productId,
-      userId: req.session.user._id, // ✅ IMPORTANT
-      size: product.category === "fashion" ? (size || "M") : null,
-      payment: `Ordered ${product.name} for ₹${product.price}`,
+
+      // ✅ OBJECT ADDRESS
+      address: {
+        fullName: name,
+        mobile: phone,
+        house,
+        area,
+        city,
+        state,
+        pincode,
+        landmark
+      },
+
+      // ✅ ITEMS ARRAY
+      items: [
+        {
+          productId: product._id,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+          size: product.category === "fashion" ? (size || "M") : null,
+          image: productImage
+        }
+      ],
+
+      // ✅ PRICE
+      totalAmount: product.price,
+
+      // ✅ PAYMENT
+      paymentMethod: "COD",
+      paymentStatus: "Pending",
+
+      // ✅ TRACKING
+      timeline: [{ status: "Placed" }]
     });
 
-    await newOrder.save(); // ✅ ORDER SAVED
+    await newOrder.save();
 
-    // ✅ EMAIL (SAFE BLOCK)
+    // ✅ EMAIL (SAFE)
     try {
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
@@ -758,7 +923,7 @@ router.get("/buy-now/:id", isLoggedIn, async (req, res) => {
           <h3>${product.name}</h3>
           <p>₹${product.price}</p>
 
-          <img src="${product.images[0]}" width="200"/>
+          <img src="${productImage}" width="200"/>
 
           <p>📦 Delivery within 4-5 days</p>
         `,
@@ -767,7 +932,7 @@ router.get("/buy-now/:id", isLoggedIn, async (req, res) => {
       console.log("❌ Email failed:", emailErr.message);
     }
 
-    // ✅ FINAL RESPONSE (IMPORTANT)
+    // ✅ SUCCESS PAGE
     res.render("orderSuccess");
 
   } catch (err) {
@@ -775,7 +940,6 @@ router.get("/buy-now/:id", isLoggedIn, async (req, res) => {
     res.send("Order failed");
   }
 });
-
 router.get("/cancel-order/:id", isLoggedIn, async (req, res) => {
   await Order.findByIdAndUpdate(req.params.id, {
     status: "Cancelled"
@@ -786,6 +950,251 @@ router.get("/cancel-order/:id", isLoggedIn, async (req, res) => {
 
 
 
+
+
+// ✅ CREATE ORDER (ONLY ONE ROUTE!)
+const razorpay = require("../config/razorpay"); // make sure this exists
+
+router.post("/create-order", async (req, res) => {
+  try {
+    const { amount } = req.body;
+
+   
+
+    if (!amount) {
+      return res.status(400).json({ error: "Amount missing" });
+    }
+
+    const order = await razorpay.orders.create({
+      amount: amount * 100, // ✅ convert to paise
+      currency: "INR",
+      receipt: "order_" + Date.now()
+    });
+
+
+
+    // ✅ IMPORTANT RESPONSE
+    res.json({
+      id: order.id,
+      amount: order.amount
+    });
+
+  } catch (err) {
+    console.log("ORDER ERROR:", err);
+    res.status(500).json({ error: "Order failed" });
+  }
+});
+
+
+// ✅ VERIFY PAYMENT
+const axios = require("axios");
+
+
+// ✅ VERIFY PAYMENT
+router.post("/verify-payment", async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      orderData,
+      productId,
+      totalAmount
+    } = req.body;
+
+    if (!orderData || !productId) {
+      return res.json({ success: false });
+    }
+
+    // ✅ SIGNATURE VERIFY
+    const expectedSign = crypto
+      .createHmac("sha256", process.env.RAZORPAY_SECRET)
+      .update(razorpay_order_id + "|" + razorpay_payment_id)
+      .digest("hex");
+
+    if (expectedSign !== razorpay_signature) {
+      console.log("❌ Signature mismatch");
+      return res.json({ success: false });
+    }
+
+    // ✅ PRODUCT FETCH
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.json({ success: false });
+    }
+
+    const productImage =
+      product.images?.[0] || product.image || "/default.png";
+
+    // ✅ DELIVERY DATE
+    const deliveryDate = new Date();
+    deliveryDate.setDate(deliveryDate.getDate() + 5);
+
+    // ✅ CREATE ORDER
+    const newOrder = new Order({
+      userId: req.session.user._id,
+
+      name: orderData.name,
+      email: orderData.email,
+      phone: orderData.phone,
+      phone2: orderData.phone2,
+
+      address: {
+        fullName: orderData.name,
+        mobile: orderData.phone,
+        house: orderData.house,
+        area: orderData.area,
+        city: orderData.city,
+        state: orderData.state,
+        pincode: orderData.pincode
+      },
+
+      items: [
+        {
+          productId: product._id,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+          image: productImage
+        }
+      ],
+
+      totalAmount: totalAmount,
+      paymentMethod: "Online",
+      paymentStatus: "Paid",
+
+      status: "Placed",
+      estimatedDelivery: deliveryDate,
+      trackingId: "TRK" + Date.now(),
+
+      statusHistory: [
+        {
+          status: "Placed",
+          date: new Date()
+        }
+      ]
+    });
+
+    // ✅ SAVE FIRST
+    await newOrder.save();
+
+    // 🚚 DELHIVERY INTEGRATION (FIXED)
+    try {
+      const payload = {
+        shipments: [
+          {
+            name: newOrder.name,
+            add: newOrder.address.house,
+            pin: newOrder.address.pincode,
+            city: newOrder.address.city,
+            state: newOrder.address.state,
+            country: "India",
+            phone: newOrder.phone,
+
+            order: newOrder._id.toString(),
+            payment_mode:
+              newOrder.paymentMethod === "COD" ? "COD" : "Prepaid",
+            total_amount: newOrder.totalAmount,
+
+            products_desc: newOrder.items.map(i => i.name).join(", "),
+            quantity: "1",
+
+            shipment_length: "10",
+            shipment_width: "10",
+            shipment_height: "10",
+            weight: "0.5"
+          }
+        ],
+        pickup_location: {
+          name: process.env.DELHIVERY_PICKUP_NAME
+        }
+      };
+
+     const response = await axios.post(
+  "https://staging-express.delhivery.com/api/cmu/create.json", // ✅ FIXED
+  payload,
+  {
+    headers: {
+      Authorization: `Token ${process.env.DELHIVERY_API_KEY}`,
+      "Content-Type": "application/json"
+    }
+  }
+);
+
+      const waybill = response.data?.packages?.[0]?.waybill;
+
+      if (waybill) {
+        newOrder.trackingId = waybill;
+        newOrder.courier = "Delhivery";
+        await newOrder.save();
+
+        console.log("✅ Delhivery AWB:", waybill);
+      }
+    } catch (err) {
+      console.log("❌ Delhivery Error:", err.response?.data || err.message);
+    }
+
+    // ✅ FINAL RESPONSE
+    res.json({ success: true });
+
+  } catch (err) {
+    console.log("VERIFY ERROR:", err);
+    res.json({ success: false });
+  }
+});
+
+
+router.get("/api/track/:id", async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order.trackingId) {
+      return res.json({ success: false, message: "No tracking ID" });
+    }
+
+    const response = await axios.get(
+      `https://track.delhivery.com/api/v1/packages/json/?waybill=${order.trackingId}`,
+      {
+        headers: {
+          Authorization: `Token ${process.env.DELHIVERY_API_KEY}`
+        }
+      }
+    );
+
+res.json({
+  success: true,
+  data: response.data
+});
+
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false });
+  }
+});
+
+// admin page
+// router.get("/admin/shipments", async (req, res) => {
+//   const orders = await Order.find();
+//   res.render("adminShipments", { orders });
+// });
+
+// update status
+// router.post("/admin/update-status", async (req, res) => {
+//   const { id, status } = req.body;
+
+//   const order = await Order.findById(id);
+
+//   order.status = status;
+
+//   order.statusHistory.push({
+//     status,
+//     date: new Date()
+//   });
+
+//   await order.save();
+
+//   res.redirect("/admin/shipments");
+// });
 // ================= REVIEW =================
 router.post("/add-review", async (req, res) => {
   const { productId, name, rating, comment } = req.body;
@@ -820,20 +1229,27 @@ router.get("/remove-from-cart/:id", (req, res) => {
   res.redirect("/cart");
 });
 
+router.get("/track-order/:id", isLoggedIn, async (req, res) => {
+  const order = await Order.findById(req.params.id);
+  res.render("orderTracking", { order });
+});
 
 // Update Order Status
 router.post("/admin/update-status/:id", async (req, res) => {
-  try {
-    const { status } = req.body;
+  const { status } = req.body;
 
-    await Order.findByIdAndUpdate(req.params.id, { status });
+  const order = await Order.findById(req.params.id);
 
-    res.redirect("/admin/orders");
+  order.status = status;
 
-  } catch (err) {
-    console.log(err);
-    res.send("Status update failed");
-  }
+  order.statusHistory.push({
+    status,
+    date: new Date()
+  });
+
+  await order.save();
+
+  res.redirect("/admin");
 });
 
 function isAdmin(req, res, next) {
@@ -843,15 +1259,16 @@ function isAdmin(req, res, next) {
   next();
 }
 
-router.get("/admin/orders", isAdmin, async (req, res) => {
-  const orders = await Order.find().populate("productId");
-  res.render("adminOrders", { orders });
-});
+// router.get("/admin/orders", isAdmin, async (req, res) => {
+//   const orders = await Order.find()
+//   .populate("items.productId", "name price images");
+//   res.render("adminOrders", { orders });
+// });
 
-router.get("/admin/products", async (req, res) => {
-  const products = await Product.find().sort({ createdAt: -1 });
-  res.render("adminProducts", { products });
-});
+// router.get("/admin/products", async (req, res) => {
+//   const products = await Product.find().sort({ createdAt: -1 });
+//   res.render("adminProducts", { products });
+// });
 
 // ================= EDIT PRODUCT PAGE =================
 router.get("/admin/edit-product/:id", async (req, res) => {
@@ -887,7 +1304,7 @@ router.post("/admin/edit-product/:id", upload.array("images", 5), async (req, re
       return res.send("Invalid Product ID");
     }
 
-    const {
+    let {
       name,
       price,
       description,
@@ -898,9 +1315,17 @@ router.post("/admin/edit-product/:id", upload.array("images", 5), async (req, re
       discountValue
     } = req.body;
 
+    // ✅ CONVERT TO NUMBER
+    price = Number(price);
+    discountValue = Number(discountValue) || 0;
+
+    // =========================
+    // ✅ IMAGES HANDLE
+    // =========================
+
     let images = [];
 
-    // ✅ OLD IMAGES (जो user ने delete नहीं की)
+    // OLD IMAGES (jo delete nahi hui)
     if (req.body.existingImages) {
       if (Array.isArray(req.body.existingImages)) {
         images = req.body.existingImages;
@@ -909,13 +1334,46 @@ router.post("/admin/edit-product/:id", upload.array("images", 5), async (req, re
       }
     }
 
-    // ✅ NEW IMAGES ADD
+    // NEW IMAGES ADD
     if (req.files && req.files.length > 0) {
       const newImages = req.files.map(file => file.path);
       images = images.concat(newImages);
     }
 
-    // ✅ DISCOUNT CALCULATION
+    // =========================
+    // ✅ HIGHLIGHTS ARRAY
+    // =========================
+
+    let highlights = [];
+    if (req.body.highlights) {
+      if (Array.isArray(req.body.highlights)) {
+        highlights = req.body.highlights.filter(h => h.trim() !== "");
+      } else {
+        highlights = [req.body.highlights];
+      }
+    }
+
+    // =========================
+    // ✅ SPECIFICATIONS OBJECT
+    // =========================
+
+    let specifications = {};
+
+    if (req.body.specKey && req.body.specValue) {
+      const keys = Array.isArray(req.body.specKey) ? req.body.specKey : [req.body.specKey];
+      const values = Array.isArray(req.body.specValue) ? req.body.specValue : [req.body.specValue];
+
+      keys.forEach((key, index) => {
+        if (key && values[index]) {
+          specifications[key] = values[index];
+        }
+      });
+    }
+
+    // =========================
+    // ✅ DISCOUNT LOGIC
+    // =========================
+
     let finalPrice = price;
 
     if (discountType === "percentage") {
@@ -923,6 +1381,12 @@ router.post("/admin/edit-product/:id", upload.array("images", 5), async (req, re
     } else if (discountType === "flat") {
       finalPrice = price - discountValue;
     }
+
+    if (finalPrice < 0) finalPrice = 0;
+
+    // =========================
+    // ✅ UPDATE PRODUCT
+    // =========================
 
     await Product.findByIdAndUpdate(id, {
       name,
@@ -934,10 +1398,12 @@ router.post("/admin/edit-product/:id", upload.array("images", 5), async (req, re
       discountType,
       discountValue,
       finalPrice,
-      images
+      images,
+      highlights,
+      specifications
     });
 
-    res.redirect("/admin/products");
+    res.redirect("/admin");
 
   } catch (err) {
     console.log("Edit POST Error:", err);
@@ -945,37 +1411,36 @@ router.post("/admin/edit-product/:id", upload.array("images", 5), async (req, re
   }
 });
 
-
 router.get("/admin/delete-product/:id", async (req, res) => {
   await Product.findByIdAndDelete(req.params.id);
-  res.redirect("/admin/products");
+  res.redirect('/admin'); // ✅ already correct
 });
 
-router.get("/admin/dashboard", async (req, res) => {
+// router.get("/admin/dashboard", async (req, res) => {
 
-  const totalProducts = await Product.countDocuments();
-  const totalOrders = await Order.countDocuments();
+//   const totalProducts = await Product.countDocuments();
+//   const totalOrders = await Order.countDocuments();
 
-  const orders = await Order.find();
+//   const orders = await Order.find();
 
- let revenue = 0;
+//  let revenue = 0;
 
-orders.forEach(o => {
-  if (o.payment) {
-    const match = o.payment.match(/\d+/);
-    if (match) {
-      revenue += parseInt(match[0]);
-    }
-  }
-});
+// orders.forEach(o => {
+//   if (o.payment) {
+//     const match = o.payment.match(/\d+/);
+//     if (match) {
+//       revenue += o.totalAmount || 0;
+//     }
+//   }
+// });
 
   
-  res.render("adminDashboard", {
-    totalProducts,
-    totalOrders,
-    revenue
-  });
-});
+//   res.render("adminDashboard", {
+//     totalProducts,
+//     totalOrders,
+//     revenue
+//   });
+// });
 
 router.get("/admin/products/search", async (req, res) => {
   try {
@@ -1002,19 +1467,21 @@ router.get("/admin/products/search", async (req, res) => {
 
 
 router.get("/admin", isAdmin, async (req, res) => {
+
   const products = await Product.find().sort({ createdAt: -1 });
-  const orders = await Order.find().populate("productId");
+
+  const orders = await Order.find()
+    .populate("items.productId", "name price images");
 
   const totalProducts = await Product.countDocuments();
   const totalOrders = await Order.countDocuments();
 
   let revenue = 0;
   orders.forEach(o => {
-    const match = o.payment?.match(/\d+/);
-    if (match) revenue += parseInt(match[0]);
+    revenue += o.totalAmount || 0;
   });
 
-  res.render("adminPanel", {
+  res.render("admin", {   // ✅ CHANGE HERE
     products,
     orders,
     totalProducts,
@@ -1029,24 +1496,7 @@ router.get("/admin", isAdmin, async (req, res) => {
 
 
 
-router.post("/create-order", async (req, res) => {
-  try {
-    const { amount } = req.body;
 
-    const options = {
-      amount: amount * 100, // paise
-      currency: "INR",
-      receipt: "order_rcptid_" + Date.now()
-    };
-
-    const order = await razorpay.orders.create(options);
-
-    res.json(order);
-
-  } catch (err) {
-    res.status(500).send(err);
-  }
-});
 
 // INCREASE QTY
 router.get("/increase-qty/:id", (req, res) => {
