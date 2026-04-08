@@ -68,7 +68,7 @@
         <h2 class="font-semibold text-sm md:text-base">Delivery Address</h2>
       </div>
 
-      <form id="orderForm" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+      <form id="orderForm" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
 
         <input type="hidden" name="productId" value="<%= product._id %>">
 
@@ -129,14 +129,15 @@
     <!-- BUTTONS -->
     <div class="mt-5 space-y-2 md:space-y-3">
 
-      <button id="codBtn"
-        form="orderForm"
-        formaction="/place-order"
-        name="paymentMethod"
-        value="COD"
-        class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base">
-        Cash on Delivery
-      </button>
+  <button
+  class="w-full bg-yellow-400 hover:bg-yellow-500 py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base"
+  type="submit"
+  form="orderForm"
+  formaction="/place-order"
+  name="paymentMethod"
+  value="COD">
+  Cash on Delivery
+</button>
 
       <button id="payBtn" onclick="payNow()"
         class="w-full bg-yellow-400 hover:bg-yellow-500 py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base">
@@ -175,7 +176,7 @@ window.payNow = async function () {
     if (!data.name || !data.phone || !data.email || !data.house || !data.city || !data.state || !data.pincode) {
       alert("Please fill all required fields");
       btn.disabled = false;
-      btn.innerText = "Pay with Online";
+      btn.innerText = "Pay with Razorpay";
       return;
     }
 
@@ -193,8 +194,8 @@ window.payNow = async function () {
     if (!order.id) {
       alert("Order failed");
       btn.disabled = false;
-      btn.innerText = "Pay with Online";
-      return;
+      btn.innerText = "Pay with Razorpay";
+       return;
     }
 
     const options = {
@@ -225,7 +226,7 @@ window.payNow = async function () {
         } else {
           alert("Payment failed");
           btn.disabled = false;
-          btn.innerText = "Pay with Online";
+         btn.innerText = "Pay with Razorpay";
         }
       },
 
@@ -244,7 +245,7 @@ window.payNow = async function () {
     console.log(err);
     alert("Something went wrong");
     btn.disabled = false;
-    btn.innerText = "Pay with Online";
+    btn.innerText = "Pay with Razorpay";
   }
 };
 

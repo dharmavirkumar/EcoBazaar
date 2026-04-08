@@ -432,6 +432,8 @@ router.post('/add-product', upload.array("images", 5), async (req, res) => {
       discountValue,
       mainCategory,
       subCategory,
+      cod, 
+      online
        
     } = req.body;
 
@@ -474,29 +476,32 @@ if (req.body.specKey && req.body.specValue) {
     if (finalPrice < 0) finalPrice = 0;
 
     // ✅ DYNAMIC SIZE SYSTEM
-    let sizes = [];
+   let sizes = [];
 
-    const sizeMap = {
-      Jeans: [
-        { size: "26" },
-        { size: "28" },
-        { size: "30" }
-      ],
-      Shoes: [
-        { size: "7" },
-        { size: "8" },
-        { size: "9" }
-      ],
-      Shirts: [
-        { size: "S" },
-        { size: "M"},
-        { size: "L" }
-      ]
-    };
+const key = subCategory?.toLowerCase();
 
-    if (sizeMap[subCategory]) {
-      sizes = sizeMap[subCategory];
-    }
+if (key?.includes("shoe")) {
+  sizes = [
+    { size: "6", price: price, stock: 10 },
+    { size: "7", price: price, stock: 10 },
+    { size: "8", price: price, stock: 10 },
+    { size: "9", price: price, stock: 10 }
+  ];
+} 
+else if (key?.includes("jean")) {
+  sizes = [
+    { size: "28", price: price, stock: 10 },
+    { size: "30", price: price, stock: 10 },
+    { size: "32", price: price, stock: 10 }
+  ];
+}
+else if (key?.includes("shirt")) {
+  sizes = [
+    { size: "S", price: price, stock: 10 },
+    { size: "M", price: price, stock: 10 },
+    { size: "L", price: price, stock: 10 }
+  ];
+}
 
     // ✅ CREATE PRODUCT
     const newProduct = new Product({
@@ -509,6 +514,8 @@ if (req.body.specKey && req.body.specValue) {
       discountValue,
       mainCategory,
       subCategory,
+      cod, 
+      online,
 
   highlights,
   specifications,
@@ -914,10 +921,23 @@ router.post("/checkout", isLoggedIn, async (req, res) => {
 
 router.get("/buy-now/:id", isLoggedIn, async (req, res) => {
   const product = await Product.findById(req.params.id);
-  res.render("buyNow", { product });
+
+  res.render("buyNow", {
+    product,
+    razorpayKey: process.env.RAZORPAY_KEY_ID
+  });
 });
 
 // ================= SINGLE ORDER =================
+
+router.get("/place-order/:id", isLoggedIn, async (req, res) => {
+  const product = await Product.findById(req.params.id);
+
+  res.render("singleCheckout", {
+    product,
+    razorpayKey: process.env.RAZORPAY_KEY_ID
+  });
+});
 
 router.post("/place-order", isLoggedIn, async (req, res) => {
   try {
@@ -933,6 +953,7 @@ router.post("/place-order", isLoggedIn, async (req, res) => {
       pincode,
       landmark,
       productId,
+      paymentMethod,
       size
     } = req.body;
 
@@ -948,9 +969,11 @@ if (!product) {
   console.log("❌ Product not found:", productId);
   return res.json({ success: false, message: "Product not found" });
 }
+ // ✅ IMAGE SAFE
+    const productImage = product.images?.[0] || product.image || "/default.png";
 
-const productImage =
-  product.images?.[0] || product.image || "/default.png";
+    // ✅ FINAL PRICE (GST ADD)
+    const totalAmount = product.price + Math.round(product.price * 0.10);
 
     // ✅ CREATE ORDER (FLIPKART STYLE)
     const newOrder = new Order({
@@ -984,16 +1007,8 @@ const productImage =
           image: productImage
         }
       ],
+      totalAmount: totalAmount, // ✅ FIXED: GST INCLUDED
 
-      // ✅ PRICE
-      totalAmount: product.price,
-
-      // ✅ PAYMENT
-      paymentMethod: "COD",
-      paymentStatus: "Pending",
-
-      // ✅ TRACKING
-      timeline: [{ status: "Placed" }]
     });
 
     await newOrder.save();
@@ -1347,11 +1362,17 @@ function isAdmin(req, res, next) {
   next();
 }
 
-// router.get("/admin/orders", isAdmin, async (req, res) => {
-//   const orders = await Order.find()
-//   .populate("items.productId", "name price images");
-//   res.render("adminOrders", { orders });
-// });
+router.get("/admin/order/:id", isLoggedIn, async (req, res) => {
+
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    return res.send("Order not found");
+  }
+
+  res.render("adminOrders", { order });
+
+});
 
 // router.get("/admin/products", async (req, res) => {
 //   const products = await Product.find().sort({ createdAt: -1 });

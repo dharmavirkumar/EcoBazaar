@@ -2,86 +2,22 @@
 <html>
 <head>
   <title>Track Order</title>
-
-  <style>
-    body {
-      font-family: Arial;
-      background:#f1f3f6;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 40px auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    }
-
-    h2 { margin-bottom: 10px; }
-
-    .progress-bar {
-      width: 100%;
-      height: 6px;
-      background: #ddd;
-      border-radius: 10px;
-      margin: 20px 0;
-      overflow: hidden;
-    }
-
-    .progress {
-      height: 100%;
-      background: #2874f0;
-      transition: width 0.6s ease;
-    }
-
-    .steps {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 10px;
-      font-size: 13px;
-    }
-
-    .steps span.active {
-      color: #2874f0;
-      font-weight: bold;
-    }
-
-    .timeline {
-      margin-top: 25px;
-    }
-
-    .timeline-item {
-      border-left: 3px solid #2874f0;
-      padding-left: 10px;
-      margin-bottom: 10px;
-    }
-
-    .tracking-box {
-      margin-top: 25px;
-      background: #fafafa;
-      padding: 15px;
-      border-radius: 8px;
-    }
-
-    .tracking-item {
-      border-bottom: 1px solid #ddd;
-      padding: 8px 0;
-    }
-
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body>
+<body class="bg-gray-100">
 
-<div class="container">
+<div class="max-w-3xl mx-auto mt-6 bg-white p-5 rounded-xl shadow">
 
-  <h2>📦 Order Tracking</h2>
+  <h2 class="text-xl font-bold mb-2">📦 Order Tracking</h2>
 
-  <p><b>Order ID:</b> <%= order._id %></p>
-  <p><b>Delivery by:</b> <%= new Date(order.estimatedDelivery).toDateString() %></p>
+  <p class="text-sm"><b>Order ID:</b> <%= order._id %></p>
+  <p class="text-sm mb-4">
+    <b>Delivery by:</b> <%= new Date(order.estimatedDelivery).toDateString() %>
+  </p>
 
-  <!-- 🔥 PROGRESS -->
+  <!-- 🔥 PROGRESS LOGIC -->
   <%
   let progress = 25;
   if(order.status==="Shipped") progress=50;
@@ -89,31 +25,51 @@
   if(order.status==="Delivered") progress=100;
   %>
 
-  <div class="progress-bar">
-    <div class="progress" style="width:<%= progress %>%"></div>
+  <!-- 🔥 PROGRESS BAR -->
+  <div class="w-full h-2 bg-gray-200 rounded overflow-hidden">
+    <div class="h-full bg-blue-500 transition-all duration-500"
+      style="width:<%= progress %>%"></div>
   </div>
 
-  <div class="steps">
-    <span class="<%= progress>=25 ? 'active':'' %>">Placed</span>
-    <span class="<%= progress>=50 ? 'active':'' %>">Shipped</span>
-    <span class="<%= progress>=75 ? 'active':'' %>">Out</span>
-    <span class="<%= progress>=100 ? 'active':'' %>">Delivered</span>
+  <!-- STEPS -->
+  <div class="flex justify-between text-xs mt-2">
+    <span class="<%= progress>=25 ? 'text-blue-600 font-semibold':'' %>">Placed</span>
+    <span class="<%= progress>=50 ? 'text-blue-600 font-semibold':'' %>">Shipped</span>
+    <span class="<%= progress>=75 ? 'text-blue-600 font-semibold':'' %>">Out</span>
+    <span class="<%= progress>=100 ? 'text-blue-600 font-semibold':'' %>">Delivered</span>
   </div>
 
   <!-- 🧾 TIMELINE -->
-  <div class="timeline">
+  <div class="mt-6 border-l-2 border-blue-500 pl-4 space-y-4">
+
     <% order.statusHistory.forEach(s => { %>
-      <div class="timeline-item">
-        <b><%= s.status %></b><br>
-        <small><%= new Date(s.date).toLocaleString() %></small>
+      <div class="relative">
+
+        <div class="absolute -left-[9px] top-1 w-4 h-4 bg-blue-500 rounded-full"></div>
+
+        <p class="font-semibold text-sm">
+          <%= s.status %>
+        </p>
+
+        <p class="text-xs text-gray-500">
+          <%= new Date(s.date).toLocaleString() %>
+        </p>
+
       </div>
     <% }) %>
+
   </div>
 
   <!-- 🚚 LIVE TRACKING -->
-  <div class="tracking-box">
-    <h3>🚚 Live Updates</h3>
-    <div id="trackingData">Loading...</div>
+  <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+
+    <h3 class="font-semibold mb-3">🚚 Live Updates</h3>
+
+    <!-- LOADER -->
+    <div id="trackingData" class="text-sm text-gray-600">
+      ⏳ Loading tracking...
+    </div>
+
   </div>
 
 </div>
@@ -124,29 +80,37 @@ async function loadTracking() {
     const res = await fetch("/api/track/<%= order._id %>");
     const data = await res.json();
 
-    if (!data.ShipmentData) {
-      document.getElementById("trackingData").innerHTML = "No tracking available";
+    const box = document.getElementById("trackingData");
+
+    if (!data || !data.ShipmentData || !data.ShipmentData.length) {
+      box.innerHTML = "No tracking available 📭";
       return;
     }
 
-    const scans = data.ShipmentData[0].Shipment.Scans;
+    const scans = data.ShipmentData[0]?.Shipment?.Scans || [];
 
-    document.getElementById("trackingData").innerHTML =
-      scans.map(s => `
-        <div class="tracking-item">
-          <b>${s.ScanDetail.Status}</b><br>
-          <small>${s.ScanDetail.Date}</small>
-        </div>
-      `).join("");
+    if (!scans.length) {
+      box.innerHTML = "Tracking not started yet ⏳";
+      return;
+    }
+
+    box.innerHTML = scans.map(s => `
+      <div class="border-b py-2">
+        <p class="font-semibold text-gray-800">${s.ScanDetail.Status}</p>
+        <p class="text-xs text-gray-500">${s.ScanDetail.Date}</p>
+      </div>
+    `).join("");
 
   } catch (err) {
-    document.getElementById("trackingData").innerHTML = "Error loading tracking";
+    document.getElementById("trackingData").innerHTML =
+      "Error loading tracking ❌";
   }
 }
 
-// 🔥 AUTO REFRESH EVERY 20 SEC
+// 🔄 AUTO REFRESH
 setInterval(loadTracking, 20000);
 
+// FIRST LOAD
 loadTracking();
 </script>
 

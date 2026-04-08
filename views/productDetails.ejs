@@ -2,48 +2,56 @@
 <html>
 <head>
   <title>Product Details</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .thumb.active { border: 2px solid #ff3f6c; }
+    .size-btn.active {
+      border: 2px solid #ff3f6c;
+      color: #ff3f6c;
+      font-weight: 600;
+      background: #fff0f3;
+    }
+  </style>
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gray-50">
 
 <%- include("partial/nav") %>
 
-<div class="max-w-7xl mx-auto mt-4 md:mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6 bg-white p-4 md:p-6 rounded-xl shadow">
+<div class="max-w-7xl mx-auto mt-6 grid grid-cols-1 lg:grid-cols-2 gap-10 bg-white p-6 rounded-lg shadow">
 
-  <!-- LEFT: IMAGES -->
-  <div class="flex flex-col md:flex-row gap-4">
+  <!-- LEFT IMAGE SECTION -->
+  <div class="flex gap-4">
 
     <!-- THUMBNAILS -->
-    <div class="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible">
-      <% product.images?.forEach(img => { %>
-        <img src="<%= img %>" onclick="changeImage('<%= img %>')"
-        class="w-16 h-16 md:w-20 md:h-20 object-cover rounded border cursor-pointer hover:border-blue-500">
+    <div class="flex flex-col gap-2">
+      <% product.images?.forEach((img,i)=>{ %>
+        <img src="<%= img %>"
+        onclick="changeImage('<%= img %>', this)"
+        class="thumb w-16 h-16 object-cover rounded cursor-pointer <%= i===0?'active':'' %>">
       <% }) %>
     </div>
 
     <!-- MAIN IMAGE -->
-    <div class="flex-1 relative group">
+    <div class="flex-1">
       <img id="mainImage"
-      src="<%= product.images?.[0] || product.image %>"
-      class="w-full h-[280px] md:h-[450px] object-contain rounded">
-
-      <div class="hidden md:block absolute inset-0 group-hover:bg-black/5"></div>
+      src="<%= product.images?.[0] || '/default.png' %>"
+      class="w-full h-[450px] object-contain rounded">
     </div>
 
   </div>
 
-  <!-- RIGHT: DETAILS -->
-  <div class="lg:sticky lg:top-20 h-fit">
+  <!-- RIGHT CONTENT -->
+  <div>
 
-    <h1 class="text-lg md:text-2xl font-semibold">
-      <%= product.name %>
-    </h1>
+    <h1 class="text-2xl font-semibold"><%= product.name %></h1>
 
     <!-- RATING -->
     <div class="flex items-center gap-2 mt-2">
       <span class="bg-green-600 text-white px-2 py-1 text-xs rounded">
-        <%= avgRating ? avgRating.toFixed(1) : 0 %> ⭐
+        <%= avgRating?.toFixed(1) || 0 %> ⭐
       </span>
       <span class="text-gray-500 text-sm">
         (<%= reviews?.length || 0 %> Reviews)
@@ -51,43 +59,83 @@
     </div>
 
     <!-- PRICE -->
-    <div class="mt-4">
+    <div class="mt-4 border-b pb-4">
+
       <% if(product.discountType && product.discountType !== 'none'){ %>
+
         <p class="text-gray-400 line-through">₹ <%= product.price %></p>
-        <p class="text-2xl md:text-3xl font-bold text-green-600">
-          ₹ <%= product.finalPrice %>
-        </p>
+
+        <div class="flex items-center gap-3">
+          <p id="priceBox" class="text-3xl font-bold text-gray-900">
+            ₹ <%= product.finalPrice %>
+          </p>
+          <span class="text-pink-500 font-semibold">
+            <%= Math.round(((product.price-product.finalPrice)/product.price)*100) %>% OFF
+          </span>
+        </div>
+
       <% } else { %>
-        <p class="text-2xl md:text-3xl font-bold text-green-600">
+
+        <p id="priceBox" class="text-3xl font-bold text-gray-900">
           ₹ <%= product.price %>
         </p>
+
       <% } %>
+
+    </div>
+
+    <!-- SIZE -->
+    <div class="mt-5">
+      <h3 class="font-semibold mb-2">Select Size</h3>
+
+      <div class="flex gap-3 flex-wrap">
+
+        <% product.sizes?.forEach(item => { %>
+
+          <button 
+          onclick="selectSize('<%= item.size %>', this)"
+          <%= item.stock === 0 ? 'disabled' : '' %>
+          class="size-btn w-14 h-14 border rounded-full text-sm 
+          hover:border-pink-500
+          <%= item.stock===0?'opacity-30 cursor-not-allowed':'' %>">
+
+          <%= item.size %>
+
+          </button>
+
+        <% }) %>
+
+      </div>
+
+      <p id="sizeError" class="text-red-500 text-sm mt-2 hidden">
+        Please select a size
+      </p>
     </div>
 
     <!-- BUTTONS -->
-    <div class="flex gap-3 mt-5">
+    <div class="flex gap-4 mt-6">
 
-      <a href="/add-to-cart/<%= product._id %>"
-      class="flex-1 border-2 border-orange-500 text-orange-600 py-2 md:py-3 text-center rounded font-semibold hover:bg-orange-50">
-      🛒 Add to Cart
-      </a>
+      <button onclick="addToCart()"
+      class="flex-1 bg-pink-500 text-white py-3 rounded font-semibold hover:bg-pink-600">
+        🛒 ADD TO BAG
+      </button>
 
-      <a href="/buy-now/<%= product._id %>"
-      class="flex-1 bg-orange-500 text-white py-2 md:py-3 text-center rounded font-semibold hover:opacity-90">
-      ⚡ Buy Now
-      </a>
+      <button onclick="buyNow()"
+      class="flex-1 border border-gray-400 py-3 rounded font-semibold hover:border-black">
+        ⚡ BUY NOW
+      </button>
 
     </div>
 
     <!-- DELIVERY -->
-    <div class="mt-4 text-sm space-y-1">
+    <div class="mt-6 text-sm space-y-1 border-t pt-4">
       <p>🚚 Free Delivery</p>
       <p>💰 Cash on Delivery</p>
       <p>🔁 7 Days Return</p>
     </div>
 
     <!-- HIGHLIGHTS -->
-    <div class="mt-5 bg-gray-100 p-4 rounded">
+    <div class="mt-6 bg-gray-50 p-4 rounded">
       <h2 class="font-semibold mb-2">Highlights</h2>
       <ul class="text-sm text-gray-600 list-disc pl-4">
         <% product.highlights?.forEach(h => { %>
@@ -95,62 +143,46 @@
         <% }) %>
       </ul>
     </div>
+      <h3 class="font-bold mt-6 mb-3">Specifications</h3>
 
+  <div class="divide-y">
+    <% Object.keys(product.specifications||{}).forEach(key => { %>
+      <div class="flex justify-between py-2 text-sm">
+        <span><%= key %></span>
+        <span><%= product.specifications[key] %></span>
+      </div>
+    <% }) %>
+  </div>
   </div>
 </div>
 
-<!-- DESCRIPTION + SPECS -->
-<div class="max-w-7xl mx-auto mt-6 bg-white p-4 md:p-6 rounded-xl shadow">
+<!-- DESCRIPTION -->
+<div class="max-w-7xl mx-auto mt-6 bg-white p-6 rounded shadow">
+  <h3 class="font-bold mb-3">Description</h3>
+  <div class="text-gray-700 text-sm"><%- product.description %></div>
 
-  <h3 class="font-bold text-lg mb-2">Description</h3>
-  <div class="text-gray-700 text-sm">
-    <%- product.description %>
-  </div>
-
-  <h3 class="font-bold text-lg mt-6 mb-2">Specifications</h3>
-
-  <div class="divide-y">
-    <% if(product.specifications){ %>
-      <% Object.keys(product.specifications).forEach(key => { %>
-        <div class="flex justify-between py-2 text-sm">
-          <span class="font-medium text-gray-700"><%= key %></span>
-          <span class="text-gray-600"><%= product.specifications[key] %></span>
-        </div>
-      <% }) %>
-    <% } %>
-  </div>
-
+  
 </div>
 
 <!-- SIMILAR PRODUCTS -->
-<div class="max-w-7xl mx-auto mt-10 px-3 md:px-4">
+<div class="max-w-7xl mx-auto mt-10">
 
-  <h2 class="text-lg md:text-2xl font-bold mb-4">
-    Similar Products 🔥
-  </h2>
+  <h2 class="text-xl font-bold mb-4">Similar Products</h2>
 
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
 
     <% similarProducts.forEach(item => { %>
 
-    <div class="bg-white rounded-xl shadow-sm hover:shadow-xl transition group overflow-hidden">
+    <a href="/product/<%= item._id %>" class="bg-white p-2 rounded shadow hover:shadow-lg transition">
 
-      <a href="/product/<%= item._id %>">
-        <img src="<%= item.images?.[0] %>"
-        class="w-full h-40 object-contain p-2 group-hover:scale-105 transition">
-      </a>
+      <img src="<%= item.images?.[0] || '/default.png' %>"
+      class="w-full h-40 object-contain">
 
-      <div class="p-2">
-        <p class="text-xs md:text-sm line-clamp-2">
-          <%= item.name %>
-        </p>
+      <p class="text-sm mt-2 line-clamp-2"><%= item.name %></p>
 
-        <p class="text-green-600 font-bold text-sm mt-1">
-          ₹ <%= item.price %>
-        </p>
-      </div>
+      <p class="text-pink-500 font-bold">₹ <%= item.price %></p>
 
-    </div>
+    </a>
 
     <% }) %>
 
@@ -159,9 +191,9 @@
 </div>
 
 <!-- REVIEWS -->
-<div class="max-w-5xl mx-auto mt-10 px-4">
+<div class="max-w-5xl mx-auto mt-10">
 
-  <h2 class="text-lg font-bold mb-3">Customer Reviews</h2>
+  <h2 class="font-bold mb-3">Customer Reviews</h2>
 
   <% if(reviews.length > 0){ %>
     <% reviews.forEach(r => { %>
@@ -177,11 +209,61 @@
 
 </div>
 
+<!-- MOBILE BAR -->
+<div class="fixed bottom-0 w-full bg-white p-3 flex gap-3 md:hidden">
+
+  <button onclick="addToCart()" class="flex-1 border border-pink-500 text-pink-500 py-2 rounded">
+    Add
+  </button>
+
+  <button onclick="buyNow()" class="flex-1 bg-pink-500 text-white py-2 rounded">
+    Buy
+  </button>
+
+</div>
+
 <%- include("partial/footer") %>
 
 <script>
-function changeImage(src){
+let selectedSize = null;
+
+function changeImage(src, el){
   document.getElementById('mainImage').src = src;
+  document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function selectSize(size, el){
+  selectedSize = size;
+  document.querySelectorAll('.size-btn').forEach(btn=>btn.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById("sizeError").classList.add("hidden");
+
+  const sizes = <%- JSON.stringify(product.sizes||[]) %>;
+  const s = sizes.find(x=>x.size==size);
+  if(s?.price){
+    document.getElementById("priceBox").innerText = "₹ "+s.price;
+  }
+}
+
+function validateSize(){
+  if(!selectedSize){
+    document.getElementById("sizeError").classList.remove("hidden");
+    return false;
+  }
+  return true;
+}
+
+function addToCart(){
+  if(validateSize()){
+    window.location=`/add-to-cart/<%= product._id %>?size=${selectedSize}`;
+  }
+}
+
+function buyNow(){
+  if(validateSize()){
+    window.location=`/buy-now/<%= product._id %>?size=${selectedSize}`;
+  }
 }
 </script>
 
