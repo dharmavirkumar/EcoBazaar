@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Cart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -9,51 +10,56 @@
 
 <%- include("partial/nav") %>
 
-<div class="max-w-6xl mx-auto p-6">
+<div class="max-w-6xl mx-auto px-3 sm:px-6 py-4">
 
-<h1 class="text-3xl font-bold mb-6">Your Cart 🛒</h1>
+<h1 class="text-xl sm:text-2xl md:text-3xl font-bold mb-4">
+  Your Cart 🛒
+</h1>
 
 <% if(cart && cart.length > 0){ %>
 
-<div class="grid md:grid-cols-3 gap-6">
+<div class="grid md:grid-cols-3 gap-4 md:gap-6">
 
   <!-- 🛒 ITEMS -->
-  <div class="md:col-span-2 space-y-4">
+  <div class="md:col-span-2 space-y-3">
 
     <% cart.forEach(item => { %>
 
-    <div class="bg-white p-4 rounded-xl shadow flex gap-4 items-center">
+    <div class="bg-white p-3 sm:p-4 rounded-xl shadow flex gap-3 sm:gap-4 items-center">
 
-      <!-- ✅ IMAGE FINAL FIX -->
-     <img 
-  src="<%= item.image.startsWith('http') ? item.image : '/' + item.image %>"
-  onerror="this.src='/default.png'"
-  class="w-24 h-24 object-cover rounded-lg border">
+      <!-- IMAGE -->
+      <img 
+        src="<%= item.image && item.image.startsWith('http') ? item.image : '/' + (item.image || 'default.png') %>"
+        onerror="this.src='/default.png'"
+        class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border shrink-0">
+
       <!-- DETAILS -->
       <div class="flex-1">
 
-        <h2 class="font-semibold text-lg">
+        <h2 class="font-semibold text-sm sm:text-base line-clamp-2">
           <%= item.name %>
         </h2>
 
-        <p class="text-green-600 font-bold">
+        <p class="text-green-600 font-bold text-sm sm:text-base mt-1">
           ₹ <%= item.price %>
         </p>
 
-        <p class="text-gray-500 text-sm">
+        <p class="text-gray-500 text-xs sm:text-sm">
           Subtotal: ₹ <%= item.price * item.qty %>
         </p>
 
-        <!-- 🔢 QTY -->
+        <!-- QTY -->
         <div class="flex items-center gap-2 mt-2">
 
           <a href="/decrease-qty/<%= item._id %>" 
-            class="px-3 py-1 bg-gray-200 rounded">-</a>
+            class="px-3 py-1 bg-gray-200 rounded-lg active:scale-90">-</a>
 
-          <span class="px-3"><%= item.qty %></span>
+          <span class="px-2 text-sm font-semibold">
+            <%= item.qty %>
+          </span>
 
           <a href="/increase-qty/<%= item._id %>" 
-            class="px-3 py-1 bg-gray-200 rounded">+</a>
+            class="px-3 py-1 bg-gray-200 rounded-lg active:scale-90">+</a>
 
         </div>
 
@@ -61,7 +67,9 @@
 
       <!-- REMOVE -->
       <a href="/remove-from-cart/<%= item._id %>" 
-        class="text-red-500 font-bold text-xl">✖</a>
+        class="text-red-500 text-lg sm:text-xl font-bold hover:scale-110 transition">
+        ✖
+      </a>
 
     </div>
 
@@ -70,16 +78,16 @@
   </div>
 
   <!-- 💰 SUMMARY -->
-  <div class="bg-white p-6 rounded-xl shadow">
+  <div class="bg-white p-4 sm:p-6 rounded-xl shadow h-fit sticky top-20 hidden md:block">
 
-    <h2 class="text-xl font-bold mb-4">Order Summary</h2>
+    <h2 class="text-lg font-bold mb-4">Order Summary</h2>
 
-    <div class="flex justify-between mb-2">
+    <div class="flex justify-between mb-2 text-sm">
       <span>Total Items</span>
       <span><%= cart.length %></span>
     </div>
 
-    <div class="flex justify-between mb-2">
+    <div class="flex justify-between mb-2 text-sm">
       <span>Total Price</span>
       <span class="font-bold text-green-600">₹ <%= total %></span>
     </div>
@@ -87,7 +95,7 @@
     <hr class="my-4">
 
     <a href="/checkout" 
-      class="block text-center bg-green-500 text-white py-3 rounded-lg">
+      class="block text-center bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold active:scale-95">
       Checkout
     </a>
 
@@ -95,13 +103,34 @@
 
 </div>
 
+<!-- 📱 MOBILE BOTTOM BAR -->
+<div class="fixed bottom-0 left-0 w-full bg-white shadow-lg p-3 flex justify-between items-center md:hidden">
+
+  <div>
+    <p class="text-xs text-gray-500">Total</p>
+    <p class="font-bold text-green-600">₹ <%= total %></p>
+  </div>
+
+  <a href="/checkout" 
+    class="bg-green-500 text-white px-6 py-2 rounded-lg font-semibold active:scale-95">
+    Checkout
+  </a>
+
+</div>
+
 <% } else { %>
 
 <div class="text-center mt-20">
-  <h2 class="text-2xl">Cart Empty 😢</h2>
-  <a href="/" class="bg-blue-500 text-white px-6 py-3 rounded mt-4 inline-block">
+
+  <h2 class="text-xl sm:text-2xl mb-4">
+    Cart Empty 😢
+  </h2>
+
+  <a href="/" 
+    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg inline-block active:scale-95">
     Shop Now
   </a>
+
 </div>
 
 <% } %>

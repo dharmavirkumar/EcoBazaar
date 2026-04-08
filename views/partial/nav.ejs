@@ -1,454 +1,140 @@
 <nav class="bg-gray-900 text-white shadow-md sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4">
 
+    <!-- TOP BAR -->
     <div class="flex justify-between items-center h-16">
 
-      <!-- 🔥 LOGO -->
-     
-        <a href="/" class="text-2xl font-bold text-yellow-400 tracking-wide flex items-center">
-  Lio<span class="text-white">Kart</span>
-  
-</a>
-     
+      <!-- LOGO -->
+      <a href="/" class="text-2xl font-bold text-yellow-400">
+        Lio<span class="text-white">Kart</span>
+      </a>
 
-     <div class="hidden md:flex flex-1 mx-6 max-w-xl relative">
-  <form action="/search" method="GET" class="flex w-full">
-    <input 
-      type="text" 
-      name="q" 
-      placeholder="Search for products..." 
-      class="w-full px-4 py-2 text-black rounded-l-lg focus:outline-none border"
-      onkeyup="liveSearch(this.value)"
-      autocomplete="off"
-    >
-    <button class="bg-yellow-400 text-black px-4 py-2 rounded-r-lg hover:bg-yellow-500">
-      🔍
-    </button>
-  </form>
+      <!-- 🔍 DESKTOP SEARCH -->
+      <div class="hidden md:flex flex-1 mx-6 max-w-xl relative">
+        <form action="/search" method="GET" class="flex w-full">
+          <input 
+            type="text" 
+            name="q" 
+            placeholder="Search for products..." 
+            class="w-full px-4 py-2 text-black rounded-l-lg focus:outline-none"
+            onkeyup="liveSearch(this.value)"
+          >
+          <button class="bg-yellow-400 px-4 rounded-r-lg">🔍</button>
+        </form>
 
-  <!-- RESULTS -->
-  <div id="results" 
-    class="absolute top-12 left-0 w-full bg-white text-black rounded shadow hidden z-50 max-h-80 overflow-y-auto">
-  </div>
-</div>
+        <div id="results" 
+          class="absolute top-12 left-0 w-full bg-white text-black rounded shadow hidden z-50 max-h-80 overflow-y-auto">
+        </div>
+      </div>
 
       <!-- DESKTOP MENU -->
       <div class="hidden md:flex items-center gap-6">
 
         <a href="/" class="hover:text-yellow-400">Home</a>
 
-        <div class="relative group">
-  <button class="hover:text-yellow-400">Fashion</button>
-
-  <!-- MEGA MENU -->
-  <div class="absolute top-full left-1/2 -translate-x-1/2 hidden group-hover:flex 
-  w-screen max-w-7xl bg-white text-black shadow-xl p-6 z-50 flex-wrap">
-
-    <!-- TOP WEAR -->
-    <div class="w-1/2 md:w-1/4 mb-4">
-      <h3 class="text-purple-600 font-bold mb-2">Top Wear</h3>
-      <ul>
-        <li><a href="/category/fashion/Shirts">Shirts</a></li>
-        <li><a href="/category/fashion/T-Shirts">T-Shirts</a></li>
-      </ul>
-    </div>
-
-    <!-- BOTTOM WEAR -->
-    <div class="w-1/2 md:w-1/4 mb-4">
-      <h3 class="text-purple-600 font-bold mb-2">Bottom Wear</h3>
-      <ul>
-        <li><a href="/category/fashion/Jeans">Jeans</a></li>
-        <li><a href="/category/fashion/Trousers">Trousers</a></li>
-      </ul>
-    </div>
-
-    <!-- ETHNIC -->
-    <div class="w-1/2 md:w-1/4 mb-4">
-      <h3 class="text-purple-600 font-bold mb-2">Ethnic Wear</h3>
-      <ul>
-        <li><a href="/category/fashion/Kurtas">Kurtas</a></li>
-        <li><a href="/category/fashion/Kurta Sets">Kurta Sets</a></li>
-      </ul>
-    </div>
-
-    <!-- FOOTWEAR -->
-    <div class="w-1/2 md:w-1/4 mb-4">
-      <h3 class="text-purple-600 font-bold mb-2">Footwear</h3>
-      <ul>
-        <li><a href="/category/fashion/Casual Shoes">Casual Shoes</a></li>
-        <li><a href="/category/fashion/Sports Shoes">Sports Shoes</a></li>
-        <li><a href="/category/fashion/Formal Shoes">Formal Shoes</a></li>
-      </ul>
-    </div>
-
-  </div>
-</div>
-
-        <div class="relative group">
-
-  <button class="hover:text-yellow-400">Accessories</button>
-
-  <!-- MEGA MENU -->
-  <div class="absolute left-0 top-full hidden group-hover:flex bg-white text-black shadow-lg p-6 w-[900px] z-50">
-
-    <!-- COLUMN 1 -->
-    <div class="w-1/4">
-      <h3 class="text-purple-600 font-bold mb-2">All Accessories</h3>
-      <ul class="space-y-1">
-        <li><a href="/category/Accessories/All">View All</a></li>
-      </ul>
-    </div>
-
-    <!-- COLUMN 2 -->
-    <div class="w-1/4">
-      <h3 class="text-purple-600 font-bold mb-2">Watches</h3>
-      <ul class="space-y-1">
-        <li><a href="/category/Accessories/Watches">All Watches</a></li>
-      </ul>
-    </div>
-
-    <!-- COLUMN 3 -->
-    <div class="w-1/4">
-      <h3 class="text-purple-600 font-bold mb-2">Wallets</h3>
-      <ul class="space-y-1">
-        <li><a href="/category/Accessories/Wallets">Wallet Collection</a></li>
-      </ul>
-    </div>
-
-    <!-- COLUMN 4 -->
-    <div class="w-1/4">
-      <h3 class="text-purple-600 font-bold mb-2">Others</h3>
-      <ul class="space-y-1">
-        <li><a href="/category/Accessories/Jewellery">Jewellery</a></li>
-        <li><a href="/category/Accessories/Sunglasses">Sunglasses</a></li>
-        <li><a href="/category/Accessories/Belts">Belts</a></li>
-      </ul>
-    </div>
-
-  </div>
-</div>
-        <div class="relative group">
-
-  <button class="hover:text-yellow-400">Beauty</button>
-
-  <!-- MEGA MENU -->
-  <div class="absolute left-0 top-full hidden group-hover:flex bg-white text-black shadow-lg p-6 w-[900px] z-50">
-
-    <!-- COLUMN 1 -->
-    <div class="w-1/4">
-      <h3 class="text-purple-600 font-bold mb-2">Hair Care</h3>
-      <ul class="space-y-1">
-        <li><a href="/category/Beauty/Hair Oil">Hair Oil</a></li>
-        <li><a href="/category/Beauty/Shampoo">Shampoo</a></li>
-        <li><a href="/category/Beauty/Conditioner">Conditioner</a></li>
-      </ul>
-    </div>
-
-    <!-- COLUMN 2 -->
-    <div class="w-1/4">
-      <h3 class="text-purple-600 font-bold mb-2">Hair Styling</h3>
-      <ul class="space-y-1">
         
-        <li><a href="/category/Beauty/Hair Wax">Hair Wax</a></li>
-        <li><a href="/category/Beauty/Hair Spray">Hair Spray</a></li>
-        <li><a href="/category/Beauty/Trimmers">Trimmers</a></li>
-      </ul>
-    </div>
-
-    <!-- COLUMN 3 -->
-    <div class="w-1/4">
-      <h3 class="text-purple-600 font-bold mb-2">Face & Body</h3>
-      <ul class="space-y-1">
-        <li><a href="/category/Beauty/Face Wash">Face Wash</a></li>
-        <li><a href="/category/Beauty/Body Lotion">Body Lotion</a></li>
-        <li><a href="/category/Beauty/Face Cream">Face Cream</a></li>
-      </ul>
-    </div>
-
-    <!-- COLUMN 4 -->
-    <div class="w-1/4">
-      <h3 class="text-purple-600 font-bold mb-2">Grooming Kits</h3>
-      <ul class="space-y-1">
-        <li><a href="/category/Beauty/Grooming Kit">Grooming Kit</a></li>
-        <li><a href="/category/Beauty/Beard Kit">Beard Kit</a></li>
-      </ul>
-    </div>
-
-  </div>
-</div>
-        <div class="relative group">
-
-  <button class="hover:text-yellow-400">Electronics</button>
-
-  <!-- MEGA MENU -->
-  <div class="absolute left-0 top-full hidden group-hover:flex bg-white text-black shadow-lg w-[800px] z-50">
-
-    <!-- LEFT COLUMN -->
-    <div class="w-1/2 p-6 bg-gray-100">
-      <h2 class="text-purple-600 font-semibold text-lg mb-4">
-        Audio & Mobiles
-      </h2>
-
-      <ul class="space-y-3 text-gray-600">
-        <li><a href="/category/Electronics/Neckband" class="hover:text-black">Neckband</a></li>
-        <li><a href="/category/Electronics/Speakers" class="hover:text-black">Speakers</a></li>
-        <li><a href="/category/Electronics/Cases" class="hover:text-black">Cases & Covers</a></li>
-        <li><a href="/category/Electronics/Earbuds" class="hover:text-black">Bluetooth Earbuds</a></li>
-        <li><a href="/category/Electronics/Earphones" class="hover:text-black">Wired Earphone</a></li>
-      </ul>
-    </div>
-
-    <!-- RIGHT COLUMN -->
-    <div class="w-1/2 p-6 bg-gray-200">
-      <h2 class="text-purple-600 font-semibold text-lg mb-4">
-        Accessories
-      </h2>
-
-      <ul class="space-y-3 text-gray-600">
-        <li><a href="/category/Electronics/Holders" class="hover:text-black">Mobile Holders</a></li>
-        <li><a href="/category/Electronics/Chargers" class="hover:text-black">Mobile Chargers & Cables</a></li>
-        <li><a href="/category/Electronics/Powerbanks" class="hover:text-black">Power Banks</a></li>
-        <li><a href="/category/Electronics/Microphone" class="hover:text-black">Microphone</a></li>
-        <li><a href="/category/Electronics/Selfie" class="hover:text-black">Selfie Stick & Ringlight</a></li>
-        <li><a href="/category/Electronics/Tripod" class="hover:text-black">Tripod & Monopod</a></li>
-        <li><a href="/category/Electronics/Extension" class="hover:text-black">Extension Cord</a></li>
-      </ul>
-    </div>
-
-    <!-- RIGHT COLUMN -->
-    <div class="w-1/2 p-6 bg-gray-200">
-      <h2 class="text-purple-600 font-semibold text-lg mb-4">
-        Home & Kitchen
-      </h2>
-
-      <ul class="space-y-3 text-gray-600">
-        <li><a href="/category/Electronics/MixerGrinder" class="hover:text-black">Mixer Grinder</a></li>
-        <li><a href="/category/Electronics/Dinnerware Sets" class="hover:text-black">Dinnerware Sets</a></li>
-       
-  
-        
-      </ul>
-    </div>
-
-  </div>
-</div>
+        <a href="/category/fashion/All" class="hover:text-yellow-400">Fashion</a>
+        <a href="/category/electronics/All" class="hover:text-yellow-400">Electronics</a>
+        <a href="/category/beauty/All" class="hover:text-yellow-400">Beauty</a>
+        <a href="/category/accessories/All" class="hover:text-yellow-400">Accessories</a>
 
         <!-- 🛒 CART -->
-        <a href="/cart" class="relative text-xl hover:scale-110 transition">
+        <a href="/cart" class="relative text-xl">
           🛒
           <% if(cartCount > 0){ %>
-            <span class="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-2 rounded-full">
-              <%= cartCount %>
-            </span>
+          <span class="absolute -top-2 -right-3 bg-red-500 text-xs px-2 rounded-full">
+            <%= cartCount %>
+          </span>
           <% } %>
         </a>
 
-        <!-- 👤 USER DROPDOWN -->
+        <!-- 👤 USER -->
         <% if(user){ %>
         <div class="relative group">
-          <button class="flex items-center gap-2 hover:text-yellow-400">
-            👤 <span><%= user.name %></span>
-          </button>
+          <button class="hover:text-yellow-400">👤 <%= user.name %></button>
 
-          <!-- DROPDOWN -->
-          <div class="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg hidden group-hover:block">
-            <a href="/my-orders" class="block px-4 py-2 hover:bg-gray-100">
-              📦 My Orders
-            </a>
-            <a href="/profile" class="block px-4 py-2 hover:bg-gray-100">
-              👤 Profile
-            </a>
-            <a href="/logout" class="block px-4 py-2 text-red-500 hover:bg-gray-100">
-              🚪 Logout
-            </a>
+          <div class="absolute right-0 hidden group-hover:block bg-white text-black rounded shadow w-40">
+            <a href="/my-orders" class="block px-4 py-2 hover:bg-gray-100">Orders</a>
+            <!-- <a href="/profile" class="block px-4 py-2 hover:bg-gray-100">Profile</a> -->
+            
+            <a href="/logout" class="block px-4 py-2 text-red-500 hover:bg-gray-100">Logout</a>
           </div>
         </div>
         <% } else { %>
-          <a href="/login" class="hover:text-yellow-400">Login</a>
+        <a href="/login">Login</a>
         <% } %>
 
       </div>
 
-      <!-- 📱 MOBILE BUTTON -->
-      <div class="md:hidden">
-        <button onclick="toggleMenu()" class="text-2xl">
-          ☰
-        </button>
+      <!-- 📱 MOBILE ICONS -->
+      <div class="flex items-center gap-4 md:hidden">
+
+        <!-- SEARCH ICON -->
+        <button onclick="toggleSearch()">🔍</button>
+
+        <!-- CART -->
+        <a href="/cart" class="relative text-xl">
+          🛒
+          <% if(cartCount > 0){ %>
+          <span class="absolute -top-2 -right-3 bg-red-500 text-xs px-2 rounded-full">
+            <%= cartCount %>
+          </span>
+          <% } %>
+        </a>
+
+        <!-- MENU -->
+        <button onclick="toggleMenu()" class="text-2xl">☰</button>
+
       </div>
 
     </div>
   </div>
 
+  <!-- 📱 MOBILE SEARCH -->
+  <div id="mobileSearch" class="hidden md:hidden p-3 bg-gray-800">
+    <form action="/search" method="GET" class="flex">
+      <input 
+        type="text" 
+        name="q" 
+        placeholder="Search..." 
+        class="w-full px-3 py-2 text-black rounded-l"
+      >
+      <button class="bg-yellow-400 px-3 rounded-r">🔍</button>
+    </form>
+  </div>
+
   <!-- 📱 MOBILE MENU -->
-  <div id="mobileMenu" class="hidden bg-gray-800 md:hidden">
+  <div id="mobileMenu" class="hidden md:hidden bg-gray-800">
 
-    <!-- SEARCH -->
-    <div class="p-3">
-      <form action="/search" method="GET" class="flex">
-        <input 
-          type="text" 
-          name="q" 
-          placeholder="Search..." 
-          class="w-full px-3 py-2 text-black rounded-l"
-        >
-        <button class="bg-yellow-400 px-3 rounded-r">🔍</button>
-      </form>
-    </div>
-
-    <a href="/" class="block px-4 py-2 hover:bg-gray-700">Home</a>
-    <a href="/men" class="block px-4 py-2 hover:bg-gray-700">Fashion</a>
-    <a href="/jewellery" class="block px-4 py-2 hover:bg-gray-700">Accessories</a>
-    <a href="/beauty" class="block px-4 py-2 hover:bg-gray-700">Beauty</a>
-    <a href="/electronics" class="block px-4 py-2 hover:bg-gray-700">Electronics</a>
-
-    <!-- <% if(user){ %>
-      <a href="/my-orders" class="block px-4 py-2 hover:bg-gray-700">📦 My Orders</a>
-      <a href="/profile" class="block px-4 py-2 hover:bg-gray-700">👤 Profile</a>
-      <a href="/logout" class="block px-4 py-2 text-red-400 hover:bg-gray-700">Logout</a>
-    <% } else { %>
-      <a href="/login" class="block px-4 py-2 hover:bg-gray-700">Login</a>
-    <% } %> -->
+    <a href="/" class="block px-4 py-2 border-b border-gray-700">Home</a>
+    <a href="/category/fashion/All" class="block px-4 py-2 border-b border-gray-700">Fashion</a>
+    <a href="/category/electronics/All" class="block px-4 py-2 border-b border-gray-700">Electronics</a>
+    <a href="/category/beauty/All" class="block px-4 py-2 border-b border-gray-700">Beauty</a>
+    <a href="/category/accessories/All" class="block px-4 py-2 border-b border-gray-700">Accessories</a>
 
     <% if(user){ %>
-  <a href="/my-orders" 
-     class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-white transition rounded-md">
-     📦 My Orders
-  </a>
+    <a href="/my-orders" class="block px-4 py-2 border-b border-gray-700">Orders</a>
+    <!-- <a href="/profile" class="block px-4 py-2 border-b border-gray-700">Profile</a> -->
+    <a href="/logout" class="block px-4 py-2 text-red-400">Logout</a>
+    <% } else { %>
+    <a href="/login" class="block px-4 py-2">Login</a>
+    <% } %>
 
-  <a href="/profile" 
-     class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-white transition rounded-md">
-     👤 Profile
-  </a>
-
-  <a href="/logout" 
-     class="block px-4 py-2 text-sm text-red-400 hover:bg-red-500 hover:text-white transition rounded-md">
-     🚪 Logout
-  </a>
-
-<% } else { %>
-
-  <a href="/login" 
-     class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-white transition rounded-md">
-     🔑 Login
-  </a>
-
-<% } %>
   </div>
 </nav>
-
-<!-- JS -->
 <script>
 function toggleMenu(){
   document.getElementById("mobileMenu").classList.toggle("hidden");
 }
 
-// 🔍 LIVE SEARCH
-async function liveSearch(value) {
-  const resultsBox = document.getElementById("results");
-
-  if (value.length < 2) {
-    resultsBox.classList.add("hidden");
-    return;
-  }
-
-  try {
-    const res = await fetch(`/search?q=${value}`);
-    const data = await res.text();
-
-    resultsBox.innerHTML = data;
-    resultsBox.classList.remove("hidden");
-
-  } catch (err) {
-    console.log(err);
-  }
-}
-</script>
-<script>
-let timer;
-
-// 🔥 LOAD SUGGESTIONS ON FOCUS
-document.querySelector("input[name='q']").addEventListener("focus", loadSuggestions);
-
-async function loadSuggestions() {
-  const res = await fetch("/api/suggestions");
-  const data = await res.json();
-
-  const recent = JSON.parse(localStorage.getItem("recentSearches")) || [];
-
-  const resultsBox = document.getElementById("results");
-
-  resultsBox.innerHTML = `
-    <div class="p-2 border-b">
-      <p class="text-xs text-gray-400">Recent</p>
-      ${recent.map(r => `<p class="p-1 hover:bg-gray-100 cursor-pointer" onclick="selectSearch('${r}')">${r}</p>`).join("")}
-    </div>
-
-    <div class="p-2">
-      <p class="text-xs text-gray-400">Suggestions</p>
-      ${data.map(s => `<p class="p-1 hover:bg-gray-100 cursor-pointer" onclick="selectSearch('${s}')">${s}</p>`).join("")}
-    </div>
-  `;
-
-  resultsBox.classList.remove("hidden");
+function toggleSearch(){
+  document.getElementById("mobileSearch").classList.toggle("hidden");
 }
 
-// 🔍 LIVE SEARCH
-async function liveSearch(query) {
-  const resultsBox = document.getElementById("results");
-
-  clearTimeout(timer);
-
-  if (!query) {
-    loadSuggestions();
-    return;
-  }
-
-  timer = setTimeout(async () => {
-    const res = await fetch(`/api/search?q=${query}`);
-    const data = await res.json();
-
-    resultsBox.innerHTML = data.map(p => `
-      <a href="/product/${p._id}" 
-         onclick="saveRecent('${query}')"
-         class="flex items-center gap-3 p-2 hover:bg-gray-100 border-b">
-
-        <img src="${p.images?.[0] || '/default.png'}" class="w-10 h-10">
-
-        <div>
-          <p class="text-sm">${p.name}</p>
-          <p class="text-green-600 text-sm">₹${p.finalPrice || p.price}</p>
-        </div>
-      </a>
-    `).join("");
-
-    resultsBox.classList.remove("hidden");
-
-  }, 300);
-}
-
-// 💾 SAVE RECENT
-function saveRecent(query) {
-  let recent = JSON.parse(localStorage.getItem("recentSearches")) || [];
-
-  if (!recent.includes(query)) {
-    recent.unshift(query);
-  }
-
-  recent = recent.slice(0, 5);
-
-  localStorage.setItem("recentSearches", JSON.stringify(recent));
-}
-
-// 👉 CLICK SELECT
-function selectSearch(value) {
-  document.querySelector("input[name='q']").value = value;
-  window.location.href = `/search?q=${value}`;
-}
-
-// ❌ CLOSE DROPDOWN
+// CLOSE ON OUTSIDE CLICK
 document.addEventListener("click", (e) => {
-  if (!e.target.closest(".relative")) {
-    document.getElementById("results").classList.add("hidden");
+  if (!e.target.closest("nav")) {
+    document.getElementById("mobileMenu").classList.add("hidden");
   }
 });
 </script>

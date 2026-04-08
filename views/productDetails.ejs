@@ -7,220 +7,177 @@
 
 <body class="bg-gray-100">
 
-<!-- NAVBAR -->
 <%- include("partial/nav") %>
 
-<div class="max-w-7xl mx-auto mt-6 grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white p-4 md:p-6 rounded shadow">
+<div class="max-w-7xl mx-auto mt-4 md:mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6 bg-white p-4 md:p-6 rounded-xl shadow">
 
-  <!-- LEFT: IMAGE + THUMBNAILS (Flipkart style) -->
+  <!-- LEFT: IMAGES -->
   <div class="flex flex-col md:flex-row gap-4">
 
+    <!-- THUMBNAILS -->
     <div class="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible">
-      <% product.images?.forEach((img,i)=>{ %>
+      <% product.images?.forEach(img => { %>
         <img src="<%= img %>" onclick="changeImage('<%= img %>')"
-        class="w-16 h-18 md:w-20 md:h-20 object-cover rounded border cursor-pointer hover:border-blue-500">
+        class="w-16 h-16 md:w-20 md:h-20 object-cover rounded border cursor-pointer hover:border-blue-500">
       <% }) %>
     </div>
 
+    <!-- MAIN IMAGE -->
     <div class="flex-1 relative group">
-      <img id="mainImage" src="<%= product.images?.[0] || product.image %>"
-      class="w-full h-[350px] md:h-[500px] object-cover rounded">
+      <img id="mainImage"
+      src="<%= product.images?.[0] || product.image %>"
+      class="w-full h-[280px] md:h-[450px] object-contain rounded">
 
-      <!-- Zoom effect -->
-      <div class="hidden md:block absolute inset-0 bg-white/0 group-hover:bg-white/10 transition"></div>
+      <div class="hidden md:block absolute inset-0 group-hover:bg-black/5"></div>
     </div>
 
   </div>
 
-  <!-- RIGHT: DETAILS (Meesho clean + Flipkart info) -->
-  <div>
+  <!-- RIGHT: DETAILS -->
+  <div class="lg:sticky lg:top-20 h-fit">
 
-    <h1 class="text-lg md:text-2xl font-semibold"><%= product.name %></h1>
+    <h1 class="text-lg md:text-2xl font-semibold">
+      <%= product.name %>
+    </h1>
 
     <!-- RATING -->
     <div class="flex items-center gap-2 mt-2">
-      <span class="bg-green-600 text-white px-2 py-1 text-sm rounded">
+      <span class="bg-green-600 text-white px-2 py-1 text-xs rounded">
         <%= avgRating ? avgRating.toFixed(1) : 0 %> ⭐
       </span>
-      <span class="text-gray-500 text-sm">(<%= reviews?.length || 0 %> Reviews)</span>
+      <span class="text-gray-500 text-sm">
+        (<%= reviews?.length || 0 %> Reviews)
+      </span>
     </div>
 
-    <!-- PRICE SECTION -->
+    <!-- PRICE -->
     <div class="mt-4">
       <% if(product.discountType && product.discountType !== 'none'){ %>
-        <p class="text-gray-400 line-through text-lg">₹ <%= product.price %></p>
-        <p class="text-3xl font-bold text-green-600">₹ <%= product.finalPrice %></p>
-        <p class="text-red-500 text-sm">
-          <% if(product.discountType==='percentage'){ %>
-            <%= product.discountValue %>% OFF
-          <% } else { %>
-            ₹ <%= product.discountValue %> OFF
-          <% } %>
+        <p class="text-gray-400 line-through">₹ <%= product.price %></p>
+        <p class="text-2xl md:text-3xl font-bold text-green-600">
+          ₹ <%= product.finalPrice %>
         </p>
       <% } else { %>
-        <p class="text-3xl font-bold text-green-600">₹ <%= product.price %></p>
+        <p class="text-2xl md:text-3xl font-bold text-green-600">
+          ₹ <%= product.price %>
+        </p>
       <% } %>
     </div>
 
     <!-- BUTTONS -->
     <div class="flex gap-3 mt-5">
+
       <a href="/add-to-cart/<%= product._id %>"
-      class="flex-1 border-2 border-orange-500 text-orange-600 py-3 text-center rounded font-semibold hover:bg-orange-50">
+      class="flex-1 border-2 border-orange-500 text-orange-600 py-2 md:py-3 text-center rounded font-semibold hover:bg-orange-50">
       🛒 Add to Cart
       </a>
 
       <a href="/buy-now/<%= product._id %>"
-      class="flex-1 bg-orange-500 text-white py-3 text-center rounded font-semibold hover:opacity-90">
+      class="flex-1 bg-orange-500 text-white py-2 md:py-3 text-center rounded font-semibold hover:opacity-90">
       ⚡ Buy Now
       </a>
+
     </div>
 
-    <!-- DELIVERY + OFFERS -->
-    <div class="mt-4 text-sm text-gray-700 space-y-1">
-      <p>🚚 Free Delivery in 3-5 days</p>
-      <p>💰 Cash on Delivery Available</p>
-      <p>🔁 7 Days Return Policy</p>
+    <!-- DELIVERY -->
+    <div class="mt-4 text-sm space-y-1">
+      <p>🚚 Free Delivery</p>
+      <p>💰 Cash on Delivery</p>
+      <p>🔁 7 Days Return</p>
     </div>
 
     <!-- HIGHLIGHTS -->
     <div class="mt-5 bg-gray-100 p-4 rounded">
       <h2 class="font-semibold mb-2">Highlights</h2>
-      <ul class="text-sm text-gray-600 list-disc pl-4 space-y-1">
-        <li>Premium Quality Product</li>
-        <li>Best in Class Design</li>
-        <li>Trusted Seller</li>
+      <ul class="text-sm text-gray-600 list-disc pl-4">
+        <% product.highlights?.forEach(h => { %>
+          <li><%= h %></li>
+        <% }) %>
       </ul>
     </div>
 
-    <!-- DESCRIPTION -->
-    <!-- <div class="mt-5">
-      <h2 class="font-semibold">Product Description</h2>
-      <p class="text-gray-600 text-sm mt-2">
-        <%= product.description || 'No description available' %>
-      </p>
-    </div> -->
-    <h3 class="font-bold text-lg mt-4">Highlights</h3>
-
-<ul class="list-disc ml-5 text-gray-700">
-  <% product.highlights.forEach(h => { %>
-    <li><%= h %></li>
-  <% }) %>
-</ul>
-<h3 class="font-bold text-lg mt-4">Description</h3>
-
-<div class="text-gray-700">
-  <%- product.description %>
-</div>
-<h3 class="font-bold text-lg mt-4">Specifications</h3>
-
-<table class="w-full mt-2 border">
-
-  <% if(product.specifications){ %>
-  <% Object.keys(product.specifications).forEach(key => { %>
-    
-    <div class="flex justify-between border-b py-2">
-      <span class="font-medium"><%= key %></span>
-      <span><%= product.specifications[key] %></span>
-    </div>
-
-  <% }) %>
-<% } %>
-
-</table>
-
   </div>
+</div>
+
+<!-- DESCRIPTION + SPECS -->
+<div class="max-w-7xl mx-auto mt-6 bg-white p-4 md:p-6 rounded-xl shadow">
+
+  <h3 class="font-bold text-lg mb-2">Description</h3>
+  <div class="text-gray-700 text-sm">
+    <%- product.description %>
+  </div>
+
+  <h3 class="font-bold text-lg mt-6 mb-2">Specifications</h3>
+
+  <div class="divide-y">
+    <% if(product.specifications){ %>
+      <% Object.keys(product.specifications).forEach(key => { %>
+        <div class="flex justify-between py-2 text-sm">
+          <span class="font-medium text-gray-700"><%= key %></span>
+          <span class="text-gray-600"><%= product.specifications[key] %></span>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+
 </div>
 
 <!-- SIMILAR PRODUCTS -->
-<div class="max-w-7xl mx-auto mt-12 px-4">
-  
-  <!-- Heading -->
-  <div class="flex items-center justify-between mb-5">
-    <h2 class="text-2xl font-bold text-gray-800">
-      Similar Products 🔥
-    </h2>
-  </div>
+<div class="max-w-7xl mx-auto mt-10 px-3 md:px-4">
 
-  <!-- Grid -->
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+  <h2 class="text-lg md:text-2xl font-bold mb-4">
+    Similar Products 🔥
+  </h2>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
 
     <% similarProducts.forEach(item => { %>
-      
-      <div class="bg-white rounded-xl shadow-sm hover:shadow-xl transition duration-300 group overflow-hidden">
 
-        <!-- Image -->
-        <div class="relative overflow-hidden">
-          <a href="/product/<%= item._id %>">
-            <img 
-              src="<%= item.images?.[0] %>" 
-              class="w-full h-44 object-cover group-hover:scale-105 transition duration-300"
-            >
-          </a>
+    <div class="bg-white rounded-xl shadow-sm hover:shadow-xl transition group overflow-hidden">
 
-          <!-- Discount badge (optional) -->
-          <% if(item.discount){ %>
-            <span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-              <%= item.discount %>% OFF
-            </span>
-          <% } %>
-        </div>
+      <a href="/product/<%= item._id %>">
+        <img src="<%= item.images?.[0] %>"
+        class="w-full h-40 object-contain p-2 group-hover:scale-105 transition">
+      </a>
 
-        <!-- Content -->
-        <div class="p-3">
+      <div class="p-2">
+        <p class="text-xs md:text-sm line-clamp-2">
+          <%= item.name %>
+        </p>
 
-          <!-- Title -->
-          <p class="text-sm text-gray-700 font-medium line-clamp-2 h-10">
-            <%= item.name %>
-          </p>
-
-          <!-- Rating -->
-          <!-- <div class="flex items-center gap-1 mt-1">
-            <span class="bg-green-600 text-white text-xs px-1.5 py-0.5 rounded">
-              ★ 4.3
-            </span>
-            <span class="text-xs text-gray-500">(120)</span>
-          </div> -->
-
-          <!-- Price -->
-          <div class="mt-2 flex items-center gap-2">
-            <span class="text-green-600 font-bold text-base">
-              ₹ <%= item.price %>
-            </span>
-
-            <% if(item.oldPrice){ %>
-              <span class="text-gray-400 text-sm line-through">
-                ₹ <%= item.oldPrice %>
-              </span>
-            <% } %>
-          </div>
-
-        </div>
-
+        <p class="text-green-600 font-bold text-sm mt-1">
+          ₹ <%= item.price %>
+        </p>
       </div>
+
+    </div>
 
     <% }) %>
 
   </div>
+
 </div>
 
 <!-- REVIEWS -->
 <div class="max-w-5xl mx-auto mt-10 px-4">
+
   <h2 class="text-lg font-bold mb-3">Customer Reviews</h2>
 
-  <% if(reviews.length>0){ %>
+  <% if(reviews.length > 0){ %>
     <% reviews.forEach(r => { %>
       <div class="bg-white p-3 mb-2 rounded shadow">
         <p class="font-semibold"><%= r.name %></p>
-        <p class="text-green-600">⭐ <%= r.rating %></p>
+        <p class="text-green-600 text-sm">⭐ <%= r.rating %></p>
         <p class="text-gray-600 text-sm"><%= r.comment %></p>
       </div>
     <% }) %>
   <% } else { %>
     <p>No reviews yet</p>
   <% } %>
+
 </div>
 
-  <%- include("partial/footer") %>
+<%- include("partial/footer") %>
 
 <script>
 function changeImage(src){

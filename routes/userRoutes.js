@@ -35,12 +35,66 @@ router.get("/my-orders", isLoggedIn, async (req, res) => {
 
   res.render("myOrders", { orders });
 });
+
+router.post("/return-request/:id", isLoggedIn, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.send("Order not found");
+    }
+
+    // ✅ Correct user check
+    if (order.userId.toString() !== req.session.user._id.toString()) {
+      return res.send("Unauthorized");
+    }
+
+    // ✅ Already requested check (optional but pro)
+    if (order.returnStatus === "Requested") {
+      return res.redirect("/my-orders");
+    }
+
+    order.returnStatus = "Requested";
+    await order.save();
+
+    res.redirect("/my-orders");
+
+  } catch (err) {
+    console.log("Return Error:", err);
+    res.send("Something went wrong");
+  }
+});
+
+
+router.get("/privacy", (req, res) => {
+  res.render("privacy");
+});
+
+router.get("/return-policy", (req, res) => {
+  res.render("Returnpolicy");
+});
+
  
 // Register page
 router.get("/register", (req, res) => {
   res.render("register");
 });
 
+// Approve
+router.get("/admin/return/approve/:id", async (req, res) => {
+  await Order.findByIdAndUpdate(req.params.id, {
+    returnStatus: "Approved"
+  });
+  res.redirect("/admin/orders");
+});
+
+// Reject
+router.get("/admin/return/reject/:id", async (req, res) => {
+  await Order.findByIdAndUpdate(req.params.id, {
+    returnStatus: "Rejected"
+  });
+  res.redirect("/admin/orders");
+});
 // Register logic
 
 
@@ -162,7 +216,7 @@ router.get("/download-invoice/:id", isLoggedIn, async (req, res) => {
   doc.pipe(res);
 
   // ================= LOGO =================
-  const logoPath = path.join(__dirname, "/logo.png"); // 🔥 add your logo
+  const logoPath = path.join(__dirname, "uploads/logo.png"); // 🔥 add your logo
   try {
     doc.image(logoPath, 40, 30, { width: 80 });
   } catch (e) {}

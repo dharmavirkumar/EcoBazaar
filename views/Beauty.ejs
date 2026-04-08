@@ -2,58 +2,104 @@
 <html>
 <head>
 <title>Beauty</title>
-
 <script src="https://cdn.tailwindcss.com"></script>
-
 </head>
 
 <body class="bg-gray-100">
 
 <%- include("partial/nav") %>
 
-<div class="max-w-7xl mx-auto p-6">
+<div class="max-w-7xl mx-auto px-3 md:px-6 py-6">
 
-<h1 class="text-3xl font-bold mb-6">Beauty</h1>
+  <!-- HEADER -->
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl md:text-3xl font-bold">Beauty</h1>
+    <p class="text-sm text-gray-500 hidden md:block">
+      <%= products.length %> Items
+    </p>
+  </div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+  <!-- GRID -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
 
-<% products.forEach(function(product){ %>
+  <% products.forEach(function(product){ %>
 
-<div class="bg-white p-4 rounded shadow">
+  <div class="bg-white rounded-xl shadow-sm hover:shadow-xl transition duration-300 group overflow-hidden">
 
-<img src="<%= product.images[0] %>" class="w-full h-40 object-cover">
+    <!-- IMAGE -->
+    <div class="relative overflow-hidden">
+      <a href="/product/<%= product._id %>">
+        <img 
+          src="<%= product.images?.[0] || '/default.png' %>" 
+          class="w-full h-40 md:h-44 object-contain p-2 group-hover:scale-105 transition duration-300"
+        >
+      </a>
 
-<h2 class="text-lg font-semibold mt-3"><%= product.name.substring(0, 22) %></h2>
+      <!-- SALE BADGE -->
+      <% if(product.discountType && product.discountType !== "none"){ %>
+        <span class="absolute top-2 left-2 bg-pink-500 text-white text-xs px-2 py-1 rounded">
+          SALE
+        </span>
+      <% } %>
 
-<p class="text-gray-600">₹ <%= product.price %></p>
+      <!-- WISHLIST -->
+      <button class="absolute top-2 right-2 bg-white p-1 rounded-full shadow text-sm">
+        ❤️
+      </button>
 
-<div>
-    <p><span> 🚚Free Delevery </span></p>
-</div>
+    </div>
 
-<p class="mb-4 text-yellow-500">
-⭐ Average Rating: <%= typeof avgRating !== "undefined" ? avgRating.toFixed(1) : "No rating" %>
-</p>
+    <!-- CONTENT -->
+    <div class="p-3">
 
-<p class="text-gray-600">
-<%= product.description.substring(0, 60) %>...
-</p>
+      <!-- NAME -->
+      <h2 class="text-xs md:text-sm font-medium text-gray-700 line-clamp-2 h-10">
+        <%= product.name %>
+      </h2>
 
-<a href="/product/<%= product._id %>" 
-class="block mt-3 bg-blue-500 text-white text-center py-2 rounded">
-View Details
-</a>
+      <!-- RATING -->
+      <!-- <div class="flex items-center gap-1 mt-1">
+        <span class="bg-green-600 text-white text-xs px-1.5 py-0.5 rounded">
+          ★ <%= product.avgRating ? product.avgRating.toFixed(1) : "4.2" %>
+        </span>
+        <span class="text-xs text-gray-500">(210)</span>
+      </div> -->
 
-</div>
+      <!-- PRICE -->
+      <div class="mt-2 flex items-center gap-2">
+        <span class="text-pink-600 font-bold text-sm md:text-base">
+          ₹ <%= product.finalPrice || product.price %>
+        </span>
 
-<% }) %>
+        <% if(product.discountType && product.discountType !== "none"){ %>
+          <span class="text-gray-400 text-xs line-through">
+            ₹ <%= product.price %>
+          </span>
+        <% } %>
+      </div>
 
-</div>
+      <!-- DELIVERY -->
+      <p class="text-xs text-green-600 mt-1">
+        🚚 Free Delivery
+      </p>
+
+      <!-- BUTTON -->
+      <a href="/product/<%= product._id %>" 
+      class="block mt-3 text-center bg-pink-500 hover:bg-pink-600 text-white py-1.5 rounded text-xs md:text-sm font-semibold">
+        View Details
+      </a>
+
+    </div>
+
+  </div>
+
+  <% }) %>
+
+  </div>
 
 </div>
 
 <%- include("partial/footer") %>
 
 </body>
-</html> 
-
+</html>

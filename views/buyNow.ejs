@@ -1,146 +1,156 @@
 <!DOCTYPE html>
-
 <html>
 <head>
   <title>Checkout - LioKart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <style>
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gray-100 antialiased">
 
 <%- include("partial/nav") %>
 
-<div class="max-w-7xl mx-auto mt-6 grid lg:grid-cols-3 gap-6 px-4">
+<div class="max-w-7xl mx-auto mt-4 md:mt-6 grid lg:grid-cols-3 gap-4 md:gap-6 px-2 sm:px-4">
 
   <!-- ================= LEFT ================= -->
+  <div class="lg:col-span-2 space-y-4 md:space-y-5">
 
-  <div class="lg:col-span-2 space-y-5">
+    <!-- STEP -->
+    <div class="bg-white p-3 md:p-4 rounded shadow flex items-center gap-3">
+      <span class="bg-blue-500 text-white px-3 py-1 rounded text-sm">1</span>
+      <h2 class="font-semibold text-sm md:text-base">Product Details</h2>
+    </div>
 
+    <!-- PRODUCT -->
+    <div class="bg-white p-4 md:p-5 rounded-xl shadow flex gap-4">
 
-<!-- STEP HEADER -->
-<div class="bg-white p-4 rounded shadow flex items-center gap-3">
-  <span class="bg-blue-500 text-white px-3 py-1 rounded">1</span>
-  <h2 class="font-semibold">Product Details</h2>
-</div>
+      <img 
+        src="<%= product.images?.[0] || '/default.png' %>" 
+        onerror="this.src='/default.png'"
+        class="w-24 h-24 md:w-32 md:h-32 object-cover rounded-lg border"
+      />
 
-<!-- PRODUCT CARD -->
-<div class="bg-white p-5 rounded-xl shadow flex gap-5">
+      <div class="flex-1">
+        <h2 class="text-sm md:text-lg font-semibold line-clamp-2">
+          <%= product.name %>
+        </h2>
 
-  <img 
-    src="<%= product.images?.[0] || '/default.png' %>"
-    class="w-32 h-32 object-cover rounded-lg border"
-  >
+        <p class="text-green-600 text-lg md:text-xl font-bold mt-1">
+          ₹ <%= product.price %>
+        </p>
 
-  <div class="flex-1">
-    <h2 class="text-lg font-semibold"><img 
-  src="<%= product.images?.[0] || '/default.png' %>" 
-  onerror="this.src='/default.png'"
-  class="w-32 h-32 object-cover rounded-lg border"
-/></h2>
+        <p class="text-gray-500 text-xs md:text-sm mt-1 line-clamp-2">
+          <%= product.description %>
+        </p>
 
-    <p class="text-green-600 text-xl font-bold mt-2">
-      ₹ <%= product.price %>
-    </p>
+        <p class="text-green-600 text-xs md:text-sm mt-2 font-semibold">
+          ✔ In Stock | Free Delivery
+        </p>
+      </div>
 
-    <p class="text-gray-500 text-sm mt-2 line-clamp-2">
-      <%= product.description %>
-    </p>
+    </div>
 
-    <p class="text-green-600 text-sm mt-2 font-semibold">
-      ✔ In Stock | Free Delivery
-    </p>
-  </div>
+    <!-- ADDRESS -->
+    <div class="bg-white p-4 md:p-5 rounded-xl shadow">
 
-</div>
+      <div class="flex items-center gap-3 mb-3 md:mb-4">
+        <span class="bg-blue-500 text-white px-3 py-1 rounded text-sm">2</span>
+        <h2 class="font-semibold text-sm md:text-base">Delivery Address</h2>
+      </div>
 
-<!-- ADDRESS -->
-<div class="bg-white p-5 rounded-xl shadow">
+      <form id="orderForm" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
 
-  <div class="flex items-center gap-3 mb-4">
-    <span class="bg-blue-500 text-white px-3 py-1 rounded">2</span>
-    <h2 class="font-semibold">Delivery Address</h2>
-  </div>
+        <input type="hidden" name="productId" value="<%= product._id %>">
 
-  <form id="orderForm" class="grid md:grid-cols-2 gap-4">
+        <input name="name" placeholder="Full Name" class="border p-2 md:p-3 rounded focus:ring-2 focus:ring-blue-400" required>
+        <input name="phone" placeholder="Phone Number" class="border p-2 md:p-3 rounded" required>
 
-    <input type="hidden" name="productId" value="<%= product._id %>">
+        <input name="state" placeholder="State" class="border p-2 md:p-3 rounded" required>
+        <input name="phone2" placeholder="Alternate Phone" class="border p-2 md:p-3 rounded">
 
-    <input name="name" placeholder="Full Name" class="border p-3 rounded focus:ring-2 focus:ring-blue-400" required>
-    <input name="phone" placeholder="Phone Number" class="border p-3 rounded" required>
-  <!-- ADD THIS FIELD -->
-<input name="state" placeholder="State" class="border p-3 rounded" required>
+        <input name="email" placeholder="Email Address" class="border p-2 md:p-3 rounded" required>
 
-<!-- FIX THIS -->
-<input name="phone2" placeholder="Alternate Phone Number" class="border p-3 rounded">
+        <input name="house" placeholder="House No." class="border p-2 md:p-3 rounded" required>
+        <input name="city" placeholder="City" class="border p-2 md:p-3 rounded" required>
+        <input name="area" placeholder="Street / Area" class="border p-2 md:p-3 rounded" required>
+        <input name="pincode" placeholder="Pincode" class="border p-2 md:p-3 rounded" required>
 
-    <input name="email" placeholder="Email Address" class="border p-3 rounded" required>
+      </form>
 
-    <input name="house" placeholder="  House No." class="border p-3 rounded" required>
-    <input name="city" placeholder="City" class="border p-3 rounded" required>
-    <input name="area" placeholder="Street / Area" class="border p-3 rounded" required>
-    <input name="pincode" placeholder="Pincode" class="border p-3 rounded" required>
-
-  </form>
-
-</div>
-
+    </div>
 
   </div>
 
   <!-- ================= RIGHT ================= -->
+  <div class="bg-white p-4 md:p-5 rounded-xl shadow h-fit sticky top-20">
 
-  <div class="bg-white p-5 rounded-xl shadow h-fit sticky top-20">
+    <h2 class="text-base md:text-lg font-semibold border-b pb-2 mb-3">
+      PRICE DETAILS
+    </h2>
 
+    <div class="space-y-2 md:space-y-3 text-xs md:text-sm">
 
-<h2 class="text-lg font-semibold border-b pb-2 mb-4">
-  PRICE DETAILS
-</h2>
+      <div class="flex justify-between">
+        <span>Price</span>
+        <span>₹ <%= product.price %></span>
+      </div>
 
-<div class="space-y-3 text-sm">
+      <div class="flex justify-between">
+        <span>Delivery</span>
+        <span class="text-green-600 font-semibold">FREE</span>
+      </div>
 
-  <div class="flex justify-between">
-    <span>Price</span>
-    <span>₹ <%= product.price %></span>
-  </div>
+      <div class="flex justify-between">
+        <span>GST (10%)</span>
+        <span>₹ <%= Math.round(product.price * 0.10) %></span>
+      </div>
 
-  <div class="flex justify-between">
-    <span>Delivery Charges</span>
-    <span class="text-green-600 font-semibold">FREE</span>
-  </div>
+      <hr>
 
-  <div class="flex justify-between">
-    <span>GST (10%)</span>
-    <span>₹ <%= Math.round(product.price * 0.10) %></span>
-  </div>
+      <div class="flex justify-between font-bold text-base md:text-lg">
+        <span>Total</span>
+        <span class="text-green-600">
+          ₹ <%= product.price + Math.round(product.price * 0.10) %>
+        </span>
+      </div>
 
-  <hr>
+    </div>
 
-  <div class="flex justify-between font-bold text-lg">
-    <span>Total Amount</span>
-    <span class="text-green-600">
-      ₹ <%= product.price + Math.round(product.price * 0.10) %>
-    </span>
-  </div>
+    <!-- BUTTONS -->
+    <div class="mt-5 space-y-2 md:space-y-3">
 
-  <p class="text-green-600 text-sm font-semibold">
-    🎉 You saved ₹ <%= Math.round(product.price * 0.10) %> on this order
-  </p>
+      <button id="codBtn"
+        form="orderForm"
+        formaction="/place-order"
+        name="paymentMethod"
+        value="COD"
+        class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base">
+        Cash on Delivery
+      </button>
 
-</div>
+      <button id="payBtn" onclick="payNow()"
+        class="w-full bg-yellow-400 hover:bg-yellow-500 py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base">
+        Pay with Razorpay
+      </button>
 
-<!-- BUTTON -->
-<button onclick="payNow()" 
-  class="mt-6 w-full bg-yellow-400 hover:bg-yellow-500 py-3 rounded-lg font-semibold text-lg shadow">
-  PLACE ORDER
-</button>
+    </div>
 
-<!-- TRUST -->
-<div class="mt-5 text-xs text-gray-500 space-y-1">
-  <p>🔒 100% Secure Payments</p>
-  <p>📦 Easy Returns</p>
-  <p>🚚 Fast Delivery</p>
-</div>
+    <!-- TRUST -->
+    <div class="mt-4 text-[11px] md:text-xs text-gray-500 space-y-1">
+      <p>🔒 100% Secure Payments</p>
+      <p>📦 Easy Returns</p>
+      <p>🚚 Fast Delivery</p>
+    </div>
 
   </div>
 
@@ -148,51 +158,45 @@
 
 <%- include("partial/footer") %>
 
-
-
- 
-</body>
+<!-- 🔥 JS -->
 <script>
-window.payNow = async function () {
-  try {
 
-    const btn = document.querySelector("button");
+window.payNow = async function () {
+  const btn = document.getElementById("payBtn");
+
+  try {
     btn.disabled = true;
     btn.innerText = "Processing...";
 
     const form = document.getElementById("orderForm");
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
+    const data = Object.fromEntries(new FormData(form).entries());
 
     // ✅ VALIDATION
     if (!data.name || !data.phone || !data.email || !data.house || !data.city || !data.state || !data.pincode) {
       alert("Please fill all required fields");
       btn.disabled = false;
-      btn.innerText = "PLACE ORDER";
+      btn.innerText = "Pay with Online";
       return;
     }
 
     const totalAmount = <%= product.price + Math.round(product.price * 0.10) %>;
 
-    // ✅ CREATE ORDER
+    // CREATE ORDER
     const res = await fetch("/create-order", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ amount: totalAmount })
     });
 
     const order = await res.json();
 
     if (!order.id) {
-      alert("❌ Order creation failed");
+      alert("Order failed");
       btn.disabled = false;
-      btn.innerText = "PLACE ORDER";
+      btn.innerText = "Pay with Online";
       return;
     }
 
-    // ✅ RAZORPAY OPTIONS
     const options = {
       key: "rzp_test_SZWDMTwNZYsa0a",
       amount: order.amount,
@@ -202,37 +206,26 @@ window.payNow = async function () {
       order_id: order.id,
 
       handler: async function (response) {
-        try {
-          const verify = await fetch("/verify-payment", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
 
-              productId: "<%= product._id %>",
-              totalAmount: totalAmount,
-              orderData: data
-            })
-          });
+        const verify = await fetch("/verify-payment", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            ...response,
+            productId: "<%= product._id %>",
+            totalAmount,
+            orderData: data
+          })
+        });
 
-          const result = await verify.json();
+        const result = await verify.json();
 
-          if (result.success) {
-            window.location.href = "/my-orders";
-          } else {
-            alert("❌ Payment verification failed");
-            btn.disabled = false;
-            btn.innerText = "PLACE ORDER";
-          }
-
-        } catch (err) {
-          console.log(err);
+        if (result.success) {
+          window.location.href = "/my-orders";
+        } else {
+          alert("Payment failed");
           btn.disabled = false;
-          btn.innerText = "PLACE ORDER";
+          btn.innerText = "Pay with Online";
         }
       },
 
@@ -242,19 +235,20 @@ window.payNow = async function () {
         contact: data.phone
       },
 
-      theme: {
-        color: "#2874F0"
-      }
+      theme: { color: "#2874F0" }
     };
 
-    // ✅ OPEN RAZORPAY
-    const rzp = new Razorpay(options);
-    rzp.open();
+    new Razorpay(options).open();
 
   } catch (err) {
     console.log(err);
     alert("Something went wrong");
+    btn.disabled = false;
+    btn.innerText = "Pay with Online";
   }
 };
+
 </script>
+
+</body>
 </html>

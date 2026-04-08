@@ -2,83 +2,114 @@
 <html>
 <head>
 <title>About Us</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gray-100 antialiased">
 
 <%- include("partial/nav") %>
 
-<!-- 🔥 HERO SECTION -->
-<div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16 text-center">
-  <h1 class="text-4xl font-bold">About Us</h1>
-  <p class="mt-4 text-lg">Know more about our journey & mission</p>
-</div>
-
-<!-- 🧱 ABOUT CONTENT -->
-<div class="max-w-6xl mx-auto p-6">
-
-<!-- About -->
-<div class="bg-white p-6 rounded shadow mb-6">
-  <h2 class="text-2xl font-bold mb-3">Who We Are</h2>
-  <p class="text-gray-600 leading-relaxed">
-    Welcome to <span class="font-semibold text-blue-600">MyShop</span> — your one-stop destination for shopping 
-    the latest trends in electronics, fashion, beauty, and more.  
-    We are passionate about delivering quality products at affordable prices with a smooth shopping experience.
+<!-- 🔥 HERO -->
+<div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12 sm:py-16 text-center px-4">
+  <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold">About Us</h1>
+  <p class="mt-3 text-sm sm:text-base md:text-lg opacity-90">
+    Know more about our journey & mission
   </p>
 </div>
 
-<!-- Mission & Vision -->
-<div class="grid md:grid-cols-2 gap-6 mb-6">
+<!-- 🧱 MAIN -->
+<div class="max-w-6xl mx-auto px-3 sm:px-6 py-6 md:py-10 space-y-6">
 
-  <div class="bg-white p-6 rounded shadow">
-    <h2 class="text-xl font-bold mb-3">🎯 Our Mission</h2>
-    <p class="text-gray-600">
-      To provide high-quality products with fast delivery and excellent customer service, 
-      making online shopping simple and reliable for everyone.
+  <!-- ABOUT -->
+  <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm md:hover:shadow-md transition">
+    <h2 class="text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3">
+      Who We Are
+    </h2>
+
+    <p class="text-gray-600 text-sm sm:text-base leading-relaxed">
+      Welcome to <span class="font-semibold text-blue-600">MyShop</span> — your one-stop destination 
+      for shopping the latest trends in electronics, fashion, beauty, and more.  
+      We focus on delivering quality products at affordable prices with a smooth, fast, 
+      and reliable shopping experience.
     </p>
   </div>
 
-  <div class="bg-white p-6 rounded shadow">
-    <h2 class="text-xl font-bold mb-3">🚀 Our Vision</h2>
-    <p class="text-gray-600">
-      To become one of the most trusted and customer-friendly eCommerce platforms 
-      by continuously improving user experience and product quality.
+  <!-- MISSION + VISION -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+
+    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm md:hover:shadow-md transition">
+      <h2 class="text-base sm:text-lg md:text-xl font-bold mb-2 sm:mb-3">
+        🎯 Our Mission
+      </h2>
+
+      <p class="text-gray-600 text-sm sm:text-base">
+        To provide high-quality products with fast delivery and excellent customer service, 
+        making online shopping simple, safe, and reliable for everyone.
+      </p>
+    </div>
+
+    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm md:hover:shadow-md transition">
+      <h2 class="text-base sm:text-lg md:text-xl font-bold mb-2 sm:mb-3">
+        🚀 Our Vision
+      </h2>
+
+      <p class="text-gray-600 text-sm sm:text-base">
+        To become one of the most trusted and customer-friendly eCommerce platforms 
+        by continuously improving user experience, product quality, and service.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- WHY CHOOSE US -->
+  <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm md:hover:shadow-md transition">
+    <h2 class="text-lg sm:text-xl md:text-2xl font-bold mb-4 text-center">
+      Why Choose Us?
+    </h2>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
+
+      <div class="p-3 sm:p-4 rounded-lg hover:bg-gray-50 transition">
+        <h3 class="text-sm sm:text-base font-semibold">⚡ Fast Delivery</h3>
+        <p class="text-gray-600 text-xs sm:text-sm mt-1">
+          Quick and reliable shipping across all locations.
+        </p>
+      </div>
+
+      <div class="p-3 sm:p-4 rounded-lg hover:bg-gray-50 transition">
+        <h3 class="text-sm sm:text-base font-semibold">💰 Best Prices</h3>
+        <p class="text-gray-600 text-xs sm:text-sm mt-1">
+          Affordable pricing with exciting offers.
+        </p>
+      </div>
+
+      <div class="p-3 sm:p-4 rounded-lg hover:bg-gray-50 transition">
+        <h3 class="text-sm sm:text-base font-semibold">🔒 Secure Payment</h3>
+        <p class="text-gray-600 text-xs sm:text-sm mt-1">
+          100% safe and secure payment methods.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm md:hover:shadow-md transition text-center">
+
+    <h2 class="text-lg sm:text-xl font-bold mb-3">
+      📞 Contact Us
+    </h2>
+
+    <p class="text-gray-600 text-sm sm:text-base">
+      Email: <span class="font-medium">liokartshop@gmail.com</span>
     </p>
-  </div>
 
-</div>
-
-<!-- Why Choose Us -->
-<div class="bg-white p-6 rounded shadow mb-6">
-  <h2 class="text-2xl font-bold mb-4">Why Choose Us?</h2>
-
-  <div class="grid md:grid-cols-3 gap-6 text-center">
-
-    <div>
-      <h3 class="text-lg font-semibold">⚡ Fast Delivery</h3>
-      <p class="text-gray-600">Quick and reliable shipping across all locations.</p>
-    </div>
-
-    <div>
-      <h3 class="text-lg font-semibold">💰 Best Prices</h3>
-      <p class="text-gray-600">Affordable pricing with exciting offers.</p>
-    </div>
-
-    <div>
-      <h3 class="text-lg font-semibold">🔒 Secure Payment</h3>
-      <p class="text-gray-600">100% safe and secure payment methods.</p>
-    </div>
+    <p class="text-gray-600 text-sm sm:text-base mt-1">
+      Phone: <span class="font-medium">+91 8578908969</span>
+    </p>
 
   </div>
-</div>
-
-<!-- Contact -->
-<div class="bg-white p-6 rounded shadow text-center">
-  <h2 class="text-xl font-bold mb-2">📞 Contact Us</h2>
-  <p class="text-gray-600">Email: support@myshop.com</p>
-  <p class="text-gray-600">Phone: +91 ************</p>
-</div>
 
 </div>
 

@@ -31,6 +31,11 @@ const productSchema = new mongoose.Schema({
   specifications: {
   type: Object
 },
+
+paymentOptions: {
+  cod: { type: Boolean, default: true },
+  online: { type: Boolean, default: true }
+},
   // 🔥 NEW (IMPORTANT)
   sizes: [
     {

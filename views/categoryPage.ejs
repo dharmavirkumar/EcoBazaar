@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Category</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
@@ -14,54 +15,29 @@
   </style>
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gray-100 antialiased">
 
 <%- include("partial/nav") %>
 
-
-
 <!-- 🔥 BANNER -->
-<div class="max-w-7xl mx-auto mt-4 px-4">
-  <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-6 rounded-xl flex justify-between items-center shadow">
+<div class="max-w-7xl mx-auto mt-3 px-2 sm:px-4">
+  <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 md:p-6 rounded-xl flex justify-between items-center shadow">
 
     <div>
-      <h1 class="text-3xl font-bold">Big Sale 🎉</h1>
-      <p class="text-sm mt-1">Up to 70% OFF on <%= main %></p>
+      <h1 class="text-lg sm:text-xl md:text-3xl font-bold">Big Sale 🎉</h1>
+      <p class="text-xs sm:text-sm mt-1">Up to 70% OFF on <%= main %></p>
     </div>
 
-    <img src="https://cdn-icons-png.flaticon.com/512/3144/3144456.png" class="w-24">
+    <img src="https://cdn-icons-png.flaticon.com/512/3144/3144456.png"
+         class="w-14 sm:w-20 md:w-24">
   </div>
 </div>
 
-<!-- 🔥 TOP CATEGORY SCROLL -->
-<!-- <div class="bg-white shadow-sm border-b sticky top-0 z-40">
-  <div class="max-w-7xl mx-auto px-4 py-3 overflow-x-auto">
-    <div class="flex gap-6 min-w-max">
-
-      <% const topCategories = subCategories || []; %>
-
-      <% topCategories.forEach(cat => { %>
-        <a href="/category/<%= main %>/<%= cat %>" 
-           class="flex flex-col items-center text-sm transition 
-           <%= sub === cat ? 'text-blue-600 font-semibold' : 'hover:text-blue-500' %>">
-
-          <div class="bg-gray-100 p-2 rounded-full hover:bg-blue-100">
-            <img src="https://cdn-icons-png.flaticon.com/512/892/892458.png"
-                 class="w-10 h-10">
-          </div>
-
-          <span class="mt-1"><%= cat %></span>
-        </a>
-      <% }) %>
-
-    </div>
-  </div>
-</div> -->
 <!-- 🔥 MAIN -->
-<div class="max-w-7xl mx-auto px-4 mt-6 flex gap-6">
+<div class="max-w-7xl mx-auto px-2 sm:px-4 mt-4 md:mt-6 flex flex-col md:flex-row gap-4 md:gap-6">
 
   <!-- 🧠 SIDEBAR -->
-  <div class="bg-white p-5 rounded-xl shadow w-64 h-fit sticky top-24">
+  <div class="hidden md:block bg-white p-5 rounded-xl shadow w-64 sticky top-24">
 
     <h2 class="font-bold text-lg mb-4">Filters</h2>
 
@@ -70,25 +46,21 @@
       <h3 class="font-semibold mb-2">Category</h3>
 
       <ul class="space-y-2 text-sm">
-
         <li>
           <a href="/category/<%= main %>/All"
-             class="block px-2 py-1 rounded 
-             <%= sub === 'All' ? 'bg-blue-100 text-blue-600 font-semibold' : 'hover:bg-gray-100' %>">
+             class="block px-2 py-1 rounded <%= sub === 'All' ? 'bg-blue-100 text-blue-600 font-semibold' : 'hover:bg-gray-100' %>">
             All
           </a>
         </li>
 
         <% subCategories.forEach(cat => { %>
-          <li>
-            <a href="/category/<%= main %>/<%= cat %>"
-               class="block px-2 py-1 rounded 
-               <%= sub === cat ? 'bg-blue-100 text-blue-600 font-semibold' : 'hover:bg-gray-100' %>">
-              <%= cat %>
-            </a>
-          </li>
+        <li>
+          <a href="/category/<%= main %>/<%= cat %>"
+             class="block px-2 py-1 rounded <%= sub === cat ? 'bg-blue-100 text-blue-600 font-semibold' : 'hover:bg-gray-100' %>">
+            <%= cat %>
+          </a>
+        </li>
         <% }) %>
-
       </ul>
     </div>
 
@@ -96,9 +68,9 @@
     <div>
       <h3 class="font-semibold mb-2">Price</h3>
       <ul class="space-y-2 text-sm">
-        <li><a href="?price=0-500" class="block hover:text-blue-500">Under ₹500</a></li>
-        <li><a href="?price=500-1000" class="block hover:text-blue-500">₹500 - ₹1000</a></li>
-        <li><a href="?price=1000-2000" class="block hover:text-blue-500">₹1000 - ₹2000</a></li>
+        <li><a href="?price=0-500">Under ₹500</a></li>
+        <li><a href="?price=500-1000">₹500 - ₹1000</a></li>
+        <li><a href="?price=1000-2000">₹1000 - ₹2000</a></li>
       </ul>
     </div>
 
@@ -107,14 +79,27 @@
   <!-- 🛍 PRODUCTS -->
   <div class="flex-1">
 
+    <!-- MOBILE TOP BAR -->
+    <div class="md:hidden flex justify-between items-center mb-3">
+      <button onclick="openFilter()" 
+        class="bg-white border px-4 py-2 rounded-lg shadow text-sm font-semibold active:scale-95">
+        ⚙️ Filters
+      </button>
+
+      <select class="border px-2 py-2 rounded text-sm">
+        <option>Sort</option>
+        <option>Price Low → High</option>
+        <option>Price High → Low</option>
+      </select>
+    </div>
+
     <!-- HEADER -->
     <div class="flex justify-between items-center mb-4">
-      <h1 class="text-xl font-bold capitalize">
+      <h1 class="text-sm sm:text-lg md:text-xl font-bold capitalize">
         <%= main %> / <%= sub %> (<%= products.length %>)
       </h1>
 
-      <!-- SORT -->
-      <select class="border px-2 py-1 rounded text-sm">
+      <select class="hidden md:block border px-2 py-1 rounded text-sm">
         <option>Sort By</option>
         <option>Price Low → High</option>
         <option>Price High → Low</option>
@@ -123,89 +108,77 @@
 
     <% if(products.length === 0){ %>
 
-      <div class="text-center py-20">
-        <p class="text-gray-500 text-xl">No products found 😔</p>
-      </div>
+    <div class="text-center py-20">
+      <p class="text-gray-500 text-lg">No products found 😔</p>
+    </div>
 
     <% } else { %>
 
     <!-- GRID -->
-    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-5">
 
       <% products.forEach(product => { %>
 
-        <div class="bg-white rounded-xl shadow hover:shadow-xl transition group overflow-hidden">
+      <a href="/product/<%= product._id %>" 
+         class="bg-white rounded-xl shadow-sm hover:shadow-md active:scale-95 transition flex flex-col overflow-hidden">
 
-          <!-- IMAGE -->
-          <div class="relative">
-            <a href="/product/<%= product._id %>">
-              <img 
-                src="<%= product.images?.[0] || '/default.png' %>"
-                class="w-full h-44 object-contain p-3 group-hover:scale-105 transition">
-            </a>
+        <!-- IMAGE -->
+        <div class="relative bg-gray-50 h-32 sm:h-36 md:h-44 flex items-center justify-center">
 
-            <!-- DISCOUNT -->
+          <img 
+            loading="lazy"
+            src="<%= product.images?.[0] || '/default.png' %>"
+            onerror="this.src='/default.png'"
+            class="max-h-full object-contain p-2 transition duration-300 hover:scale-105"
+          >
+
+          <% if(product.discountValue){ %>
+          <span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-2 py-1 rounded">
+            <%= product.discountType === 'percentage' ? product.discountValue + '%' : '₹' + product.discountValue %> OFF
+          </span>
+          <% } %>
+
+        </div>
+
+        <!-- DETAILS -->
+        <div class="p-2 sm:p-3 flex flex-col flex-grow">
+
+          <h2 class="text-[11px] sm:text-xs md:text-sm font-medium text-gray-700 line-clamp-2 h-8 sm:h-10">
+            <%= product.name %>
+          </h2>
+
+          <!-- PRICE -->
+          <div class="mt-1 flex items-center gap-2">
             <% if(product.discountValue){ %>
-              <span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                <%= product.discountType === 'percentage' ? product.discountValue + '%' : '₹' + product.discountValue %> OFF
-              </span>
+            <span class="text-green-600 font-bold text-sm md:text-base">
+              ₹<%= product.finalPrice %>
+            </span>
+
+            <span class="line-through text-gray-400 text-[10px] sm:text-xs">
+              ₹<%= product.price %>
+            </span>
+            <% } else { %>
+            <span class="text-green-600 font-bold text-sm md:text-base">
+              ₹<%= product.price %>
+            </span>
             <% } %>
           </div>
 
-          <!-- DETAILS -->
-          <div class="p-3">
+          <!-- RATING -->
+          <p class="text-yellow-500 text-[10px] sm:text-xs mt-1">
+            ⭐ <%= product.avgRating ? product.avgRating.toFixed(1) : "0.0" %>
+          </p>
 
-            <h2 class="text-sm font-semibold line-clamp-2 h-10">
-              <%= product.name %>
-            </h2>
-
-            <!-- PRICE -->
-            <div class="mt-1 flex items-center gap-2">
-              <% if(product.discountValue){ %>
-
-                <span class="text-green-600 font-bold text-lg">
-                  ₹<%= product.finalPrice %>
-                </span>
-
-                <span class="line-through text-gray-400 text-sm">
-                  ₹<%= product.price %>
-                </span>
-
-              <% } else { %>
-
-                <span class="text-green-600 font-bold text-lg">
-                  ₹<%= product.price %>
-                </span>
-
-              <% } %>
-            </div>
-
-            <!-- RATING -->
-            <p class="text-yellow-500 text-xs mt-1">
-              ⭐ 
-              <%= product.avgRating != null 
-                  ? product.avgRating.toFixed(1) 
-                  : "No rating" %>
-            </p>
-
-            <!-- BUTTONS -->
-            <div class="flex gap-2 mt-3">
-
-              <a href="/product/<%= product._id %>" 
-                 class="flex-1 text-center bg-blue-500 text-white py-1.5 rounded hover:bg-blue-600 text-sm">
-                View
-              </a>
-
-              <a href="/add-to-cart/<%= product._id %>" 
-                 class="flex-1 text-center bg-yellow-400 py-1.5 rounded hover:bg-yellow-500 text-sm">
-                Cart
-              </a>
-
-            </div>
-
+          <!-- BUTTON -->
+          <div class="mt-auto pt-2">
+            <span class="block text-center bg-blue-500 hover:bg-blue-600 text-white py-1.5 rounded text-[11px] sm:text-xs">
+              View Details
+            </span>
           </div>
 
         </div>
+
+      </a>
 
       <% }) %>
 
@@ -217,7 +190,70 @@
 
 </div>
 
+<!-- 🔥 FILTER POPUP -->
+<div id="filterPopup" class="fixed inset-0 bg-black/40 z-50 hidden">
+
+  <div id="sheet" class="absolute bottom-0 w-full bg-white rounded-t-2xl p-4 max-h-[80vh] overflow-y-auto transform translate-y-full transition">
+
+    <div class="flex justify-between mb-4">
+      <h2 class="font-bold text-lg">Filters</h2>
+      <button onclick="closeFilter()">✕</button>
+    </div>
+
+    <!-- CATEGORY -->
+    <div class="mb-5">
+      <h3 class="font-semibold mb-2">Category</h3>
+
+      <% subCategories.forEach(cat => { %>
+      <a href="/category/<%= main %>/<%= cat %>" 
+         class="block border p-2 rounded mb-2">
+        <%= cat %>
+      </a>
+      <% }) %>
+    </div>
+
+    <!-- PRICE -->
+    <div>
+      <h3 class="font-semibold mb-2">Price</h3>
+
+      <a href="?price=0-500" class="block border p-2 rounded mb-2">Under ₹500</a>
+      <a href="?price=500-1000" class="block border p-2 rounded mb-2">₹500 - ₹1000</a>
+      <a href="?price=1000-2000" class="block border p-2 rounded">₹1000 - ₹2000</a>
+    </div>
+
+  </div>
+</div>
+
 <%- include("partial/footer") %>
+
+<!-- JS -->
+<script>
+function openFilter(){
+  const popup = document.getElementById("filterPopup");
+  const sheet = document.getElementById("sheet");
+
+  popup.classList.remove("hidden");
+
+  requestAnimationFrame(()=>{
+    sheet.classList.remove("translate-y-full");
+  });
+}
+
+function closeFilter(){
+  const popup = document.getElementById("filterPopup");
+  const sheet = document.getElementById("sheet");
+
+  sheet.classList.add("translate-y-full");
+
+  setTimeout(()=>{
+    popup.classList.add("hidden");
+  },200);
+}
+
+document.getElementById("filterPopup")?.addEventListener("click", (e)=>{
+  if(e.target.id === "filterPopup") closeFilter();
+});
+</script>
 
 </body>
 </html>

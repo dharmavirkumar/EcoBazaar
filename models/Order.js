@@ -97,6 +97,10 @@ statusHistory: [
     date: Date
   }
 ],
+returnStatus: {
+  type: String,
+  default: "None" // None | Requested | Approved | Rejected
+},
 
   // 🕒 TRACKING TIMELINE
   timeline: [

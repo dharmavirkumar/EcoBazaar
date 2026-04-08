@@ -1,54 +1,98 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Electronics</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
+  <title>Electronics</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gray-100 antialiased">
 
 <%- include("partial/nav") %>
 
-<div class="max-w-7xl mx-auto p-6">
+<div class="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-4 md:py-6">
 
-<h1 class="text-3xl font-bold mb-6">Electronics</h1>
+  <!-- HEADER -->
+  <div class="flex items-center justify-between mb-4 md:mb-6">
+    <h1 class="text-lg sm:text-xl md:text-3xl font-bold">
+      Electronics
+    </h1>
 
-<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <p class="text-xs sm:text-sm text-gray-500">
+      <%= products.length %> Items
+    </p>
+  </div>
 
-<% products.forEach(function(product){ %>
+  <!-- GRID -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-6">
 
-<div class="bg-white p-4 rounded shadow">
+  <% products.forEach(function(product){ %>
 
-<img src="<%= product.images[0] %>" class="w-full h-40 object-cover">
+  <!-- 🔥 PRODUCT CARD -->
+  <a href="/product/<%= product._id %>" 
+     class="bg-white rounded-xl shadow-sm active:scale-95 md:hover:shadow-2xl transition duration-200 overflow-hidden group flex flex-col">
 
-<h2 class="text-lg font-semibold mt-3"><%= product.name.substring(0, 22) %></h2>
+    <!-- IMAGE -->
+    <div class="relative bg-gray-50 flex items-center justify-center h-32 sm:h-36 md:h-44 overflow-hidden">
 
-<p class="text-gray-600">₹ <%= product.price %></p>
+      <img 
+        loading="lazy"
+        src="<%= product.images?.[0] || '/default.png' %>" 
+        onerror="this.src='/default.png'"
+        class="max-h-full object-contain p-2 md:group-hover:scale-110 transition duration-300"
+      >
 
-<div>
-    <p><span> 🚚Free Delevery </span></p>
-</div>
+      <!-- SALE BADGE -->
+      <% if(product.discountType && product.discountType !== "none"){ %>
+        <span class="absolute top-2 left-2 bg-green-500 text-white text-[10px] px-2 py-0.5 rounded">
+          SALE
+        </span>
+      <% } %>
 
-<p class="mb-4 text-yellow-500">
-⭐ Average Rating: <%= typeof avgRating !== "undefined" ? avgRating.toFixed(1) : "No rating" %>
-</p>
+    </div>
 
-<p class="text-gray-600">
-<%= product.description.substring(0, 60) %>...
-</p>
+    <!-- CONTENT -->
+    <div class="p-2 sm:p-3 flex flex-col flex-grow">
 
-<a href="/product/<%= product._id %>"
-class="block mt-3 bg-blue-500 text-white text-center py-2 rounded">
-View Details
-</a>
+      <!-- NAME -->
+      <h2 class="text-[11px] sm:text-xs md:text-sm font-medium text-gray-700 line-clamp-2 h-8 sm:h-10">
+        <%= product.name %>
+      </h2>
 
-</div>
+      <!-- PRICE -->
+      <div class="mt-1 flex items-center gap-2">
 
-<% }) %>
+        <span class="text-green-600 font-bold text-sm md:text-base">
+          ₹ <%= product.finalPrice || product.price %>
+        </span>
 
-</div>
+        <% if(product.discountType && product.discountType !== "none"){ %>
+          <span class="text-gray-400 text-[10px] sm:text-xs line-through">
+            ₹ <%= product.price %>
+          </span>
+        <% } %>
+
+      </div>
+
+      <!-- DELIVERY -->
+      <p class="text-[10px] sm:text-xs text-green-600 mt-1">
+        🚚 Free Delivery
+      </p>
+
+      <!-- BUTTON -->
+      <div class="mt-auto pt-2">
+        <span class="block text-center bg-pink-500 md:hover:bg-pink-600 text-white py-1.5 rounded text-[11px] sm:text-xs md:text-sm font-semibold transition">
+          View Details
+        </span>
+      </div>
+
+    </div>
+
+  </a>
+
+  <% }) %>
+
+  </div>
 
 </div>
 

@@ -110,10 +110,57 @@
         Invoice
       </a>
 
+
+
+
+      
+
     </div>
 
   </div>
+<% orders.forEach(order => { %>
 
+<div class="bg-white p-4 rounded shadow mb-4">
+
+  <h2 class="font-bold">Order ID: <%= order._id %></h2>
+
+  <p>Status: <span class="text-blue-600"><%= order.status %></span></p>
+
+  <!-- RETURN STATUS -->
+  <p class="text-sm mt-1">
+    Return Status: 
+    <span class="font-semibold">
+      <%= order.returnStatus %>
+    </span>
+  </p>
+
+  <!-- BUTTON LOGIC -->
+  <% if(order.returnStatus === "None"){ %>
+
+    <form action="/return-request/<%= order._id %>" method="POST">
+      <button 
+        class="mt-3 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+        🔄 Request Return
+      </button>
+    </form>
+
+  <% } else if(order.returnStatus === "Requested"){ %>
+
+    <p class="text-yellow-600 mt-2">⏳ Return Requested</p>
+
+  <% } else if(order.returnStatus === "Approved"){ %>
+
+    <p class="text-green-600 mt-2">✅ Return Approved</p>
+
+  <% } else if(order.returnStatus === "Rejected"){ %>
+
+    <p class="text-red-600 mt-2">❌ Return Rejected</p>
+
+  <% } %>
+
+</div>
+
+<% }) %>
   <!-- PAYMENT -->
   <div class="mt-3 text-sm">
     Payment:

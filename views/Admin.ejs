@@ -7,7 +7,7 @@
 
 <body class="bg-gray-100 flex">
 
-<!-- ================= SIDEBAR ================= -->
+<!-- SIDEBAR -->
 <div class="w-64 bg-gradient-to-b from-gray-900 to-gray-800 text-white min-h-screen p-5">
 
   <h1 class="text-2xl font-bold mb-6">⚡ LioKart Admin</h1>
@@ -19,7 +19,7 @@
   <a href="/logout" class="block bg-red-500 text-center py-2 rounded mt-6">Logout</a>
 </div>
 
-<!-- ================= MAIN ================= -->
+<!-- MAIN -->
 <div class="flex-1 p-6">
 
 <!-- HEADER -->
@@ -52,18 +52,15 @@
 </div>
 
 <!-- ================= PRODUCTS ================= -->
+<div id="products" class="tab-content hidden">
 
 <a href="/add-product" class="bg-blue-500 text-white px-4 py-2 rounded">
   ➕ Add Product
 </a>
 
-
-
-<!-- SEARCH -->
 <input type="text" id="search" placeholder="🔍 Search product..."
  class="border p-3 mb-4 w-full rounded">
 
-<!-- PRODUCT LIST -->
 <div class="grid md:grid-cols-3 gap-4" id="productList">
 
 <% products.forEach(p => { %>
@@ -97,7 +94,6 @@
 <% }) %>
 
 </div>
-
 </div>
 
 <!-- ================= ORDERS ================= -->
@@ -112,6 +108,7 @@
 
 <div class="bg-white p-4 rounded shadow order-card">
 
+<!-- HEADER -->
 <div class="flex justify-between border-b pb-2">
 
 <div>
@@ -119,11 +116,21 @@
 <p class="text-xs"><%= new Date(o.createdAt).toDateString() %></p>
 </div>
 
-<span class="text-xs px-3 py-1 rounded-full
-<%= o.status==='Delivered'?'bg-green-100 text-green-600':
-o.status==='Cancelled'?'bg-red-100 text-red-600':
-o.status==='Shipped'?'bg-blue-100 text-blue-600':
-'bg-yellow-100 text-yellow-600' %>">
+<%
+let statusClass = '';
+
+if(o.status === 'Delivered'){
+  statusClass = 'bg-green-100 text-green-600';
+}else if(o.status === 'Cancelled'){
+  statusClass = 'bg-red-100 text-red-600';
+}else if(o.status === 'Shipped'){
+  statusClass = 'bg-blue-100 text-blue-600';
+}else{
+  statusClass = 'bg-yellow-100 text-yellow-600';
+}
+%>
+
+<span class="text-xs px-3 py-1 rounded-full <%= statusClass %>">
 <%= o.status %>
 </span>
 
@@ -156,18 +163,56 @@ o.status==='Shipped'?'bg-blue-100 text-blue-600':
 
 </form>
 
+<!-- 🔄 RETURN MANAGEMENT -->
+<div class="mt-3">
+
+<p class="text-sm">
+Return: 
+<span class="font-semibold">
+<%= o.returnStatus || "None" %>
+</span>
+</p>
+
+<% if(o.returnStatus === "Requested"){ %>
+
+<div class="flex gap-2 mt-2">
+
+<a href="/admin/return/approve/<%= o._id %>"
+class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">
+✅ Approve
+</a>
+
+<a href="/admin/return/reject/<%= o._id %>"
+class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">
+❌ Reject
+</a>
+
+</div>
+
+<% } else if(o.returnStatus === "Approved"){ %>
+
+<p class="text-green-600 text-sm mt-1">Approved ✅</p>
+
+<% } else if(o.returnStatus === "Rejected"){ %>
+
+<p class="text-red-600 text-sm mt-1">Rejected ❌</p>
+
+<% } %>
+
+</div>
+
 </div>
 
 <% }) %>
 
 </div>
-
-</div>
-
 </div>
 
 <!-- ================= SCRIPTS ================= -->
 <script>
+
+// DEFAULT TAB
+showTab("dashboard");
 
 // TAB SWITCH
 function showTab(tab){
@@ -191,7 +236,7 @@ card.style.display = card.innerText.toLowerCase().includes(val) ? "block":"none"
 });
 });
 
-// DELETE CONFIRM
+// DELETE
 function confirmDelete(id){
 if(confirm("Delete product?")){
 window.location.href="/admin/delete-product/"+id;
