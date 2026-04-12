@@ -14,6 +14,9 @@
       background: #fff0f3;
     }
   </style>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
 </head>
 
 <body class="bg-gray-50">
@@ -22,25 +25,19 @@
 
 <div class="max-w-7xl mx-auto mt-6 grid grid-cols-1 lg:grid-cols-2 gap-10 bg-white p-6 rounded-lg shadow">
 
-  <!-- LEFT IMAGE SECTION -->
-  <div class="flex gap-4">
-
-    <!-- THUMBNAILS -->
-    <div class="flex flex-col gap-2">
-      <% product.images?.forEach((img,i)=>{ %>
-        <img src="<%= img %>"
-        onclick="changeImage('<%= img %>', this)"
-        class="thumb w-16 h-16 object-cover rounded cursor-pointer <%= i===0?'active':'' %>">
+  <!-- IMAGE SLIDER -->
+  <div class="swiper mySwiper w-full">
+    <div class="swiper-wrapper">
+      <% product.images?.forEach(img => { %>
+        <div class="swiper-slide">
+          <img src="<%= img %>" class="w-full h-[450px] object-contain rounded">
+        </div>
       <% }) %>
     </div>
 
-    <!-- MAIN IMAGE -->
-    <div class="flex-1">
-      <img id="mainImage"
-      src="<%= product.images?.[0] || '/default.png' %>"
-      class="w-full h-[450px] object-contain rounded">
-    </div>
-
+    <div class="swiper-button-next"></div>
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-pagination"></div>
   </div>
 
   <!-- RIGHT CONTENT -->
@@ -60,7 +57,6 @@
 
     <!-- PRICE -->
     <div class="mt-4 border-b pb-4">
-
       <% if(product.discountType && product.discountType !== 'none'){ %>
 
         <p class="text-gray-400 line-through">₹ <%= product.price %></p>
@@ -81,50 +77,43 @@
         </p>
 
       <% } %>
-
     </div>
 
     <!-- SIZE -->
+    <% if(showSize && product.sizes && product.sizes.length > 0){ %>
     <div class="mt-5">
       <h3 class="font-semibold mb-2">Select Size</h3>
 
       <div class="flex gap-3 flex-wrap">
-
-        <% product.sizes?.forEach(item => { %>
-
+        <% product.sizes.forEach(item => { %>
           <button 
-          onclick="selectSize('<%= item.size %>', this)"
-          <%= item.stock === 0 ? 'disabled' : '' %>
-          class="size-btn w-14 h-14 border rounded-full text-sm 
-          hover:border-pink-500
-          <%= item.stock===0?'opacity-30 cursor-not-allowed':'' %>">
+            onclick="selectSize('<%= item.size %>', this)"
+            <%= item.stock === 0 ? 'disabled' : '' %>
+            class="size-btn w-14 h-14 border rounded-full text-sm 
+            <%= item.stock===0?'opacity-30 cursor-not-allowed':'' %>">
 
-          <%= item.size %>
-
+            <%= item.size %>
           </button>
-
         <% }) %>
-
       </div>
 
       <p id="sizeError" class="text-red-500 text-sm mt-2 hidden">
         Please select a size
       </p>
     </div>
+    <% } %>
 
     <!-- BUTTONS -->
     <div class="flex gap-4 mt-6">
-
       <button onclick="addToCart()"
-      class="flex-1 bg-pink-500 text-white py-3 rounded font-semibold hover:bg-pink-600">
+        class="flex-1 bg-pink-500 text-white py-3 rounded font-semibold hover:bg-pink-600">
         🛒 ADD TO BAG
       </button>
 
       <button onclick="buyNow()"
-      class="flex-1 border border-gray-400 py-3 rounded font-semibold hover:border-black">
+        class="flex-1 border border-gray-400 py-3 rounded font-semibold hover:border-black">
         ⚡ BUY NOW
       </button>
-
     </div>
 
     <!-- DELIVERY -->
@@ -143,16 +132,18 @@
         <% }) %>
       </ul>
     </div>
-      <h3 class="font-bold mt-6 mb-3">Specifications</h3>
 
-  <div class="divide-y">
-    <% Object.keys(product.specifications||{}).forEach(key => { %>
-      <div class="flex justify-between py-2 text-sm">
-        <span><%= key %></span>
-        <span><%= product.specifications[key] %></span>
-      </div>
-    <% }) %>
-  </div>
+    <!-- SPECIFICATIONS -->
+    <h3 class="font-bold mt-6 mb-3">Specifications</h3>
+    <div class="divide-y">
+      <% Object.keys(product.specifications||{}).forEach(key => { %>
+        <div class="flex justify-between py-2 text-sm">
+          <span><%= key %></span>
+          <span><%= product.specifications[key] %></span>
+        </div>
+      <% }) %>
+    </div>
+
   </div>
 </div>
 
@@ -160,34 +151,21 @@
 <div class="max-w-7xl mx-auto mt-6 bg-white p-6 rounded shadow">
   <h3 class="font-bold mb-3">Description</h3>
   <div class="text-gray-700 text-sm"><%- product.description %></div>
-
-  
 </div>
 
 <!-- SIMILAR PRODUCTS -->
 <div class="max-w-7xl mx-auto mt-10">
-
   <h2 class="text-xl font-bold mb-4">Similar Products</h2>
 
   <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-
     <% similarProducts.forEach(item => { %>
-
-    <a href="/product/<%= item._id %>" class="bg-white p-2 rounded shadow hover:shadow-lg transition">
-
-      <img src="<%= item.images?.[0] || '/default.png' %>"
-      class="w-full h-40 object-contain">
-
-      <p class="text-sm mt-2 line-clamp-2"><%= item.name %></p>
-
-      <p class="text-pink-500 font-bold">₹ <%= item.price %></p>
-
-    </a>
-
+      <a href="/product/<%= item._id %>" class="bg-white p-2 rounded shadow hover:shadow-lg transition">
+        <img src="<%= item.images?.[0] || '/default.png' %>" class="w-full h-40 object-contain">
+        <p class="text-sm mt-2 line-clamp-2"><%= item.name %></p>
+        <p class="text-pink-500 font-bold">₹ <%= item.price %></p>
+      </a>
     <% }) %>
-
   </div>
-
 </div>
 
 <!-- REVIEWS -->
@@ -196,59 +174,105 @@
   <h2 class="font-bold mb-3">Customer Reviews</h2>
 
   <% if(reviews.length > 0){ %>
-    <% reviews.forEach(r => { %>
-      <div class="bg-white p-3 mb-2 rounded shadow">
-        <p class="font-semibold"><%= r.name %></p>
-        <p class="text-green-600 text-sm">⭐ <%= r.rating %></p>
-        <p class="text-gray-600 text-sm"><%= r.comment %></p>
-      </div>
-    <% }) %>
+
+    <div id="reviewContainer">
+
+      <% reviews.forEach((r, i) => { %>
+
+        <div class="review-item bg-white p-3 mb-2 rounded shadow 
+        <%= i >= 4 ? 'hidden extra-review' : '' %>">
+
+          <p class="font-semibold"><%= r.name %></p>
+          <p class="text-green-600 text-sm">⭐ <%= r.rating %></p>
+          <p class="text-gray-600 text-sm"><%= r.comment %></p>
+
+        </div>
+
+      <% }) %>
+
+    </div>
+
+    <!-- SHOW MORE BUTTON -->
+    <% if(reviews.length > 4){ %>
+      <button id="showMoreBtn"
+        class="mt-4 text-pink-500 font-semibold">
+        Show More
+      </button>
+    <% } %>
+
   <% } else { %>
     <p>No reviews yet</p>
   <% } %>
 
 </div>
 
-<!-- MOBILE BAR -->
-<div class="fixed bottom-0 w-full bg-white p-3 flex gap-3 md:hidden">
+<!-- ADD REVIEW -->
+ <div class="max-w-5xl mx-auto mt-10 bg-white p-5 rounded shadow">
 
-  <button onclick="addToCart()" class="flex-1 border border-pink-500 text-pink-500 py-2 rounded">
-    Add
-  </button>
+  <h2 class="font-bold mb-4 text-lg">Write a Review</h2>
 
-  <button onclick="buyNow()" class="flex-1 bg-pink-500 text-white py-2 rounded">
-    Buy
-  </button>
+  <form action="/add-review" method="POST" class="space-y-4"> 
 
-</div>
+    <!-- hidden product id --> 
+     <input type="hidden" name="productId" value="<%= product._id %>">
 
-<%- include("partial/footer") %>
+    <!-- NAME -->
+<input type="text" name="name" placeholder="Your Name"
+      class="w-full border p-2 rounded" required> 
 
+    <!-- RATING -->
+    <select name="rating" class="w-full border p-2 rounded" required>
+      <option value="">Select Rating</option>
+      <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+      <option value="4">⭐⭐⭐⭐ (4)</option>
+      <option value="3">⭐⭐⭐ (3)</option>
+      <option value="2">⭐⭐ (2)</option>
+      <option value="1">⭐ (1)</option>
+    </select>
+
+    <!-- COMMENT -->
+   <textarea name="comment" placeholder="Write your review..."
+      class="w-full border p-2 rounded" rows="4" required></textarea>
+
+    <!-- BUTTON -->
+   <button type="submit"
+      class="bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-600">
+      Submit Review
+    </button>
+
+  </form>
+
+</div> 
+
+<%- include("partial/footer") %> 
+
+ <!-- SCRIPTS  -->
 <script>
 let selectedSize = null;
 
-function changeImage(src, el){
-  document.getElementById('mainImage').src = src;
-  document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-}
+const sizeErrorEl = document.getElementById("sizeError");
+const priceBoxEl = document.getElementById("priceBox");
+
+const sizes = <%- JSON.stringify(product.sizes || []) %>;
+const hasSize = <%- JSON.stringify(showSize) %>;
 
 function selectSize(size, el){
   selectedSize = size;
+
   document.querySelectorAll('.size-btn').forEach(btn=>btn.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById("sizeError").classList.add("hidden");
 
-  const sizes = <%- JSON.stringify(product.sizes||[]) %>;
-  const s = sizes.find(x=>x.size==size);
-  if(s?.price){
-    document.getElementById("priceBox").innerText = "₹ "+s.price;
+  if(sizeErrorEl) sizeErrorEl.classList.add("hidden");
+
+  const s = sizes.find(x => x.size == size);
+  if(s?.price && priceBoxEl){
+    priceBoxEl.innerText = "₹ " + s.price;
   }
 }
 
 function validateSize(){
-  if(!selectedSize){
-    document.getElementById("sizeError").classList.remove("hidden");
+  if(hasSize && !selectedSize){
+    if(sizeErrorEl) sizeErrorEl.classList.remove("hidden");
     return false;
   }
   return true;
@@ -256,14 +280,42 @@ function validateSize(){
 
 function addToCart(){
   if(validateSize()){
-    window.location=`/add-to-cart/<%= product._id %>?size=${selectedSize}`;
+    window.location = `/add-to-cart/<%= product._id %>?size=${selectedSize || ''}`;
   }
 }
 
 function buyNow(){
   if(validateSize()){
-    window.location=`/buy-now/<%= product._id %>?size=${selectedSize}`;
+    window.location = `/buy-now/<%= product._id %>?size=${selectedSize || ''}`;
   }
+}
+</script>
+
+<script>
+new Swiper(".mySwiper", {
+  loop: true,
+  spaceBetween: 10,
+  pagination: { el: ".swiper-pagination", clickable: true },
+  navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" }
+});
+</script>
+<script>
+let expanded = false;
+
+const btn = document.getElementById("showMoreBtn");
+
+if(btn){
+  btn.addEventListener("click", () => {
+
+    const extraReviews = document.querySelectorAll(".extra-review");
+
+    extraReviews.forEach(el => {
+      el.classList.toggle("hidden");
+    });
+
+    expanded = !expanded;
+    btn.innerText = expanded ? "Show Less" : "Show More";
+  });
 }
 </script>
 

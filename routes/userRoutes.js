@@ -476,31 +476,72 @@ if (req.body.specKey && req.body.specValue) {
     if (finalPrice < 0) finalPrice = 0;
 
     // ✅ DYNAMIC SIZE SYSTEM
-   let sizes = [];
 
-const key = subCategory?.toLowerCase();
+    function getProductType(mainCategory, subCategory) {
+  const main = mainCategory?.toLowerCase() || "";
+  const sub = subCategory?.toLowerCase() || "";
 
-if (key?.includes("shoe")) {
-  sizes = [
-    { size: "6", price: price, stock: 10 },
-    { size: "7", price: price, stock: 10 },
-    { size: "8", price: price, stock: 10 },
-    { size: "9", price: price, stock: 10 }
-  ];
-} 
-else if (key?.includes("jean")) {
-  sizes = [
-    { size: "28", price: price, stock: 10 },
-    { size: "30", price: price, stock: 10 },
-    { size: "32", price: price, stock: 10 }
-  ];
+  // 🔌 ELECTRONICS
+  if (main.includes("electronics")) return "electronics";
+
+  // 👟 SHOES
+  if (sub.includes("shoe") || sub.includes("sneaker")) return "shoes";
+
+  // 👖 BOTTOM WEAR
+  if (
+    sub.includes("jean") ||
+    sub.includes("pant") ||
+    sub.includes("trouser")
+  ) return "bottom";
+
+  // 👕 TOP WEAR
+  if (
+    sub.includes("Shirts") ||
+    sub.includes("tshirt") ||
+    sub.includes("kurta")
+  ) return "top";
+
+  // 🩳 SHORTS
+  if (sub.includes("Shirts")) return "Shirts";
+
+  return "other";
 }
-else if (key?.includes("shirt")) {
-  sizes = [
-    { size: "S", price: price, stock: 10 },
-    { size: "M", price: price, stock: 10 },
-    { size: "L", price: price, stock: 10 }
-  ];
+
+function generateSizes(type, price) {
+
+  if (type === "electronics") return [];
+
+  if (type === "shoes") {
+    return ["6","7","8","9","10"].map(s => ({
+      size: s,
+      price,
+      stock: 10
+    }));
+  }
+
+  if (type === "bottom") {
+    return ["28","30","32","34"].map(s => ({
+      size: s,
+      price,
+      stock: 10
+    }));
+  }
+
+  if (type === "top" || type === "shorts") {
+    return ["S","M","L","XL"].map(s => ({
+      size: s,
+      price,
+      stock: 10
+    }));
+  }
+
+  return [];
+}
+  const type = getProductType(mainCategory, subCategory);
+let sizes = [];
+
+if (["fashion", "Fashion","clothing","fusion"].includes(mainCategory?.toLowerCase())) {
+  sizes = generateSizes(type, price);
 }
 
     // ✅ CREATE PRODUCT
@@ -534,6 +575,32 @@ else if (key?.includes("shirt")) {
 });
 
 
+// router.get("/category/:main/:sub", async (req, res) => {
+//   const { main, sub } = req.params;
+
+//   let filter = {
+//     mainCategory: { $regex: `^${main}$`, $options: "i" }
+//   };
+
+//   // ✅ Agar "All" hai to sirf mainCategory filter karo
+//   if (sub !== "All") {
+//     filter.subCategory = { $regex: sub, $options: "i" };
+//   }
+
+//   const products = await Product.find(filter);
+
+//   // ✅ Dynamic subcategories fetch karo
+//   const subCategories = await Product.distinct("subCategory", {
+//     mainCategory: { $regex: `^${main}$`, $options: "i" }
+//   });
+
+//   res.render("categoryPage", {
+//     products,
+//     main,
+//     sub,
+//     subCategories
+//   });
+// });
 router.get("/category/:main/:sub", async (req, res) => {
   const { main, sub } = req.params;
 
@@ -541,26 +608,46 @@ router.get("/category/:main/:sub", async (req, res) => {
     mainCategory: { $regex: `^${main}$`, $options: "i" }
   };
 
-  // ✅ Agar "All" hai to sirf mainCategory filter karo
   if (sub !== "All") {
     filter.subCategory = { $regex: sub, $options: "i" };
   }
 
   const products = await Product.find(filter);
 
-  // ✅ Dynamic subcategories fetch karo
+  // ⭐ ADD THIS BLOCK
+  const productsWithRating = await Promise.all(
+    products.map(async (p) => {
+      const reviews = await Review.find({ productId: p._id });
+
+      let avgRating = 0;
+
+      if (reviews.length > 0) {
+        avgRating =
+          reviews.reduce((sum, r) => sum + Number(r.rating || 0), 0) /
+          reviews.length;
+      }
+
+      return {
+        ...p.toObject(),
+        avgRating,
+        reviewCount: reviews.length
+      };
+    })
+  );
+
   const subCategories = await Product.distinct("subCategory", {
     mainCategory: { $regex: `^${main}$`, $options: "i" }
   });
 
   res.render("categoryPage", {
-    products,
+    products: productsWithRating,
     main,
     sub,
     subCategories
   });
 });
 // ================= PRODUCT DETAILS =================
+
 router.get("/product/:id", async (req, res) => {
   try {
     const id = req.params.id;
@@ -574,34 +661,41 @@ router.get("/product/:id", async (req, res) => {
     const product = await Product.findById(id);
     if (!product) return res.send("Product not found");
 
-    // 🔥 STEP 1: SAME SUBCATEGORY + PRICE RANGE
-    let similarProducts = await Product.find({
-      _id: { $ne: product._id },
-      subCategory: product.subCategory,
-      price: {
-        $gte: product.price * 0.5,
-        $lte: product.price * 1.5
-      }
-    }).limit(6);
+    // 🔥 STEP 1: SAME SUBCATEGORY (CASE-INSENSITIVE) + PRICE
+let similarProducts = await Product.find({
+  _id: { $ne: product._id },
+  subCategory: { $regex: new RegExp(product.subCategory, "i") },
+  price: {
+    $gte: product.price * 0.5,
+    $lte: product.price * 1.5
+  }
+}).limit(6);
 
-    // 🔥 STEP 2: FALLBACK → SAME MAIN CATEGORY
-    if (similarProducts.length < 6) {
-      const moreProducts = await Product.find({
-        _id: { $ne: product._id },
-        mainCategory: product.mainCategory
-      }).limit(6 - similarProducts.length);
+// 🔥 STEP 2: SAME MAIN CATEGORY (NO DUPLICATE)
+if (similarProducts.length < 6) {
 
-      similarProducts = [...similarProducts, ...moreProducts];
-    }
+  const existingIds = similarProducts.map(p => p._id);
 
-    // 🔥 STEP 3: FINAL FALLBACK (JUST IN CASE)
-    if (similarProducts.length < 6) {
-      const randomProducts = await Product.find({
-        _id: { $ne: product._id }
-      }).limit(6 - similarProducts.length);
+  const moreProducts = await Product.find({
+    _id: { $nin: [...existingIds, product._id] },
+    mainCategory: { $regex: new RegExp(product.mainCategory, "i") }
+  }).limit(6 - similarProducts.length);
 
-      similarProducts = [...similarProducts, ...randomProducts];
-    }
+  similarProducts = [...similarProducts, ...moreProducts];
+}
+
+// 🔥 STEP 3: RANDOM PRODUCTS (NO DUPLICATE)
+if (similarProducts.length < 6) {
+
+  const existingIds = similarProducts.map(p => p._id);
+
+  const randomProducts = await Product.find({
+    _id: { $nin: [...existingIds, product._id] }
+  }).limit(6 - similarProducts.length);
+
+  similarProducts = [...similarProducts, ...randomProducts];
+}
+
 
     // ✅ REVIEWS
     const reviews = await Review.find({ productId: product._id });
@@ -612,13 +706,22 @@ router.get("/product/:id", async (req, res) => {
       avgRating =
         reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
     }
+const category = product.mainCategory?.toLowerCase();
+const subCategory = product.subCategory?.toLowerCase();
 
+const sizeCategories = ["fashion", "clothing", "fusion"];
+const sizeSubCategories = ["shirt","tshirt","jeans","pant","kurta","shorts"];
+
+const showSize =
+  sizeCategories.includes(category) ||
+  sizeSubCategories.some(sub => subCategory?.includes(sub));
     // ✅ RENDER
     res.render("productDetails", {
       product,
       similarProducts,
       reviews,
-      avgRating
+      avgRating,
+      showSize  
     });
 
   } catch (err) {
@@ -1590,7 +1693,7 @@ router.get("/admin", isAdmin, async (req, res) => {
     revenue += o.totalAmount || 0;
   });
 
-  res.render("admin", {   // ✅ CHANGE HERE
+  res.render("Admin", {   // ✅ CHANGE HERE
     products,
     orders,
     totalProducts,

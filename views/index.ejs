@@ -9,34 +9,38 @@
 <body class="bg-gray-100">
 
 <%- include("partial/nav") %>
+<div class="relative overflow-hidden rounded-xl">
 
-<!-- 🔥 HERO -->
-<div class="bg-white shadow mt-2">
-  <div class="max-w-7xl mx-auto p-4">
+  <!-- SLIDER -->
+  <div id="heroSlider" class="flex transition-transform duration-700 ease-in-out">
 
-    <div class="grid md:grid-cols-3 gap-4">
+    <!-- SLIDE 1 -->
+    <div class="min-w-full h-56 md:h-80">
+      <img src="/uploads/companytr.png"
+           class="w-full h-full object-contain bg-white">
+    </div>
 
-      <div class="md:col-span-2 bg-gradient-to-r from-indigo-600 to-blue-500 text-white p-6 rounded-xl flex items-center justify-between">
+    <!-- SLIDE 2 -->
+    <div class="min-w-full h-56 md:h-80">
+      <img src="/uploads/banner1.png"
+           class="w-full h-full object-cover">
+    </div>
 
-        <div>
-          <h1 class="text-xl md:text-3xl font-bold">
-            Big Billion Sale comming soon 🎉
-          </h1>
-          <p class="mt-2">Up to 70% OFF</p>
-        </div>
-
-        <img src="https://cdn-icons-png.flaticon.com/512/3144/3144456.png"
-             class="w-24 md:w-36 object-contain">
-      </div>
-
-      <div class="bg-gradient-to-r from-pink-500 to-red-500 text-white p-6 rounded-xl">
-        <h2 class="text-lg font-bold">Fashion Deals 👕</h2>
-        <p>Min 50% OFF</p>
-      </div>
-
+    <!-- SLIDE 3 -->
+    <div class="min-w-full h-56 md:h-80">
+      <img src="/images/banner3.jpg"
+           class="w-full h-full object-cover">
     </div>
 
   </div>
+
+  <!-- DOTS -->
+  <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+    <span class="dot w-2 h-2 bg-white/80 rounded-full"></span>
+    <span class="dot w-2 h-2 bg-white/40 rounded-full"></span>
+    <span class="dot w-2 h-2 bg-white/40 rounded-full"></span>
+  </div>
+
 </div>
 
 <!-- 🔥 CATEGORY BAR -->
@@ -46,7 +50,8 @@
        class="flex gap-8 overflow-x-auto py-3 px-4 scroll-smooth">
 
     <% const categories = [
-      {name: "Fashion", main: "fashion", icon: "👕"},
+      {name: "Men Wear", main: "fashion", icon: "👕"},
+      {name: "Women Wear", main: "women", icon: "👚"},
       {name: "Accessories", main: "accessories", icon: "👜"},
       {name: "Beauty", main: "beauty", icon: "💄"},
       {name: "Electronics", main: "electronics", icon: "📱"}
@@ -124,7 +129,7 @@
       <% } %>
 
     </div>
-
+      
     <p class="text-xs text-green-600 mt-1">Free Delivery</p>
 
   </div>
@@ -196,5 +201,25 @@ document.querySelectorAll(".cat-item").forEach(item => {
 });
 </script>
 
+<script>
+const slider = document.getElementById("heroSlider");
+const dots = document.querySelectorAll(".dot");
+
+let index = 0;
+
+function updateSlider() {
+  slider.style.transform = `translateX(-${index * 100}%)`;
+
+  dots.forEach((d, i) => {
+    d.classList.toggle("bg-white/80", i === index);
+    d.classList.toggle("bg-white/40", i !== index);
+  });
+}
+
+setInterval(() => {
+  index = (index + 1) % 3;
+  updateSlider();
+}, 3000);
+</script>
 </body>
 </html>

@@ -5,7 +5,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-white">
+<body class="bg-gray-50">
 
 <%- include("partial/nav") %>
 
@@ -20,37 +20,38 @@
       name="q"
       value="<%= query %>"
       placeholder="Search for products, brands..."
-      class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400"
+      class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
     >
 
-    <button class="bg-black text-white px-6 py-3 rounded-md">
+    <button class="bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800">
       Search
     </button>
 
   </form>
 
   <!-- HEADER -->
-  <h1 class="text-xl font-semibold mb-6">
+  <h1 class="text-lg md:text-xl font-semibold mb-6">
     Results for "<%= query %>" 
     <span class="text-gray-500">(<%= products.length %>)</span>
   </h1>
 
   <div class="flex flex-col md:flex-row gap-6">
 
-    <!-- 🧱 LEFT FILTER PANEL -->
-    <div class="w-full md:w-1/4 border-r pr-4">
+    <!-- 🧱 FILTER PANEL -->
+    <div class="w-full md:w-1/4 bg-white p-4 rounded shadow-sm">
 
       <h2 class="font-semibold mb-4">FILTERS</h2>
 
       <!-- CATEGORY -->
-      <!-- <div class="mb-6">
+      <div class="mb-6">
         <h3 class="font-medium mb-2">Category</h3>
         <ul class="space-y-1 text-sm text-gray-600">
-          <li><input type="checkbox"> Shirts</li>
-          <li><input type="checkbox"> T-Shirts</li>
-          <li><input type="checkbox"> Jeans</li>
+          <li><input type="checkbox"> Shirt</li>
+          <li><input type="checkbox"> Pant</li>
+          <li><input type="checkbox"> Shoes</li>
+          <li><input type="checkbox"> Shorts</li>
         </ul>
-      </div> -->
+      </div>
 
       <!-- PRICE -->
       <div class="mb-6">
@@ -73,21 +74,27 @@
 
     </div>
 
-    <!-- 🛍 RIGHT PRODUCTS -->
+    <!-- 🛍 PRODUCTS -->
     <div class="flex-1">
 
       <!-- SORT -->
-      <div class="flex justify-end mb-4">
+      <div class="flex justify-between items-center mb-4">
+
+        <p class="text-sm text-gray-500">
+          Showing <%= products.length %> products
+        </p>
+
         <form method="GET" action="/search">
           <input type="hidden" name="q" value="<%= query %>">
 
           <select name="sort" onchange="this.form.submit()"
-            class="border px-4 py-2 text-sm">
+            class="border px-4 py-2 text-sm rounded">
             <option value="">Sort By</option>
-            <option value="low">Price Low to High</option>
-            <option value="high">Price High to Low</option>
+            <option value="low">Price Low → High</option>
+            <option value="high">Price High → Low</option>
           </select>
         </form>
+
       </div>
 
       <% if(products.length === 0){ %>
@@ -105,39 +112,57 @@
 
         <% products.forEach(product => { %>
 
-        <div class="group cursor-pointer">
+        <div class="group bg-white rounded-xl shadow-sm hover:shadow-xl transition overflow-hidden">
 
-          <!-- IMAGE -->
-          <a href="/product/<%= product._id %>" class="group block">
+          <a href="/product/<%= product._id %>">
 
-  <!-- IMAGE -->
-  <div class="overflow-hidden bg-gray-100">
-    <img 
-      src="<%= product.images?.[0] || '/default.png' %>" 
-      class="w-full h-56 object-cover group-hover:scale-105 transition duration-300"
-    >
-  </div>
+            <!-- IMAGE -->
+            <div class="relative bg-gray-100">
 
-  <!-- INFO -->
-  <div class="mt-2">
+              <img 
+                src="<%= product.images?.[0] || '/default.png' %>" 
+                class="w-full h-56 object-cover group-hover:scale-105 transition duration-300"
+              >
 
-    <h2 class="text-sm font-medium text-gray-800 line-clamp-1">
-      <%= product.name %>
-    </h2>
+              <!-- DISCOUNT BADGE -->
+              <% if(product.discountType && product.discountType !== 'none'){ %>
+                <span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                  SALE
+                </span>
+              <% } %>
 
-    <p class="text-xs text-gray-500">
-      <%= product.category || "Brand" %>
-    </p>
+            </div>
 
-    <div class="mt-1 text-sm">
-      <span class="font-semibold">
-        ₹<%= product.finalPrice || product.price %>
-      </span>
-    </div>
+            <!-- INFO -->
+            <div class="p-3">
 
-  </div>
+              <h2 class="text-sm font-medium text-gray-800 line-clamp-1">
+                <%= product.name %>
+              </h2>
 
-</a>
+              <p class="text-xs text-gray-500">
+                <%= product.mainCategory || product.category %>
+              </p>
+
+              <!-- PRICE -->
+              <div class="mt-1 text-sm flex items-center gap-2">
+
+                <span class="font-semibold text-black">
+                  ₹<%= product.finalPrice || product.price %>
+                </span>
+
+                <% if(product.finalPrice && product.price){ %>
+                  <span class="text-gray-400 line-through text-xs">
+                    ₹<%= product.price %>
+                  </span>
+                <% } %>
+
+              </div>
+
+            </div>
+
+          </a>
+
         </div>
 
         <% }) %>

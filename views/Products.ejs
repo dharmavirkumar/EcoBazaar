@@ -38,7 +38,9 @@
         class="w-full border p-3 rounded-lg mt-1 focus:ring-2 focus:ring-purple-400 outline-none">
 
         <option value="electronics">📱 Electronics</option>
-        <option value="fashion">👕 Fashion</option>
+        <option value="fashion">👕 Men</option>
+        <option value="women">👚 Women</option>
+
         <option value="Jewellery">💍 Jewellery</option>
         <option value="Beauty">💄 Beauty</option>
 
@@ -58,6 +60,7 @@
         <option value="ethnic-wear">Ethnic Wear</option>
         <option value="kurtas">Kurtas</option>
         <option value="kurta-sets">Kurta Sets</option>
+       
         
       
         <option value="sports-shoes">Sports Shoes</option>
@@ -85,7 +88,7 @@
         <option value="hair-spray">Hair Spray</option>
         <option value="trimmers">Trimmers</option>
         <option value="face-body">Face & Body</option>
-        <option value="face-wash">Face Wash</option>
+        
         <option value="body-lotion">Body Lotion</option>
         <option value="face-cream">Face Cream</option>
         <option value="grooming-kits">Grooming Kits</option>
@@ -106,38 +109,78 @@
             <option value="mixer-grinder">Mixer Grinder</option>
             <option value="dinnerware-sets">Dinnerware Sets</option>
             <option value="formal pents">Formal Pents</option>
+            <option value="Ceiling fans">Ceiling Fans</option>
 
+            <option value="kurtis">Kurtis</option>
+            <option value="kurti-sets">Kurti Sets</option>
+            <option value="sarees">Sarees</option>
+            
 
-
-      
-
+            
 
       </select>
     </div>
 
     <!-- // Highlights -->
-    <div>
+<div>
   <label class="font-medium">Highlights</label>
 
-  <input name="highlights[]" placeholder="Highlight 1" class="input">
-  <input name="highlights[]" placeholder="Highlight 2" class="input mt-2">
-  <input name="highlights[]" placeholder="Highlight 3" class="input mt-2">
+  <div id="highlightsWrapper">
+    <input name="highlights[]" placeholder="Highlight 1" class="input">
+  </div>
+
+  <button type="button" onclick="addHighlight()" 
+  class="mt-2 text-blue-500 text-sm">+ Add More</button>
 </div>
 
 <!-- Specifications -->
-<div>
+<div class="mt-4">
   <label class="font-medium">Specifications</label>
 
-  <div class="flex gap-2 mt-2">
-    <input name="specKey[]" placeholder="Key (e.g. Brand)" class="input">
-    <input name="specValue[]" placeholder="Value (e.g. Nike)" class="input">
+  <div id="specWrapper">
+    <div class="flex gap-2 mt-2">
+      <input name="specKey[]" placeholder="Key (e.g. Brand)" class="input">
+      <input name="specValue[]" placeholder="Value (e.g. Nike)" class="input">
+    </div>
   </div>
 
-  <div class="flex gap-2 mt-2">
-    <input name="specKey[]" placeholder="Material" class="input">
-    <input name="specValue[]" placeholder="Cotton" class="input">
-  </div>
+  <button type="button" onclick="addSpec()" 
+  class="mt-2 text-blue-500 text-sm">+ Add More</button>
 </div>
+
+<!-- SCRIPT -->
+<script>
+
+let highlightCount = 1;
+
+function addHighlight(){
+  highlightCount++;
+
+  const div = document.createElement("div");
+  div.classList.add("flex","gap-2","mt-2");
+
+  div.innerHTML = `
+    <input name="highlights[]" placeholder="Highlight ${highlightCount}" class="input">
+    <button type="button" onclick="this.parentElement.remove()" class="text-red-500">❌</button>
+  `;
+
+  document.getElementById("highlightsWrapper").appendChild(div);
+}
+
+function addSpec(){
+  const div = document.createElement("div");
+  div.classList.add("flex","gap-2","mt-2");
+
+  div.innerHTML = `
+    <input name="specKey[]" placeholder="Key" class="input">
+    <input name="specValue[]" placeholder="Value" class="input">
+    <button type="button" onclick="this.parentElement.remove()" class="text-red-500">❌</button>
+  `;
+
+  document.getElementById("specWrapper").appendChild(div);
+}
+
+</script>
 
 <label>
   <input type="checkbox" name="cod" checked> Cash on Delivery
