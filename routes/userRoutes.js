@@ -17,7 +17,46 @@ const fs = require("fs");
 const path = require("path");
 const QRCode = require("qrcode");
 const crypto = require("crypto"); 
+const axios = require("axios");
 
+async function checkDelhivery(pincode) {
+  try {
+    const res = await axios.get(
+      "https://track.delhivery.com/c/api/pin-codes/json/",
+      {
+        params: { filter_codes: pincode },
+        headers: {
+          Authorization: "Token 40d6d3f396ccdf29bc0dd570e876ee22300b677f" // 👈 yaha apni API key daalo
+        }
+      }
+    );
+
+    return res.data;
+  
+  } catch (err) {
+    console.log(err.message);
+    return null;
+  }
+}
+
+router.get("/check-delivery", async (req, res) => {
+  const { pincode } = req.query;
+
+  const data = await checkDelhivery(pincode);
+
+  if (!data || !data.delivery_codes || data.delivery_codes.length === 0) {
+  return res.json({ available: false });
+}
+
+  // 👇 delivery date manually calculate
+  const deliveryDate = new Date();
+  deliveryDate.setDate(deliveryDate.getDate() + 6);  // 6 din ka delivery time assume kar rahe hain
+
+  res.json({
+    available: true,
+    deliveryDate: deliveryDate.toDateString()
+  });
+});
 
 
 function isLoggedIn(req, res, next) {
@@ -380,13 +419,44 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage: storage });
 
 // ================= HOME =================
+// router.get("/", async (req, res) => {
+//   const products = await Product.find().limit(20);
+//   res.render("index", {
+//   products,
+//   user: req.session.user,
+//   cartCount: req.session.cart ? req.session.cart.length : 0
+// });
+// });
 router.get("/", async (req, res) => {
-  const products = await Product.find().limit(20);
-  res.render("index", {
-  products,
-  user: req.session.user,
-  cartCount: req.session.cart ? req.session.cart.length : 0
-});
+  try {
+
+    const [products, menProducts, womenProducts] = await Promise.all([
+
+      Product.find().sort({ createdAt: -1 }).limit(12),
+
+      // 👕 MEN FIXED
+      Product.find({
+        mainCategory: "fashion",
+      }).limit(10),
+
+      // 👗 WOMEN FIXED
+      Product.find({
+        mainCategory: "women"
+      }).limit(10)
+
+    ]);
+
+    res.render("index", {
+      products,
+      menProducts,
+      womenProducts,
+      user: req.session.user
+    });
+
+  } catch (err) {
+    console.log("HOME ERROR:", err);
+    res.send("Server Error");
+  }
 });
 
 // ================= CATEGORY =================
@@ -501,6 +571,13 @@ if (req.body.specKey && req.body.specValue) {
     sub.includes("kurta")
   ) return "top";
 
+  // 👗 WOMEN'S WEAR
+  if (
+    sub.includes("kurti") ||
+    sub.includes("kurta-set") ||
+    sub.includes("saree")
+  ) return "women";
+
   // 🩳 SHORTS
   if (sub.includes("Shirts")) return "Shirts";
 
@@ -535,13 +612,14 @@ function generateSizes(type, price) {
     }));
   }
 
+
   return [];
 }
   const type = getProductType(mainCategory, subCategory);
 let sizes = [];
 
-if (["fashion", "Fashion","clothing","fusion"].includes(mainCategory?.toLowerCase())) {
-  sizes = generateSizes(type, price);
+if (req.body.sizes) {
+  sizes = req.body.sizes.split(",").map(s => s.trim());
 }
 
     // ✅ CREATE PRODUCT
@@ -709,8 +787,8 @@ if (similarProducts.length < 6) {
 const category = product.mainCategory?.toLowerCase();
 const subCategory = product.subCategory?.toLowerCase();
 
-const sizeCategories = ["fashion", "clothing", "fusion"];
-const sizeSubCategories = ["shirt","tshirt","jeans","pant","kurta","shorts"];
+const sizeCategories = ["fashion", "clothing", "fusion","women"];
+const sizeSubCategories = ["shirt","tshirt","jeans","pant","kurta","shorts","kurti","kurti-set","saree","footwear"];
 
 const showSize =
   sizeCategories.includes(category) ||
@@ -842,6 +920,7 @@ router.get("/api/suggestions", async (req, res) => {
 router.get("/add-to-cart/:id", async (req, res) => {
 
   const product = await Product.findById(req.params.id);
+  const size = req.query.size;   // 🔥 ADD THIS
 
   if (!req.session.cart) {
     req.session.cart = [];
@@ -849,7 +928,7 @@ router.get("/add-to-cart/:id", async (req, res) => {
 
   let cart = req.session.cart;
 
-  let existing = cart.find(item => item._id == product._id);
+  let existing = cart.find(item => item._id == product._id && item.size == size);
 
   if (existing) {
     existing.qty += 1;
@@ -859,9 +938,8 @@ router.get("/add-to-cart/:id", async (req, res) => {
       name: product.name,
       price: product.price,
       qty: 1,
-
-      // ✅ FINAL IMAGE FIX
-      image: product.images?.[0] || product.image || "default.png"
+      size: size,   // 🔥 ADD SIZE HERE
+      image: product.images?.[0] || "default.png"
     });
   }
 
@@ -1193,7 +1271,7 @@ router.post("/create-order", async (req, res) => {
 
 
 // ✅ VERIFY PAYMENT
-const axios = require("axios");
+
 
 
 // ✅ VERIFY PAYMENT
@@ -1524,13 +1602,18 @@ router.post("/admin/edit-product/:id", upload.array("images", 5), async (req, re
       mainCategory,
       subCategory,
       discountType,
-      discountValue
+      discountValue,
+      sizes
     } = req.body;
 
     // ✅ CONVERT TO NUMBER
     price = Number(price);
     discountValue = Number(discountValue) || 0;
+let sizeArray = [];
 
+if (sizes) {
+  sizeArray = sizes.split(",").map(s => s.trim());
+}
     // =========================
     // ✅ IMAGES HANDLE
     // =========================
@@ -1612,7 +1695,8 @@ router.post("/admin/edit-product/:id", upload.array("images", 5), async (req, re
       finalPrice,
       images,
       highlights,
-      specifications
+      specifications,
+      sizes: sizeArray
     });
 
     res.redirect("/admin");

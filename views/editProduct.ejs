@@ -35,6 +35,40 @@
           <option <%= product.category=="beauty"?"selected":"" %>>beauty</option>
           <option <%= product.category=="jewellery"?"selected":"" %>>jewellery</option>
         </select>
+<select name="discountType" class="border p-2">
+  <option value="none">No Discount</option>
+  <option value="percentage">%</option>
+  <option value="flat">₹ Flat</option>
+</select>
+
+<input name="discountValue" type="number" placeholder="Discount Value" class="border p-2 ">
+
+
+<!-- ✅ SIZE SECTION -->
+<div class="mt-4">
+  <label class="font-medium">Sizes</label>
+
+  <div id="sizeContainer">
+    <% if(product.sizes && product.sizes.length > 0){ %>
+      <% product.sizes.forEach(s => { %>
+        <div class="flex gap-2 mt-2">
+          <input name="sizes[]" value="<%= s %>" 
+            class="w-full border p-2 rounded" placeholder="Size (S, M, L, 42...)">
+
+          <button type="button" onclick="this.parentElement.remove()" 
+            class="text-red-500">❌</button>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <input name="sizes[]" placeholder="Size" class="w-full border p-2 mt-2 rounded">
+    <% } %>
+  </div>
+
+  <button type="button" onclick="addSize()" class="text-blue-600 mt-2">
+    + Add Size
+  </button>
+</div>
+
 
         <!-- HIGHLIGHTS -->
         <div>
@@ -211,6 +245,18 @@ function previewImages() {
   });
 }
 </script>
+<script>
+function addSize(){
+  const div = document.createElement("div");
+  div.classList.add("flex","gap-2","mt-2");
 
+  div.innerHTML = `
+    <input name="sizes[]" placeholder="Size" class="w-full border p-2 rounded">
+    <button type="button" onclick="this.parentElement.remove()" class="text-red-500">❌</button>
+  `;
+
+  document.getElementById("sizeContainer").appendChild(div);
+}
+</script>
 </body>
 </html>

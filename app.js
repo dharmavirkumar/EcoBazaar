@@ -6,6 +6,7 @@ const userRoutes = require('./routes/userRoutes');
 const mongoose = require('./models/DB');
 const Product = require('./models/Product');
 const session = require("express-session");
+const axios = require("axios");
 
 
 const app = express();

@@ -1,225 +1,205 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Home</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-
 <body class="bg-gray-100">
 
 <%- include("partial/nav") %>
-<div class="relative overflow-hidden rounded-xl">
 
-  <!-- SLIDER -->
-  <div id="heroSlider" class="flex transition-transform duration-700 ease-in-out">
+<!-- 🔥 HELPER -->
+<%
+function getFinalPrice(p){
+  if(p.discountType === "percentage"){
+    return Math.round(p.price - (p.price * p.discountValue / 100));
+  }
+  if(p.discountType === "fixed"){
+    return p.price - p.discountValue;
+  }
+  return p.price;
+}
+%>
 
-    <!-- SLIDE 1 -->
-    <div class="min-w-full h-56 md:h-80">
-      <img src="/uploads/companytr.png"
-           class="w-full h-full object-contain bg-white">
+<!-- 🔥 HERO SLIDER -->
+<div class="max-w-7xl mx-auto px-4 mt-4">
+  <div class="relative overflow-hidden rounded-xl">
+    <div id="slider" class="flex transition-transform duration-700">
+
+      <% ["banner1.png","companytr.png","banner1.png"].forEach(img => { %>
+        <div class="min-w-full">
+          <img src="/uploads/<%= img %>" class="w-full h-48 sm:h-64 md:h-80 object-cover rounded-xl">
+        </div>
+      <% }) %>
+
     </div>
-
-    <!-- SLIDE 2 -->
-    <div class="min-w-full h-56 md:h-80">
-      <img src="/uploads/banner1.png"
-           class="w-full h-full object-cover">
-    </div>
-
-    <!-- SLIDE 3 -->
-    <div class="min-w-full h-56 md:h-80">
-      <img src="/images/banner3.jpg"
-           class="w-full h-full object-cover">
-    </div>
-
   </div>
-
-  <!-- DOTS -->
-  <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-    <span class="dot w-2 h-2 bg-white/80 rounded-full"></span>
-    <span class="dot w-2 h-2 bg-white/40 rounded-full"></span>
-    <span class="dot w-2 h-2 bg-white/40 rounded-full"></span>
-  </div>
-
 </div>
 
-<!-- 🔥 CATEGORY BAR -->
-<div class="bg-white sticky top-16 z-40 shadow-sm">
-
-  <div id="catBar"
-       class="flex gap-8 overflow-x-auto py-3 px-4 scroll-smooth">
+<!-- 🔥 CATEGORY -->
+<div class="bg-white mt-4 shadow-sm">
+  <div class="max-w-7xl mx-auto flex gap-6 overflow-x-auto py-4 px-4 text-sm">
 
     <% const categories = [
-      {name: "Men Wear", main: "fashion", icon: "👕"},
-      {name: "Women Wear", main: "women", icon: "👚"},
-      {name: "Accessories", main: "accessories", icon: "👜"},
-      {name: "Beauty", main: "beauty", icon: "💄"},
-      {name: "Electronics", main: "electronics", icon: "📱"}
+      {name:"Men",icon:"👕",link:"/category/fashion/All"},
+      {name:"Women",icon:"👗",link:"/category/women/All"},
+      {name:"Beauty",icon:"💄",link:"/category/beauty/All"},
+      {name:"Electronics",icon:"📱",link:"/category/electronics/All"},
+      {name:"Accessories",icon:"👜",link:"/category/accessories/All"}
     ]; %>
 
     <% categories.forEach(cat => { %>
-
-      <a href="/category/<%= cat.main %>/All"
-         class="cat-item flex flex-col items-center min-w-[80px] text-sm text-gray-600 hover:text-blue-600">
-
+      <a href="<%= cat.link %>" class="flex flex-col items-center min-w-[70px] hover:text-blue-600">
         <div class="text-2xl"><%= cat.icon %></div>
-        <span><%= cat.name %></span>
-
-        <span class="underline-bar h-[2px] w-0 bg-blue-600 mt-1 transition-all"></span>
+        <span class="text-xs sm:text-sm"><%= cat.name %></span>
       </a>
-
     <% }) %>
 
   </div>
-
 </div>
 
-<!-- 🔥 PRODUCTS -->
-<div class="max-w-7xl mx-auto px-4 mt-6">
+<!-- 🔥 PRODUCT CARD COMPONENT -->
+<%
+function productCard(p){ %>
 
-<h2 class="text-xl font-bold mb-5">🔥 Trending Products</h2>
+<div class="bg-white p-3 rounded-xl hover:shadow-md transition">
 
-<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+  <a href="/product/<%= p._id %>">
+    <img src="<%= p.images?.[0] || '/uploads/default.png' %>"
+         class="w-full h-32 sm:h-36 object-contain">
+  </a>
 
-<% products.forEach(product => { %>
+  <p class="text-xs sm:text-sm mt-2 line-clamp-2 h-10">
+    <%= p.name %>
+  </p>
 
-<div class="bg-white rounded-xl overflow-hidden group hover:shadow-2xl transition">
+  <div class="flex items-center gap-2 mt-1 flex-wrap">
 
-  <!-- IMAGE -->
-  <div class="bg-gray-50 p-3 relative">
+    <% if(p.discountType && p.discountType !== "none"){ %>
 
-    <% if(product.discountType && product.discountType !== "none"){ %>
-      <span class="absolute top-2 left-2 bg-pink-500 text-white text-xs px-2 py-1 rounded">
-        SALE
+      <span class="font-bold text-sm">
+        ₹ <%= getFinalPrice(p) %>
       </span>
+
+      <span class="line-through text-gray-400 text-xs">
+        ₹ <%= p.price %>
+      </span>
+
+      <span class="text-green-600 text-xs font-semibold">
+        <% if(p.discountType === "percentage"){ %>
+          <%= p.discountValue %>% OFF
+        <% } else { %>
+          ₹ <%= p.discountValue %> OFF
+        <% } %>
+      </span>
+
+    <% } else { %>
+      <span class="font-bold text-sm">₹ <%= p.price %></span>
     <% } %>
 
-    <a href="/product/<%= product._id %>">
-      <img 
-        src="<%= product.images?.[0] || '/default.png' %>" 
-        class="w-full h-40 object-contain group-hover:scale-110 transition">
-    </a>
-
   </div>
 
-  <!-- DETAILS -->
-  <div class="p-3">
+</div>
 
-    <p class="text-xs text-gray-400 uppercase">
-      <%= product.mainCategory %>
-    </p>
+<% } %>
 
-    <h3 class="text-sm font-semibold line-clamp-2">
-      <%= product.name %>
-    </h3>
+<!-- 🔥 TRENDING -->
+<div class="max-w-7xl mx-auto px-4 mt-6 sm:mt-8">
 
-    <div class="flex gap-2 items-center mt-1">
+  <div class="flex justify-between items-center mb-3">
+    <h2 class="text-base sm:text-lg font-bold">🔥 Trending</h2>
 
-      <% if(product.discountType && product.discountType !== "none"){ %>
+    <% if(products && products.length){ %>
+      <span class="text-xs text-gray-500"><%= products.length %> items</span>
+    <% } %>
+  </div>
 
-        <span class="font-bold">₹ <%= product.finalPrice %></span>
-        <span class="line-through text-gray-400 text-xs">
-          ₹ <%= product.price %>
-        </span>
+  <% if(!products || products.length === 0){ %>
 
-      <% } else { %>
+    <div class="bg-white p-6 text-center text-gray-500 rounded-xl">
+      No products available
+    </div>
 
-        <span class="font-bold">₹ <%= product.price %></span>
+  <% } else { %>
 
-      <% } %>
+    <div class="flex gap-3 overflow-x-auto pb-2">
+
+      <% products.forEach(p => { %>
+        <div class="min-w-[160px] sm:min-w-[180px] flex-shrink-0">
+          <%- productCard(p) %>
+        </div>
+      <% }) %>
 
     </div>
-      
-    <p class="text-xs text-green-600 mt-1">Free Delivery</p>
 
+  <% } %>
+
+</div>
+
+<!-- 👕 MEN -->
+<div class="max-w-7xl mx-auto px-4 mt-10">
+
+  <div class="flex justify-between mb-3">
+    <h2 class="text-base sm:text-lg font-bold">👕 Men's Wear</h2>
+    <a href="/category/fashion/All" class="text-blue-600 text-xs sm:text-sm">View All</a>
   </div>
 
-  <!-- BUTTON -->
-  <div class="px-3 pb-3 opacity-0 group-hover:opacity-100 transition">
+  <% if(!menProducts || menProducts.length === 0){ %>
+    <p class="text-gray-500">No Men's Products Found</p>
+  <% } else { %>
 
-    <button onclick="addToCart('<%= product._id %>')"
-      class="w-full border border-gray-300 hover:bg-black hover:text-white py-2 text-xs rounded">
-      ADD TO BAG
-    </button>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
 
+      <% menProducts.forEach(p => { %>
+        <%- productCard(p) %>
+      <% }) %>
+
+    </div>
+
+  <% } %>
+
+</div>
+
+<!-- 👗 WOMEN -->
+<div class="max-w-7xl mx-auto px-4 mt-10">
+
+  <div class="flex justify-between mb-3">
+    <h2 class="text-base sm:text-lg font-bold">👗 Women's Wear</h2>
+    <a href="/category/women/All" class="text-blue-600 text-xs sm:text-sm">View All</a>
   </div>
 
+  <% if(!womenProducts || womenProducts.length === 0){ %>
+    <p class="text-gray-500">No Women's Products Found</p>
+  <% } else { %>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+
+      <% womenProducts.forEach(p => { %>
+        <%- productCard(p) %>
+      <% }) %>
+
+    </div>
+
+  <% } %>
+
 </div>
 
-<% }) %>
-
-</div>
-
-</div>
-
-<!-- POPUP -->
-<div id="popup" class="fixed bottom-5 right-5 bg-green-500 text-white px-4 py-2 rounded hidden">
-  Added to cart ✅
+<!-- 🔥 TRUST -->
+<div class="bg-white mt-10 py-6">
+  <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 text-center text-xs sm:text-sm gap-4">
+    <div>🚚 Free Delivery</div>
+    <div>💰 Cash on Delivery</div>
+    <div>🔄 Easy Returns</div>
+    <div>🔒 Secure Payments</div>
+  </div>
 </div>
 
 <%- include("partial/footer") %>
 
-<!-- JS -->
+<!-- 🔥 SLIDER -->
 <script>
-async function addToCart(id){
-  await fetch('/add-to-cart/' + id);
-
-  const popup = document.getElementById("popup");
-  popup.classList.remove("hidden");
-
-  setTimeout(()=>{
-    popup.classList.add("hidden");
-  },2000);
-}
-</script>
-
-<!-- CATEGORY ACTIVE -->
-<script>
-const path = window.location.pathname.toLowerCase();
-
-document.querySelectorAll(".cat-item").forEach(item => {
-
-  const href = item.getAttribute("href").toLowerCase();
-
-  if (path.includes(href.split("/")[2])) {
-    item.classList.add("text-blue-600");
-
-    const bar = item.querySelector(".underline-bar");
-    bar.style.width = "100%";
-  }
-
-  item.addEventListener("mouseenter", () => {
-    item.querySelector(".underline-bar").style.width = "100%";
-  });
-
-  item.addEventListener("mouseleave", () => {
-    if (!item.classList.contains("text-blue-600")) {
-      item.querySelector(".underline-bar").style.width = "0";
-    }
-  });
-
-});
-</script>
-
-<script>
-const slider = document.getElementById("heroSlider");
-const dots = document.querySelectorAll(".dot");
-
+const slider = document.getElementById("slider");
 let index = 0;
 
-function updateSlider() {
-  slider.style.transform = `translateX(-${index * 100}%)`;
-
-  dots.forEach((d, i) => {
-    d.classList.toggle("bg-white/80", i === index);
-    d.classList.toggle("bg-white/40", i !== index);
-  });
-}
-
 setInterval(() => {
+  if(!slider) return;
   index = (index + 1) % 3;
-  updateSlider();
+  slider.style.transform = `translateX(-${index * 100}%)`;
 }, 3000);
 </script>
+
 </body>
-</html>

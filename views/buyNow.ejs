@@ -20,9 +20,19 @@
 
 <%- include("partial/nav") %>
 
+<%
+  const hasDiscount = product.discountType && product.discountType !== 'none';
+  const basePrice = hasDiscount ? product.finalPrice : product.price;
+  const gst = Math.round(basePrice * 0.10);
+  const total = basePrice + gst;
+  const discountPercent = hasDiscount 
+    ? Math.round(((product.price - product.finalPrice) / product.price) * 100)
+    : 0;
+%>
+
 <div class="max-w-7xl mx-auto mt-4 md:mt-6 grid lg:grid-cols-3 gap-4 md:gap-6 px-2 sm:px-4">
 
-  <!-- ================= LEFT ================= -->
+  <!-- LEFT -->
   <div class="lg:col-span-2 space-y-4 md:space-y-5">
 
     <!-- STEP -->
@@ -45,9 +55,28 @@
           <%= product.name %>
         </h2>
 
-        <p class="text-green-600 text-lg md:text-xl font-bold mt-1">
-          ₹ <%= product.price %>
-        </p>
+        <!-- PRICE -->
+        <% if(hasDiscount){ %>
+          <p class="text-gray-400 line-through text-sm">
+            ₹ <%= Math.round(product.price) %>
+          </p>
+
+          <p class="text-green-600 text-lg md:text-xl font-bold">
+            ₹ <%= Math.round(product.finalPrice) %>
+          </p>
+
+          <p class="text-pink-500 text-sm font-semibold">
+            <%= discountPercent %>% OFF
+          </p>
+
+          <p class="text-green-600 text-xs font-semibold">
+            You saved ₹ <%= Math.round(product.price - product.finalPrice) %>
+          </p>
+        <% } else { %>
+          <p class="text-green-600 text-lg md:text-xl font-bold mt-1">
+            ₹ <%= Math.round(product.price) %>
+          </p>
+        <% } %>
 
         <p class="text-gray-500 text-xs md:text-sm mt-1 line-clamp-2">
           <%= product.description %>
@@ -91,7 +120,7 @@
 
   </div>
 
-  <!-- ================= RIGHT ================= -->
+  <!-- RIGHT -->
   <div class="bg-white p-4 md:p-5 rounded-xl shadow h-fit sticky top-20">
 
     <h2 class="text-base md:text-lg font-semibold border-b pb-2 mb-3">
@@ -102,7 +131,7 @@
 
       <div class="flex justify-between">
         <span>Price</span>
-        <span>₹ <%= product.price %></span>
+        <span>₹ <%= Math.round(basePrice) %></span>
       </div>
 
       <div class="flex justify-between">
@@ -112,7 +141,7 @@
 
       <div class="flex justify-between">
         <span>GST (10%)</span>
-        <span>₹ <%= Math.round(product.price * 0.10) %></span>
+        <span>₹ <%= gst %></span>
       </div>
 
       <hr>
@@ -120,7 +149,7 @@
       <div class="flex justify-between font-bold text-base md:text-lg">
         <span>Total</span>
         <span class="text-green-600">
-          ₹ <%= product.price + Math.round(product.price * 0.10) %>
+          ₹ <%= total %>
         </span>
       </div>
 
@@ -129,25 +158,25 @@
     <!-- BUTTONS -->
     <div class="mt-5 space-y-2 md:space-y-3">
 
-  <button
-  class="w-full bg-yellow-400 hover:bg-yellow-500 py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base"
-  type="submit"
-  form="orderForm"
-  formaction="/place-order"
-  name="paymentMethod"
-  value="COD">
-  Cash on Delivery
-</button>
+      <button
+        class="w-full bg-yellow-400 hover:bg-yellow-500 py-2.5 md:py-3 rounded-lg font-semibold"
+        type="submit"
+        form="orderForm"
+        formaction="/place-order"
+        name="paymentMethod"
+        value="COD">
+        Cash on Delivery
+      </button>
 
       <button id="payBtn" onclick="payNow()"
-        class="w-full bg-yellow-400 hover:bg-yellow-500 py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base">
+        class="w-full bg-yellow-400 hover:bg-yellow-500 py-2.5 md:py-3 rounded-lg font-semibold">
         Pay with Razorpay
       </button>
 
     </div>
 
     <!-- TRUST -->
-    <div class="mt-4 text-[11px] md:text-xs text-gray-500 space-y-1">
+    <div class="mt-4 text-xs text-gray-500 space-y-1">
       <p>🔒 100% Secure Payments</p>
       <p>📦 Easy Returns</p>
       <p>🚚 Fast Delivery</p>
@@ -159,9 +188,7 @@
 
 <%- include("partial/footer") %>
 
-<!-- 🔥 JS -->
 <script>
-
 window.payNow = async function () {
   const btn = document.getElementById("payBtn");
 
@@ -172,7 +199,6 @@ window.payNow = async function () {
     const form = document.getElementById("orderForm");
     const data = Object.fromEntries(new FormData(form).entries());
 
-    // ✅ VALIDATION
     if (!data.name || !data.phone || !data.email || !data.house || !data.city || !data.state || !data.pincode) {
       alert("Please fill all required fields");
       btn.disabled = false;
@@ -180,9 +206,8 @@ window.payNow = async function () {
       return;
     }
 
-    const totalAmount = <%= product.price + Math.round(product.price * 0.10) %>;
+    const totalAmount = <%= total %>;
 
-    // CREATE ORDER
     const res = await fetch("/create-order", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
@@ -195,7 +220,7 @@ window.payNow = async function () {
       alert("Order failed");
       btn.disabled = false;
       btn.innerText = "Pay with Razorpay";
-       return;
+      return;
     }
 
     const options = {
@@ -226,7 +251,7 @@ window.payNow = async function () {
         } else {
           alert("Payment failed");
           btn.disabled = false;
-         btn.innerText = "Pay with Razorpay";
+          btn.innerText = "Pay with Razorpay";
         }
       },
 
@@ -248,7 +273,6 @@ window.payNow = async function () {
     btn.innerText = "Pay with Razorpay";
   }
 };
-
 </script>
 
 </body>

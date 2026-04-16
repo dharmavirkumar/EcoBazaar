@@ -37,17 +37,10 @@ paymentOptions: {
   online: { type: Boolean, default: true }
 },
   // 🔥 NEW (IMPORTANT)
-  sizes: [
-    {
-      size: String,
-      price: Number,
-      stock: {
-        type: Number,
-        default: 10
-      }
-    }
-  ]
-
+  sizes: {
+  type: [String],
+  default: []
+}
 }, { timestamps: true });
 
 module.exports = mongoose.model("Product", productSchema);

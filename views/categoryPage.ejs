@@ -71,6 +71,7 @@
         <li><a href="?price=0-500">Under ₹500</a></li>
         <li><a href="?price=500-1000">₹500 - ₹1000</a></li>
         <li><a href="?price=1000-2000">₹1000 - ₹2000</a></li>
+        
       </ul>
     </div>
 
@@ -151,15 +152,15 @@
           <div class="mt-1 flex items-center gap-2">
             <% if(product.discountValue){ %>
             <span class="text-green-600 font-bold text-sm md:text-base">
-              ₹<%= product.finalPrice %>
+              ₹<%= product.finalPrice.toFixed(2) %>
             </span>
 
             <span class="line-through text-gray-400 text-[10px] sm:text-xs">
-              ₹<%= product.price %>
+              ₹<%= product.price.toFixed(2) %>
             </span>
             <% } else { %>
             <span class="text-green-600 font-bold text-sm md:text-base">
-              ₹<%= product.price %>
+              ₹<%= product.price.toFixed(2) %>
             </span>
             <% } %>
           </div>
