@@ -10,6 +10,30 @@
 
 <%- include("partial/nav") %>
 
+<%
+const getFinalPrice = (item) => {
+  if (!item) return 0;
+
+  if (item.discountType === "percentage") {
+    return Math.round(item.price - (item.price * item.discountValue / 100));
+  }
+
+  if (item.discountType === "fixed") {
+    return item.price - item.discountValue;
+  }
+
+  return item.price;
+};
+
+const getDiscountText = (item) => {
+  if (!item || !item.discountType || item.discountType === "none") return "";
+
+  return item.discountType === "percentage"
+    ? `${item.discountValue}% OFF`
+    : `₹${item.discountValue} OFF`;
+};
+%>
+
 <div class="max-w-6xl mx-auto px-3 sm:px-6 py-4">
 
 <h1 class="text-xl sm:text-2xl md:text-3xl font-bold mb-4">
@@ -20,16 +44,16 @@
 
 <div class="grid md:grid-cols-3 gap-4 md:gap-6">
 
-  <!-- 🛒 ITEMS -->
+  <!-- ITEMS -->
   <div class="md:col-span-2 space-y-3">
 
     <% cart.forEach(item => { %>
 
-    <div class="bg-white p-3 sm:p-4 rounded-xl shadow flex gap-3 sm:gap-4 items-center">
+    <div class="bg-white p-3 sm:p-4 rounded-xl shadow flex gap-3 items-center">
 
       <!-- IMAGE -->
       <img 
-        src="<%= item.image && item.image.startsWith('http') ? item.image : '/' + (item.image || 'default.png') %>"
+        src="<%= item.image || '/default.png' %>"
         onerror="this.src='/default.png'"
         class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border shrink-0">
 
@@ -40,25 +64,38 @@
           <%= item.name %>
         </h2>
 
-        <p class="text-green-600 font-bold text-sm sm:text-base mt-1">
-          ₹ <%= item.price %>
-        </p>
+        <!-- PRICE -->
+        <div class="flex items-center gap-2 mt-1">
 
-        <p class="text-gray-500 text-xs sm:text-sm">
-          Subtotal: ₹ <%= item.price * item.qty %>
-        </p>
+          <span class="font-bold text-green-600">
+            ₹ <%= getFinalPrice(item) * item.qty %>
+          </span>
+
+          <% if(item.discountType && item.discountType !== "none"){ %>
+
+            <span class="line-through text-gray-400 text-xs">
+              ₹ <%= item.price * item.qty %>
+            </span>
+
+            <span class="text-green-600 text-xs font-semibold">
+              <%= getDiscountText(item) %>
+            </span>
+
+          <% } %>
+
+        </div>
 
         <!-- QTY -->
         <div class="flex items-center gap-2 mt-2">
 
-          <a href="/decrease-qty/<%= item._id %>" 
+          <a href="/decrease-qty/<%= item._id %>"
             class="px-3 py-1 bg-gray-200 rounded-lg active:scale-90">-</a>
 
           <span class="px-2 text-sm font-semibold">
             <%= item.qty %>
           </span>
 
-          <a href="/increase-qty/<%= item._id %>" 
+          <a href="/increase-qty/<%= item._id %>"
             class="px-3 py-1 bg-gray-200 rounded-lg active:scale-90">+</a>
 
         </div>
@@ -66,8 +103,8 @@
       </div>
 
       <!-- REMOVE -->
-      <a href="/remove-from-cart/<%= item._id %>" 
-        class="text-red-500 text-lg sm:text-xl font-bold hover:scale-110 transition">
+      <a href="/remove-from-cart/<%= item._id %>"
+        class="text-red-500 text-lg font-bold hover:scale-110 transition">
         ✖
       </a>
 
@@ -77,24 +114,24 @@
 
   </div>
 
-  <!-- 💰 SUMMARY -->
+  <!-- SUMMARY -->
   <div class="bg-white p-4 sm:p-6 rounded-xl shadow h-fit sticky top-20 hidden md:block">
 
     <h2 class="text-lg font-bold mb-4">Order Summary</h2>
 
     <div class="flex justify-between mb-2 text-sm">
       <span>Total Items</span>
-      <span><%= cart.length %></span>
+      <span><%= cart.reduce((sum, i) => sum + i.qty, 0) %></span>
     </div>
 
     <div class="flex justify-between mb-2 text-sm">
       <span>Total Price</span>
-      <span class="font-bold text-green-600">₹ <%= total %></span>
+      <span class="font-bold text-green-600">₹ <%= total || 0 %></span>
     </div>
 
     <hr class="my-4">
 
-    <a href="/checkout" 
+    <a href="/checkout"
       class="block text-center bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold active:scale-95">
       Checkout
     </a>
@@ -103,15 +140,15 @@
 
 </div>
 
-<!-- 📱 MOBILE BOTTOM BAR -->
+<!-- MOBILE BAR -->
 <div class="fixed bottom-0 left-0 w-full bg-white shadow-lg p-3 flex justify-between items-center md:hidden">
 
   <div>
     <p class="text-xs text-gray-500">Total</p>
-    <p class="font-bold text-green-600">₹ <%= total %></p>
+    <p class="font-bold text-green-600">₹ <%= total || 0 %></p>
   </div>
 
-  <a href="/checkout" 
+  <a href="/checkout"
     class="bg-green-500 text-white px-6 py-2 rounded-lg font-semibold active:scale-95">
     Checkout
   </a>
@@ -126,7 +163,7 @@
     Cart Empty 😢
   </h2>
 
-  <a href="/" 
+  <a href="/"
     class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg inline-block active:scale-95">
     Shop Now
   </a>

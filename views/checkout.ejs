@@ -12,252 +12,231 @@
 
 <div class="max-w-7xl mx-auto mt-6 px-4">
 
-<!-- 🔥 STEP HEADER -->
-<div class="flex gap-2 mb-6 text-xs sm:text-sm font-semibold overflow-x-auto">
-
-  <div class="bg-blue-500 text-white px-3 py-2 rounded whitespace-nowrap">✔ Login</div>
-  <div class="bg-blue-500 text-white px-3 py-2 rounded whitespace-nowrap">✔ Address</div>
-  <div class="bg-gray-300 px-3 py-2 rounded whitespace-nowrap">3 Payment</div>
-
-</div>
-
-<div class="grid lg:grid-cols-3 gap-6">
-
-<!-- LEFT -->
-<div class="lg:col-span-2 space-y-5">
-
-  <!-- 📍 ADDRESS -->
-  <div class="bg-white p-5 rounded-xl shadow">
-
-    <h2 class="font-semibold mb-4 text-lg border-b pb-2">
-      📍 Delivery Address
-    </h2>
-
-    <form id="checkoutForm" action="/checkout" method="POST" class="space-y-3">
-
-      <div class="grid md:grid-cols-2 gap-3">
-        <input name="name" placeholder="Full Name" required class="input">
-        <input name="phone" placeholder="Phone" required class="input">
-      </div>
-
-      <input name="email" placeholder="Email" required class="input w-full">
-
-      <input name="house" placeholder="House / Building" required class="input w-full">
-      <input name="area" placeholder="Area / Street" required class="input w-full">
-
-      <div class="grid md:grid-cols-3 gap-3">
-        <input name="city" placeholder="City" required class="input">
-        <input name="state" placeholder="State" required class="input">
-        <input name="pincode" placeholder="Pincode" required class="input">
-      </div>
-
-      <input name="landmark" placeholder="Landmark" class="input w-full">
-
-      <!-- hidden payment -->
-      <input type="hidden" name="paymentMethod" id="paymentMethod">
-
-    </form>
+  <!-- STEP -->
+  <div class="flex gap-2 mb-6 text-xs sm:text-sm font-semibold overflow-x-auto">
+    <div class="bg-blue-500 text-white px-3 py-2 rounded whitespace-nowrap">✔ Login</div>
+    <div class="bg-blue-500 text-white px-3 py-2 rounded whitespace-nowrap">✔ Address</div>
+    <div class="bg-gray-300 px-3 py-2 rounded whitespace-nowrap">3 Payment</div>
   </div>
 
-  <!-- 🛒 ITEMS -->
-  <div class="bg-white p-5 rounded-xl shadow">
+  <div class="grid lg:grid-cols-3 gap-6">
 
-    <h2 class="font-semibold mb-4 text-lg border-b pb-2">
-      🛒 Order Items
-    </h2>
+    <!-- LEFT -->
+    <div class="lg:col-span-2 space-y-5">
 
-    <% cart.forEach(item => { %>
+      <!-- ADDRESS -->
+      <div class="bg-white p-5 rounded-xl shadow">
+        <h2 class="font-semibold mb-4 text-lg border-b pb-2">📍 Delivery Address</h2>
 
-    <div class="flex gap-3 border-b py-3">
+        <form id="checkoutForm" class="space-y-3">
 
-      <img src="<%= item.image || '/default.png' %>"
-        class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded border">
+          <div class="grid md:grid-cols-2 gap-3">
+            <input name="name" placeholder="Full Name" class="input" required>
+            <input name="phone" placeholder="Phone" class="input" required>
+          </div>
 
-      <div class="flex-1">
+          <input name="email" placeholder="Email" class="input w-full" required>
 
-        <h3 class="text-sm font-medium text-gray-800">
-          <%= item.name %>
-        </h3>
+          <input name="house" placeholder="House / Building" class="input w-full" required>
+          <input name="area" placeholder="Area / Street" class="input w-full" required>
 
-        <p class="text-xs text-gray-500 mt-1">
-          Qty: <%= item.qty %>
-        </p>
+          <div class="grid md:grid-cols-3 gap-3">
+            <input name="city" placeholder="City" class="input" required>
+            <input name="state" placeholder="State" class="input" required>
+            <input name="pincode" placeholder="Pincode" class="input" required>
+          </div>
 
-        <p class="text-xs text-gray-500">
-          ₹ <%= item.price %>
-        </p>
+          <input name="landmark" placeholder="Landmark" class="input w-full">
 
+          <input type="hidden" name="paymentMethod" id="paymentMethod">
+        </form>
       </div>
 
-      <p class="text-sm font-semibold">
-        ₹ <%= item.price * item.qty %>
-      </p>
+      <!-- ITEMS -->
+      <div class="bg-white p-5 rounded-xl shadow">
+        <h2 class="font-semibold mb-4 text-lg border-b pb-2">🛒 Order Items</h2>
 
+        <% cart.forEach(item => { %>
+        <div class="flex gap-3 border-b py-3">
+
+          <img src="<%= item.image || '/default.png' %>"
+               class="w-16 h-16 object-cover rounded border">
+
+          <div class="flex-1">
+            <h3 class="text-sm font-medium"><%= item.name %></h3>
+            <p class="text-xs text-gray-500">Qty: <%= item.qty %></p>
+            <p class="text-xs text-gray-500">₹ <%= item.price %></p>
+          </div>
+
+          <p class="font-semibold">
+            ₹ <%= item.price * item.qty %>
+          </p>
+        </div>
+        <% }) %>
+
+      </div>
     </div>
 
-    <% }) %>
+    <!-- RIGHT -->
+    <div class="bg-white p-5 rounded-xl shadow sticky top-20 h-fit">
 
-  </div>
+      <h2 class="font-semibold mb-4 text-lg border-b pb-2">PRICE DETAILS</h2>
 
-</div>
+      <% const gst = Math.round(total * 0.10); %>
+      <% const finalTotal = total + gst; %>
 
-<!-- RIGHT -->
-<div>
+      <div class="space-y-2 text-sm">
 
-  <div class="bg-white p-5 rounded-xl shadow sticky top-20">
+        <div class="flex justify-between">
+          <span>Price</span>
+          <span>₹ <%= total %></span>
+        </div>
 
-    <h2 class="font-semibold mb-4 text-lg border-b pb-2">
-      PRICE DETAILS
-    </h2>
+        <div class="flex justify-between">
+          <span>Delivery</span>
+          <span class="text-green-600">FREE</span>
+        </div>
 
-    <% let gst = Math.round(total * 0.10); %>
-    <% let finalTotal = total + gst; %>
+        <div class="flex justify-between">
+          <span>GST (10%)</span>
+          <span>₹ <%= gst %></span>
+        </div>
 
-    <div class="space-y-2 text-sm">
+        <hr>
 
-      <div class="flex justify-between">
-        <span>Price</span>
-        <span>₹ <%= total %></span>
+        <div class="flex justify-between font-bold text-lg">
+          <span>Total</span>
+          <span>₹ <%= finalTotal %></span>
+        </div>
+
       </div>
 
-      <div class="flex justify-between">
-        <span>Delivery</span>
-        <span class="text-green-600">FREE</span>
-      </div>
+      <div class="mt-5 space-y-3">
 
-      <div class="flex justify-between">
-        <span>GST (10%)</span>
-        <span>₹ <%= gst %></span>
-      </div>
+        <button type="button" onclick="placeCOD()"
+          class="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold">
+          Cash on Delivery
+        </button>
 
-      <hr>
+        <button type="button" onclick="payOnline()"
+          class="w-full bg-yellow-400 py-3 rounded-lg font-semibold">
+          Pay Online
+        </button>
 
-      <div class="flex justify-between font-bold text-lg">
-        <span>Total</span>
-        <span>₹ <%= finalTotal %></span>
       </div>
 
     </div>
 
-    <!-- BUTTONS -->
-    <div class="mt-5 space-y-3">
-
-      <button onclick="codOrder()"
-        class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold active:scale-95">
-        Cash on Delivery
-      </button>
-
-      <button onclick="payNow()"
-        class="w-full bg-yellow-400 hover:bg-yellow-500 py-3 rounded-lg font-semibold active:scale-95">
-        Pay Online
-      </button>
-
-    </div>
-
   </div>
-
-</div>
-
-</div>
 </div>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <style>
-.input {
-  @apply border p-3 rounded-lg w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-400;
-}
+  .input{
+    @apply border p-3 rounded-lg w-full text-sm;
+  }
 </style>
 
 <script>
 const form = document.getElementById("checkoutForm");
 
-function validateForm() {
-  const data = Object.fromEntries(new FormData(form).entries());
+function getFormData(){
+  return Object.fromEntries(new FormData(form).entries());
+}
 
-  if (!data.name || !data.phone || !data.house || !data.city) {
-    alert("Fill all required fields ⚠️");
-    return false;
+function validate(){
+  const d = getFormData();
+  const required = ["name","phone","email","house","area","city","state","pincode"];
+
+  for (let f of required){
+    if(!d[f]){
+      alert("Please fill all required fields");
+      return false;
+    }
   }
-
   return true;
 }
 
-// ✅ COD
-function codOrder() {
-  if (!validateForm()) return;
+// COD
+function placeCOD(){
+  if(!validate()) return;
 
   document.getElementById("paymentMethod").value = "COD";
+  form.method = "POST";
+  form.action = "/checkout";
   form.submit();
 }
 
-// ✅ ONLINE PAYMENT
-async function payNow() {
+// ONLINE PAYMENT (FIXED)
+async function payOnline(){
 
-  if (!validateForm()) return;
+  if(!validate()) return;
 
-  const data = Object.fromEntries(new FormData(form).entries());
+  const data = getFormData();
 
   try {
-
+    // 1. CREATE ORDER
     const res = await fetch("/create-order", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: {"Content-Type":"application/json"},
       body: JSON.stringify({
-        amount: <%= finalTotal %>
+        amount: Math.round(<%= finalTotal %>)
       })
     });
 
     const order = await res.json();
 
+    if(!order.id){
+      alert("Order create failed");
+      return;
+    }
+
+    // 2. RAZORPAY OPTIONS
     const options = {
       key: "<%= razorpayKey %>",
       amount: order.amount,
       currency: "INR",
       order_id: order.id,
-      name: "EcoBazaar",
-      description: "Secure Payment",
 
-      handler: async function (response) {
+      handler: async function (response){
 
-        const verify = await fetch("/verify-payment", {
+        const verifyRes = await fetch("/verify-payment", {
           method: "POST",
-          headers: {"Content-Type": "application/json"},
+          headers: {"Content-Type":"application/json"},
           body: JSON.stringify({
-            ...response,
-            address: data
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            orderData: data
           })
         });
 
-        const result = await verify.json();
+        const result = await verifyRes.json();
 
-        if (result.success) {
-
-          document.getElementById("paymentMethod").value = "ONLINE";
-          form.submit();
-
+        if(result.success){
+          window.location.href = "/orderSuccess";
         } else {
-          alert("Payment Failed ❌");
+          alert(result.message || "Payment Failed");
         }
       },
 
-      prefill: {
-        name: data.name,
-        email: data.email,
-        contact: data.phone
+      prefill:{
+        name:data.name,
+        email:data.email,
+        contact:data.phone
       },
 
-      theme: { color: "#2874F0" }
+      theme:{ color:"#2874F0" }
     };
 
     new Razorpay(options).open();
 
-  } catch (err) {
+  } catch(err){
     console.log(err);
-    alert("Something went wrong ❌");
+    alert("Payment error");
   }
 }
 </script>
-
 </body>
 </html>

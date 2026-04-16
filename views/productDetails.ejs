@@ -5,19 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <style>
-    .thumb.active { border: 2px solid #ff3f6c; }
-    .size-btn.active {
-      border: 2px solid #ff3f6c;
-      color: #ff3f6c;
-      font-weight: 600;
-      background: #fff0f3;
-    }
-  </style>
-
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
-  
 </head>
 
 <body class="bg-gray-50">
@@ -57,55 +46,31 @@
     </div>
 
     <!-- PRICE -->
-   <div class="mt-4 border-b pb-4">
-  <% if(product.discountType && product.discountType !== 'none'){ %>
+    <div class="mt-4 border-b pb-4">
+      <% if(product.discountType && product.discountType !== 'none'){ %>
 
-    <p class="text-gray-400 line-through">
-      ₹ <%= product.price.toFixed(2) %>
-    </p>
+        <p class="text-gray-400 line-through">
+          ₹ <%= product.price.toFixed(2) %>
+        </p>
 
-    <div class="flex items-center gap-3">
-      <p id="priceBox" class="text-3xl font-bold text-gray-900">
-        ₹ <%= product.finalPrice.toFixed(2) %>
-      </p>
+        <div class="flex items-center gap-3">
+          <p class="text-3xl font-bold text-gray-900">
+            ₹ <%= product.finalPrice.toFixed(2) %>
+          </p>
 
-      <span class="text-pink-500 font-semibold">
-        <%= Math.round(((product.price - product.finalPrice) / product.price) * 100) %>% OFF
-      </span>
+          <span class="text-pink-500 font-semibold">
+            <%= Math.round(((product.price - product.finalPrice) / product.price) * 100) %>% OFF
+          </span>
+        </div>
+
+      <% } else { %>
+
+        <p class="text-3xl font-bold text-gray-900">
+          ₹ <%= product.price.toFixed(2) %>
+        </p>
+
+      <% } %>
     </div>
-
-  <% } else { %>
-
-    <p id="priceBox" class="text-3xl font-bold text-gray-900">
-      ₹ <%= product.price.toFixed(2) %>
-    </p>
-
-  <% } %>
-</div>
-
-   <% if (showSize && product.sizes && product.sizes.length > 0) { %>
-
-<div class="mt-6">
-  <h3 class="font-semibold mb-2">Select Size</h3>
-
-  <div class="flex gap-3 flex-wrap" id="sizeWrapper">
-    <% product.sizes.forEach(size => { %>
-      
-      <button 
-        type="button"
-        class="size-btn border px-4 py-2 rounded-lg hover:bg-black hover:text-white transition"
-        data-size="<%= size %>">
-        <%= size %>
-      </button>
-
-    <% }) %>
-  </div>
-
-  <!-- hidden input -->
-  <input type="hidden" name="size" id="selectedSize">
-</div>
-
-<% } %>
 
     <!-- BUTTONS -->
     <div class="flex gap-4 mt-6">
@@ -122,38 +87,37 @@
 
     <!-- DELIVERY -->
     <div class="mt-6 text-sm space-y-1 border-t pt-4">
-      
       <p>🚚 Free Delivery</p>
       <p>💰 Cash on Delivery</p>
       <p>🔁 7 Days Return</p>
       <p>📞 24/7 Customer Care</p>
     </div>
+
+    <!-- PINCODE -->
     <div class="bg-white p-4 rounded-xl shadow mt-4">
 
-  <h2 class="font-bold text-lg mb-3">Delivery details</h2>
+      <h2 class="font-bold text-lg mb-3">Delivery details</h2>
 
-  <!-- PINCODE INPUT -->
-  <div class="flex gap-2 mb-3">
-    <input id="pincode"
-           placeholder="Enter pincode"
-           class="border p-2 flex-1 rounded outline-none focus:ring-2 focus:ring-blue-400">
+      <div class="flex gap-2 mb-3">
+        <input id="pincode"
+          placeholder="Enter pincode"
+          class="border p-2 flex-1 rounded">
 
-    <button onclick="checkDelivery()"
-            class="bg-blue-500 hover:bg-blue-600 text-white px-4 rounded transition">
-      Check
-    </button>
-  </div>
+        <button onclick="checkDelivery()"
+          class="bg-blue-500 text-white px-4 rounded">
+          Check
+        </button>
+      </div>
 
-  <!-- RESULT SHOW HERE -->
-  <div id="result" class="text-sm"></div>
+      <div id="result" class="text-sm"></div>
 
-</div>
+    </div>
 
     <!-- HIGHLIGHTS -->
     <div class="mt-6 bg-gray-50 p-4 rounded">
       <h2 class="font-semibold mb-2">Highlights</h2>
       <ul class="text-sm text-gray-600 list-disc pl-4">
-        <% product.highlights?.forEach(h => { %>
+        <% (product.highlights || []).forEach(h => { %>
           <li><%= h %></li>
         <% }) %>
       </ul>
@@ -162,7 +126,7 @@
     <!-- SPECIFICATIONS -->
     <h3 class="font-bold mt-6 mb-3">Specifications</h3>
     <div class="divide-y">
-      <% Object.keys(product.specifications||{}).forEach(key => { %>
+      <% Object.keys(product.specifications || {}).forEach(key => { %>
         <div class="flex justify-between py-2 text-sm">
           <span><%= key %></span>
           <span><%= product.specifications[key] %></span>
@@ -179,395 +143,94 @@
   <div class="text-gray-700 text-sm"><%- product.description %></div>
 </div>
 
-<!-- SIMILAR PRODUCTS -->
-<!-- <div class="max-w-7xl mx-auto mt-10">
-  <h2 class="text-xl font-bold mb-4">Similar Products</h2>
-
-  <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-    <% similarProducts.forEach(item => { %>
-      <a href="/product/<%= item._id %>" class="bg-white p-2 rounded shadow hover:shadow-lg transition">
-        <img src="<%= item.images?.[0] || '/default.png' %>" class="w-full h-40 object-contain">
-        <p class="text-sm mt-2 line-clamp-2"><%= item.name %></p>
-        <p class="text-pink-500 font-bold">₹ <%= item.price %></p>
-      </a>
-    <% }) %>
-  </div>
-</div> -->
-
-<!-- SIMILAR PRODUCTS SLIDER -->
+<!-- SIMILAR -->
 <div class="max-w-7xl mx-auto mt-10">
   <h2 class="text-xl font-bold mb-4">Similar Products</h2>
 
   <% if(similarProducts && similarProducts.length > 0){ %>
 
   <div class="swiper similarSwiper">
-
     <div class="swiper-wrapper">
 
       <% similarProducts.forEach(item => { %>
-
         <div class="swiper-slide">
+          <div class="bg-white p-3 rounded shadow">
 
-          <div class="bg-white p-3 rounded-xl shadow hover:shadow-lg transition group relative">
-
-            <!-- 🔥 DISCOUNT BADGE -->
-            <% if(item.finalPrice && item.price){ 
-              let discount = Math.round(((item.price - item.finalPrice) / item.price) * 100);
-              if(discount > 0){ %>
-
-              <span class="absolute top-2 left-2 bg-pink-500 text-white text-xs px-2 py-1 rounded">
-                <%= discount %>% OFF
-              </span>
-
-            <% } } %>
-
-            <!-- ✅ IMAGE (CLICKABLE) -->
             <a href="/product/<%= item._id %>">
-              <div class="overflow-hidden rounded">
-                <img src="<%= item.images?.[0] || '/default.png' %>" 
-                     class="w-full h-40 object-contain group-hover:scale-105 transition duration-300 cursor-pointer">
-              </div>
+              <img src="<%= item.images?.[0] || '/default.png' %>"
+                class="w-full h-40 object-contain">
             </a>
 
-            <!-- NAME -->
-            <p class="text-sm mt-2 line-clamp-2 font-medium">
-              <%= item.name %>
-            </p>
+            <p class="text-sm mt-2 font-medium"><%= item.name %></p>
 
-            <!-- ⭐ RATING -->
-            <!-- <div class="flex items-center gap-1 mt-1">
-              <span class="bg-green-600 text-white text-xs px-2 py-0.5 rounded">
-                <%= item.avgRating ? item.avgRating.toFixed(1) : "0.0" %> ⭐
-              </span>
-
-              <span class="text-gray-500 text-xs">
-                (<%= item.reviewCount || 0 %>)
-              </span>
-            </div> -->
-
-            <!-- PRICE -->
-            <div class="mt-1">
-              <% if(item.finalPrice && item.finalPrice < item.price){ %>
-
-                <span class="text-pink-500 font-bold">
-                  ₹ <%= item.finalPrice %>
-                </span>
-
-                <span class="text-gray-400 line-through text-xs ml-1">
-                  ₹ <%= item.price %>
-                </span>
-
-              <% } else { %>
-
-                <span class="text-pink-500 font-bold">
-                  ₹ <%= item.price %>
-                </span>
-
-              <% } %>
+            <div class="mt-1 font-bold text-pink-500">
+              ₹ <%= item.finalPrice || item.price %>
             </div>
 
-            <!-- BUTTON -->
-            <a href="/product/<%= item._id %>" 
-               class="block mt-3 text-center bg-black text-white text-xs py-1 rounded hover:bg-gray-800">
-              View
-            </a>
-
           </div>
-
         </div>
-
       <% }) %>
 
     </div>
 
-    <!-- ARROWS -->
     <div class="swiper-button-next"></div>
     <div class="swiper-button-prev"></div>
-
   </div>
-
-  <% } else { %>
-
-    <p class="text-gray-500">No similar products found</p>
 
   <% } %>
 </div>
-
 
 <!-- REVIEWS -->
 <div class="max-w-5xl mx-auto mt-10">
-
   <h2 class="font-bold mb-3">Customer Reviews</h2>
 
-  <% if(reviews.length > 0){ %>
-
-    <div id="reviewContainer">
-
-      <% reviews.forEach((r, i) => { %>
-
-        <div class="review-item bg-white p-3 mb-2 rounded shadow 
-        <%= i >= 4 ? 'hidden extra-review' : '' %>">
-
-          <p class="font-semibold"><%= r.name %></p>
-          <p class="text-green-600 text-sm">⭐ <%= r.rating %></p>
-          <p class="text-gray-600 text-sm"><%= r.comment %></p>
-
-        </div>
-
-      <% }) %>
-
+  <% (reviews || []).forEach(r => { %>
+    <div class="bg-white p-3 mb-2 rounded shadow">
+      <p class="font-semibold"><%= r.name %></p>
+      <p class="text-green-600 text-sm">⭐ <%= r.rating %></p>
+      <p class="text-gray-600 text-sm"><%= r.comment %></p>
     </div>
-
-    <!-- SHOW MORE BUTTON -->
-    <% if(reviews.length > 4){ %>
-      <button id="showMoreBtn"
-        class="mt-4 text-pink-500 font-semibold">
-        Show More
-      </button>
-    <% } %>
-
-  <% } else { %>
-    <p>No reviews yet</p>
-  <% } %>
-
+  <% }) %>
 </div>
 
-<!-- ADD REVIEW -->
- <!-- <div class="max-w-5xl mx-auto mt-10 bg-white p-5 rounded shadow">
-
-  <h2 class="font-bold mb-4 text-lg">Write a Review</h2>
-
-  <form action="/add-review" method="POST" class="space-y-4">  -->
-
-    <!-- hidden product id --> 
-     <!-- <input type="hidden" name="productId" value="<%= product._id %>"> -->
-
-    <!-- NAME -->
-<!-- <input type="text" name="name" placeholder="Your Name"
-      class="w-full border p-2 rounded" required>  -->
-
-    <!-- RATING -->
-   <!-- <select name="rating" class="w-full border p-2 rounded" required>
-      <option value="">Select Rating</option>
-      <option value="5">⭐⭐⭐⭐⭐ (5)</option>
-      <option value="4">⭐⭐⭐⭐ (4)</option>
-      <option value="3">⭐⭐⭐ (3)</option>
-      <option value="2">⭐⭐ (2)</option>
-      <option value="1">⭐ (1)</option>
-    </select> -->
-
-    <!-- COMMENT -->
-   <!-- <textarea name="comment" placeholder="Write your review..."
-      class="w-full border p-2 rounded" rows="4" required></textarea> -->
-
-    <!-- BUTTON -->
-   <!-- <button type="submit"
-      class="bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-600">
-      Submit Review
-    </button>
-
-  </form>  -->
-
-</div> 
-
-<%- include("partial/footer") %> 
-
- <!-- SCRIPTS  -->
-  <script>
-async function checkDelivery(){
-  const pin = document.getElementById("pincode").value.trim();
-  const result = document.getElementById("result");
-
-  if(!pin){
-    result.innerHTML = `
-      <div class="bg-red-100 text-red-600 p-2 rounded">
-        ⚠️ Please enter pincode
-      </div>
-    `;
-    return;
-  }
-
-  // Loading state
-  result.innerHTML = `
-    <div class="text-gray-500">Checking delivery...</div>
-  `;
-
-  try{
-    const res = await fetch(`/check-delivery?pincode=${pin}`);
-    const data = await res.json();
-
-    if(data.available){
-      result.innerHTML = `
-        <div class="bg-green-100 text-green-700 p-3 rounded flex justify-between items-center">
-          <span>🚚 Delivery by <b>${data.deliveryDate}</b></span>
-          <span class="text-xs text-green-600 font-semibold">FREE</span>
-        </div>
-      `;
-    } else {
-      result.innerHTML = `
-        <div class="bg-red-100 text-red-600 p-2 rounded">
-          ❌ Delivery not available for this pincode
-        </div>
-      `;
-    }
-
-  } catch(err){
-    result.innerHTML = `
-      <div class="bg-red-100 text-red-600 p-2 rounded">
-        ⚠️ Server error, try again
-      </div>
-    `;
-  }
-}
-</script>
+<!-- SCRIPTS -->
 <script>
-let selectedSize = null;
-
-const sizeErrorEl = document.getElementById("sizeError");
-const priceBoxEl = document.getElementById("priceBox");
-
-const sizes = <%- JSON.stringify(product.sizes || []) %>;
-const hasSize = <%- JSON.stringify(showSize) %>;
-
-
-
 function addToCart(){
-  if(!selectedSize){
-    alert("Please select size");
-    return;
-  }
-  window.location = `/add-to-cart/<%= product._id %>?size=${selectedSize}`;
+  window.location = `/add-to-cart/<%= product._id %>`;
 }
 
 function buyNow(){
-  if(!selectedSize){
-    alert("Please select size");
-    return;
-  }
-  window.location = `/buy-now/<%= product._id %>?size=${selectedSize}`;
+  window.location = `/buy-now/<%= product._id %>`;
 }
-document.addEventListener("DOMContentLoaded", () => {
 
-  const sizeButtons = document.querySelectorAll(".size-btn");
-  const selectedInput = document.getElementById("selectedSize");
+async function checkDelivery(){
+  const pin = document.getElementById("pincode").value;
+  const res = await fetch(`/check-delivery?pincode=${pin}`);
+  const data = await res.json();
 
-  let selectedSize = null;
-
-  sizeButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-
-      sizeButtons.forEach(b => b.classList.remove("active"));
-
-      btn.classList.add("active");
-
-      selectedSize = btn.dataset.size;
-
-      if (selectedInput) {
-        selectedInput.value = selectedSize;
-      }
-    });
-  });
-
-  window.addToCart = function () {
-    if (!selectedSize) {
-      alert("Please select size");
-      return;
-    }
-    window.location = `/add-to-cart/<%= product._id %>?size=${selectedSize}`;
-  };
-
-  window.buyNow = function () {
-    if (!selectedSize) {
-      alert("Please select size");
-      return;
-    }
-    window.location = `/buy-now/<%= product._id %>?size=${selectedSize}`;
-  };
-
-});
+  document.getElementById("result").innerHTML =
+    data.available
+      ? `🚚 Delivery by ${data.deliveryDate}`
+      : `❌ Not available`;
+}
 </script>
 
 <script>
 new Swiper(".mySwiper", {
   loop: true,
-  spaceBetween: 10,
   pagination: { el: ".swiper-pagination", clickable: true },
   navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" }
 });
-</script>
-<script>
-let expanded = false;
 
-const btn = document.getElementById("showMoreBtn");
-
-if(btn){
-  btn.addEventListener("click", () => {
-
-    const extraReviews = document.querySelectorAll(".extra-review");
-
-    extraReviews.forEach(el => {
-      el.classList.toggle("hidden");
-    });
-
-    expanded = !expanded;
-    btn.innerText = expanded ? "Show Less" : "Show More";
-  });
-}
-</script>
-<script>
 new Swiper(".similarSwiper", {
   slidesPerView: 2,
   spaceBetween: 10,
-  loop: true,
-
-  autoplay: {
-    delay: 2500,
-    disableOnInteraction: false,
-  },
-
-  navigation: {
-    nextEl: ".swiper-button-next",
-    prevEl: ".swiper-button-prev",
-  },
-
   breakpoints: {
     640: { slidesPerView: 3 },
-    768: { slidesPerView: 4 },
     1024: { slidesPerView: 5 }
   }
 });
 </script>
-<style>
-.size-btn.active {
-  background-color: black;
-  color: white;
-  border: 2px solid black;
-}
 
-.size-btn {
-  min-width: 45px;
-  text-align: center;
-  font-weight: 500;
-}
-
-</style>
-<script>
-  const sizeButtons = document.querySelectorAll(".size-btn");
-const selectedInput = document.getElementById("selectedSize");
-
-let selectedSize = null;
-
-sizeButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-
-    sizeButtons.forEach(b => b.classList.remove("active"));
-
-    btn.classList.add("active");
-
-    selectedSize = btn.dataset.size;   // 🔥 MAIN FIX
-    selectedInput.value = selectedSize;
-  });
-});
-</script>
 </body>
 </html>

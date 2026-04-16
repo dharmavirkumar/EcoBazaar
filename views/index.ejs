@@ -1,28 +1,31 @@
-<body class="bg-gray-100">
+<body class="bg-gray-100 text-gray-900">
 
 <%- include("partial/nav") %>
 
-<!-- 🔥 HELPER -->
+<!-- ================= HELPERS ================= -->
 <%
 function getFinalPrice(p){
   if(p.discountType === "percentage"){
     return Math.round(p.price - (p.price * p.discountValue / 100));
-  }
-  if(p.discountType === "fixed"){
+  } else if(p.discountType === "fixed"){
     return p.price - p.discountValue;
   }
   return p.price;
 }
 %>
 
-<!-- 🔥 HERO SLIDER -->
-<div class="max-w-7xl mx-auto px-4 mt-4">
-  <div class="relative overflow-hidden rounded-xl">
+<!-- ================= HERO SLIDER ================= -->
+<div class="max-w-7xl mx-auto px-2 mt-3">
+  <div class="overflow-hidden rounded-lg">
     <div id="slider" class="flex transition-transform duration-700">
 
       <% ["banner1.png","companytr.png","banner1.png"].forEach(img => { %>
         <div class="min-w-full">
-          <img src="/uploads/<%= img %>" class="w-full h-48 sm:h-64 md:h-80 object-cover rounded-xl">
+          <img 
+            src="/uploads/<%= img %>" 
+            class="w-full h-40 sm:h-64 object-cover"
+            loading="lazy"
+          >
         </div>
       <% }) %>
 
@@ -30,173 +33,142 @@ function getFinalPrice(p){
   </div>
 </div>
 
-<!-- 🔥 CATEGORY -->
-<div class="bg-white mt-4 shadow-sm">
-  <div class="max-w-7xl mx-auto flex gap-6 overflow-x-auto py-4 px-4 text-sm">
+<!-- ================= CATEGORY ================= -->
+<div class="bg-white mt-3 shadow-sm">
+  <div class="max-w-7xl mx-auto flex gap-6 overflow-x-auto px-3 py-3 text-xs sm:text-sm">
 
     <% const categories = [
       {name:"Men",icon:"👕",link:"/category/fashion/All"},
       {name:"Women",icon:"👗",link:"/category/women/All"},
       {name:"Beauty",icon:"💄",link:"/category/beauty/All"},
       {name:"Electronics",icon:"📱",link:"/category/electronics/All"},
-      {name:"Accessories",icon:"👜",link:"/category/accessories/All"}
+      {name:"More",icon:"👜",link:"/category/accessories/All"}
     ]; %>
 
-    <% categories.forEach(cat => { %>
-      <a href="<%= cat.link %>" class="flex flex-col items-center min-w-[70px] hover:text-blue-600">
-        <div class="text-2xl"><%= cat.icon %></div>
-        <span class="text-xs sm:text-sm"><%= cat.name %></span>
+    <% categories.forEach(c => { %>
+      <a href="<%= c.link %>" class="flex flex-col items-center min-w-[70px] active:scale-95 transition">
+        <div class="text-xl"><%= c.icon %></div>
+        <span class="mt-1"><%= c.name %></span>
       </a>
     <% }) %>
 
   </div>
 </div>
 
-<!-- 🔥 PRODUCT CARD COMPONENT -->
+<!-- ================= PRODUCT CARD ================= -->
 <%
 function productCard(p){ %>
 
-<div class="bg-white p-3 rounded-xl hover:shadow-md transition">
+<div class="bg-white rounded-md overflow-hidden shadow-sm hover:shadow-md transition">
 
   <a href="/product/<%= p._id %>">
-    <img src="<%= p.images?.[0] || '/uploads/default.png' %>"
-         class="w-full h-32 sm:h-36 object-contain">
+    <img 
+      src="<%= p.images?.[0] %>" 
+      loading="lazy"
+      class="w-full h-36 object-contain bg-white"
+    >
   </a>
 
-  <p class="text-xs sm:text-sm mt-2 line-clamp-2 h-10">
-    <%= p.name %>
-  </p>
+  <div class="p-2">
 
-  <div class="flex items-center gap-2 mt-1 flex-wrap">
+    <p class="text-xs sm:text-sm line-clamp-2 h-10">
+      <%= p.name %>
+    </p>
 
-    <% if(p.discountType && p.discountType !== "none"){ %>
+    <div class="mt-1 flex flex-wrap items-center gap-1">
 
       <span class="font-bold text-sm">
-        ₹ <%= getFinalPrice(p) %>
+        ₹<%= getFinalPrice(p) %>
       </span>
 
-      <span class="line-through text-gray-400 text-xs">
-        ₹ <%= p.price %>
-      </span>
+      <% if(p.discountType && p.discountType !== "none"){ %>
+        <span class="line-through text-gray-400 text-xs">
+          ₹<%= p.price %>
+        </span>
 
-      <span class="text-green-600 text-xs font-semibold">
-        <% if(p.discountType === "percentage"){ %>
-          <%= p.discountValue %>% OFF
-        <% } else { %>
-          ₹ <%= p.discountValue %> OFF
-        <% } %>
-      </span>
+        <span class="text-green-600 text-xs font-semibold">
+          <%= p.discountType === "percentage" 
+              ? p.discountValue + "% OFF"
+              : "₹" + p.discountValue + " OFF"
+          %>
+        </span>
+      <% } %>
 
-    <% } else { %>
-      <span class="font-bold text-sm">₹ <%= p.price %></span>
-    <% } %>
+    </div>
 
   </div>
-
 </div>
 
 <% } %>
 
-<!-- 🔥 TRENDING -->
-<div class="max-w-7xl mx-auto px-4 mt-6 sm:mt-8">
+<!-- ================= TRENDING ================= -->
+<div class="max-w-7xl mx-auto px-2 mt-6">
 
-  <div class="flex justify-between items-center mb-3">
-    <h2 class="text-base sm:text-lg font-bold">🔥 Trending</h2>
+  <h2 class="text-base font-bold mb-2">🔥 Trending</h2>
 
-    <% if(products && products.length){ %>
-      <span class="text-xs text-gray-500"><%= products.length %> items</span>
-    <% } %>
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+
+    <% products.forEach(p => { %>
+      <%- productCard(p) %>
+    <% }) %>
+
   </div>
-
-  <% if(!products || products.length === 0){ %>
-
-    <div class="bg-white p-6 text-center text-gray-500 rounded-xl">
-      No products available
-    </div>
-
-  <% } else { %>
-
-    <div class="flex gap-3 overflow-x-auto pb-2">
-
-      <% products.forEach(p => { %>
-        <div class="min-w-[160px] sm:min-w-[180px] flex-shrink-0">
-          <%- productCard(p) %>
-        </div>
-      <% }) %>
-
-    </div>
-
-  <% } %>
-
 </div>
 
-<!-- 👕 MEN -->
-<div class="max-w-7xl mx-auto px-4 mt-10">
+<!-- ================= MEN ================= -->
+<div class="max-w-7xl mx-auto px-2 mt-8">
 
-  <div class="flex justify-between mb-3">
-    <h2 class="text-base sm:text-lg font-bold">👕 Men's Wear</h2>
-    <a href="/category/fashion/All" class="text-blue-600 text-xs sm:text-sm">View All</a>
+  <div class="flex justify-between mb-2">
+    <h2 class="font-bold">👕 Men's Wear</h2>
+    <a href="/category/fashion/All" class="text-blue-600 text-xs">View All</a>
   </div>
 
-  <% if(!menProducts || menProducts.length === 0){ %>
-    <p class="text-gray-500">No Men's Products Found</p>
-  <% } else { %>
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+    <% menProducts.forEach(p => { %>
+      <%- productCard(p) %>
+    <% }) %>
 
-      <% menProducts.forEach(p => { %>
-        <%- productCard(p) %>
-      <% }) %>
-
-    </div>
-
-  <% } %>
-
+  </div>
 </div>
 
-<!-- 👗 WOMEN -->
-<div class="max-w-7xl mx-auto px-4 mt-10">
+<!-- ================= WOMEN ================= -->
+<div class="max-w-7xl mx-auto px-2 mt-8">
 
-  <div class="flex justify-between mb-3">
-    <h2 class="text-base sm:text-lg font-bold">👗 Women's Wear</h2>
-    <a href="/category/women/All" class="text-blue-600 text-xs sm:text-sm">View All</a>
+  <div class="flex justify-between mb-2">
+    <h2 class="font-bold">👗 Women's Wear</h2>
+    <a href="/category/women/All" class="text-blue-600 text-xs">View All</a>
   </div>
 
-  <% if(!womenProducts || womenProducts.length === 0){ %>
-    <p class="text-gray-500">No Women's Products Found</p>
-  <% } else { %>
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+    <% womenProducts.forEach(p => { %>
+      <%- productCard(p) %>
+    <% }) %>
 
-      <% womenProducts.forEach(p => { %>
-        <%- productCard(p) %>
-      <% }) %>
-
-    </div>
-
-  <% } %>
-
+  </div>
 </div>
 
-<!-- 🔥 TRUST -->
-<div class="bg-white mt-10 py-6">
-  <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 text-center text-xs sm:text-sm gap-4">
+<!-- ================= TRUST ================= -->
+<div class="bg-white mt-8 py-5">
+  <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 text-center text-xs gap-3">
+
     <div>🚚 Free Delivery</div>
-    <div>💰 Cash on Delivery</div>
+    <div>💰 COD Available</div>
     <div>🔄 Easy Returns</div>
     <div>🔒 Secure Payments</div>
+
   </div>
 </div>
 
 <%- include("partial/footer") %>
 
-<!-- 🔥 SLIDER -->
+<!-- ================= SLIDER SCRIPT ================= -->
 <script>
 const slider = document.getElementById("slider");
 let index = 0;
 
 setInterval(() => {
-  if(!slider) return;
   index = (index + 1) % 3;
   slider.style.transform = `translateX(-${index * 100}%)`;
 }, 3000);

@@ -15,7 +15,7 @@ const User = require("../models/User");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
-const QRCode = require("qrcode");
+
 const crypto = require("crypto"); 
 const axios = require("axios");
 
@@ -26,7 +26,7 @@ async function checkDelhivery(pincode) {
       {
         params: { filter_codes: pincode },
         headers: {
-          Authorization: "Token 40d6d3f396ccdf29bc0dd570e876ee22300b677f" // 👈 yaha apni API key daalo
+          Authorization: `Token ${process.env.DELHIVERY_API_KEY}` // 👈 yaha apni API key daalo
         }
       }
     );
@@ -331,7 +331,7 @@ router.get("/download-invoice/:id", isLoggedIn, async (req, res) => {
   // ================= ITEMS =================
   doc.fillColor("black");
 
-  const fs = require("fs");
+  
 
 order.items.forEach(item => {
 
@@ -418,15 +418,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage: storage });
 
-// ================= HOME =================
-// router.get("/", async (req, res) => {
-//   const products = await Product.find().limit(20);
-//   res.render("index", {
-//   products,
-//   user: req.session.user,
-//   cartCount: req.session.cart ? req.session.cart.length : 0
-// });
-// });
+
 router.get("/", async (req, res) => {
   try {
 
@@ -547,80 +539,8 @@ if (req.body.specKey && req.body.specValue) {
 
     // ✅ DYNAMIC SIZE SYSTEM
 
-    function getProductType(mainCategory, subCategory) {
-  const main = mainCategory?.toLowerCase() || "";
-  const sub = subCategory?.toLowerCase() || "";
-
-  // 🔌 ELECTRONICS
-  if (main.includes("electronics")) return "electronics";
-
-  // 👟 SHOES
-  if (sub.includes("shoe") || sub.includes("sneaker")) return "shoes";
-
-  // 👖 BOTTOM WEAR
-  if (
-    sub.includes("jean") ||
-    sub.includes("pant") ||
-    sub.includes("trouser")
-  ) return "bottom";
-
-  // 👕 TOP WEAR
-  if (
-    sub.includes("Shirts") ||
-    sub.includes("tshirt") ||
-    sub.includes("kurta")
-  ) return "top";
-
-  // 👗 WOMEN'S WEAR
-  if (
-    sub.includes("kurti") ||
-    sub.includes("kurta-set") ||
-    sub.includes("saree")
-  ) return "women";
-
-  // 🩳 SHORTS
-  if (sub.includes("Shirts")) return "Shirts";
-
-  return "other";
-}
-
-function generateSizes(type, price) {
-
-  if (type === "electronics") return [];
-
-  if (type === "shoes") {
-    return ["6","7","8","9","10"].map(s => ({
-      size: s,
-      price,
-      stock: 10
-    }));
-  }
-
-  if (type === "bottom") {
-    return ["28","30","32","34"].map(s => ({
-      size: s,
-      price,
-      stock: 10
-    }));
-  }
-
-  if (type === "top" || type === "shorts") {
-    return ["S","M","L","XL"].map(s => ({
-      size: s,
-      price,
-      stock: 10
-    }));
-  }
 
 
-  return [];
-}
-  const type = getProductType(mainCategory, subCategory);
-let sizes = [];
-
-if (req.body.sizes) {
-  sizes = req.body.sizes.split(",").map(s => s.trim());
-}
 
     // ✅ CREATE PRODUCT
     const newProduct = new Product({
@@ -639,7 +559,7 @@ if (req.body.sizes) {
   highlights,
   specifications,
       finalPrice,
-      sizes
+      
     });
 
     await newProduct.save();
@@ -653,32 +573,7 @@ if (req.body.sizes) {
 });
 
 
-// router.get("/category/:main/:sub", async (req, res) => {
-//   const { main, sub } = req.params;
 
-//   let filter = {
-//     mainCategory: { $regex: `^${main}$`, $options: "i" }
-//   };
-
-//   // ✅ Agar "All" hai to sirf mainCategory filter karo
-//   if (sub !== "All") {
-//     filter.subCategory = { $regex: sub, $options: "i" };
-//   }
-
-//   const products = await Product.find(filter);
-
-//   // ✅ Dynamic subcategories fetch karo
-//   const subCategories = await Product.distinct("subCategory", {
-//     mainCategory: { $regex: `^${main}$`, $options: "i" }
-//   });
-
-//   res.render("categoryPage", {
-//     products,
-//     main,
-//     sub,
-//     subCategories
-//   });
-// });
 router.get("/category/:main/:sub", async (req, res) => {
   const { main, sub } = req.params;
 
@@ -784,23 +679,15 @@ if (similarProducts.length < 6) {
       avgRating =
         reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
     }
-const category = product.mainCategory?.toLowerCase();
-const subCategory = product.subCategory?.toLowerCase();
 
-const sizeCategories = ["fashion", "clothing", "fusion","women"];
-const sizeSubCategories = ["shirt","tshirt","jeans","pant","kurta","shorts","kurti","kurti-set","saree","footwear"];
 
-const showSize =
-  sizeCategories.includes(category) ||
-  sizeSubCategories.some(sub => subCategory?.includes(sub));
     // ✅ RENDER
-    res.render("productDetails", {
-      product,
-      similarProducts,
-      reviews,
-      avgRating,
-      showSize  
-    });
+   res.render("productDetails", {
+  product,
+  similarProducts,
+  reviews,
+  avgRating
+});
 
   } catch (err) {
     console.log("Product Page Error:", err);
@@ -920,42 +807,54 @@ router.get("/api/suggestions", async (req, res) => {
 router.get("/add-to-cart/:id", async (req, res) => {
 
   const product = await Product.findById(req.params.id);
-  const size = req.query.size;   // 🔥 ADD THIS
+  
 
   if (!req.session.cart) {
     req.session.cart = [];
   }
 
   let cart = req.session.cart;
-
-  let existing = cart.find(item => item._id == product._id && item.size == size);
+let existing = cart.find(
+  item => item._id == product._id
+);
 
   if (existing) {
     existing.qty += 1;
   } else {
     cart.push({
-      _id: product._id,
-      name: product.name,
-      price: product.price,
-      qty: 1,
-      size: size,   // 🔥 ADD SIZE HERE
-      image: product.images?.[0] || "default.png"
-    });
+  _id: product._id,
+  name: product.name,
+  price: product.price,
+  qty: 1,
+  image: product.images?.[0] || "default.png",
+  discountType: product.discountType || "none",
+  discountValue: product.discountValue || 0
+});
   }
 
   res.redirect("/cart");
 });
-
 router.get("/cart", (req, res) => {
 
   let cart = req.session.cart || [];
 
+  const getFinalPrice = (item) => {
+    if (item.discountType === "percentage") {
+      return Math.round(item.price - (item.price * item.discountValue / 100));
+    }
+
+    if (item.discountType === "fixed") {
+      return item.price - item.discountValue;
+    }
+
+    return item.price;
+  };
+
   let total = cart.reduce((sum, item) => {
-    return sum + item.price * item.qty;
+    return sum + getFinalPrice(item) * item.qty;
   }, 0);
 
   res.render("cart", { cart, total });
-
 });
 
 
@@ -1135,7 +1034,7 @@ router.post("/place-order", isLoggedIn, async (req, res) => {
       landmark,
       productId,
       paymentMethod,
-      size
+     
     } = req.body;
 
     // ✅ BASIC VALIDATION
@@ -1156,7 +1055,7 @@ if (!product) {
     // ✅ FINAL PRICE (GST ADD)
     const totalAmount = product.price + Math.round(product.price * 0.10);
 
-    // ✅ CREATE ORDER (FLIPKART STYLE)
+    // ✅ CREATE ORDER 
     const newOrder = new Order({
       userId: req.session.user._id,
 
@@ -1184,7 +1083,7 @@ if (!product) {
           name: product.name,
           price: product.price,
           quantity: 1,
-          size: product.category === "fashion" ? (size || "M") : null,
+      
           image: productImage
         }
       ],
@@ -1241,30 +1140,25 @@ const razorpay = require("../config/razorpay"); // make sure this exists
 
 router.post("/create-order", async (req, res) => {
   try {
-    const { amount } = req.body;
+    const amount = Number(req.body.amount);
 
-   
-
-    if (!amount) {
-      return res.status(400).json({ error: "Amount missing" });
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: "Invalid amount" });
     }
 
     const order = await razorpay.orders.create({
-      amount: amount * 100, // ✅ convert to paise
+      amount: Math.round(amount * 100),
       currency: "INR",
       receipt: "order_" + Date.now()
     });
 
-
-
-    // ✅ IMPORTANT RESPONSE
     res.json({
       id: order.id,
       amount: order.amount
     });
 
   } catch (err) {
-    console.log("ORDER ERROR:", err);
+    console.log("RAZORPAY ERROR:", err);
     res.status(500).json({ error: "Order failed" });
   }
 });
@@ -1282,12 +1176,11 @@ router.post("/verify-payment", async (req, res) => {
       razorpay_payment_id,
       razorpay_signature,
       orderData,
-      productId,
-      totalAmount
+      productId
     } = req.body;
 
     if (!orderData || !productId) {
-      return res.json({ success: false });
+      return res.json({ success: false, message: "Missing data" });
     }
 
     // ✅ SIGNATURE VERIFY
@@ -1298,17 +1191,21 @@ router.post("/verify-payment", async (req, res) => {
 
     if (expectedSign !== razorpay_signature) {
       console.log("❌ Signature mismatch");
-      return res.json({ success: false });
+      return res.json({ success: false, message: "Signature failed" });
     }
 
     // ✅ PRODUCT FETCH
     const product = await Product.findById(productId);
     if (!product) {
-      return res.json({ success: false });
+      return res.json({ success: false, message: "Product not found" });
     }
 
     const productImage =
       product.images?.[0] || product.image || "/default.png";
+
+    // ✅ TOTAL AMOUNT FIX (IMPORTANT)
+    const totalAmount =
+      product.price + Math.round(product.price * 0.10);
 
     // ✅ DELIVERY DATE
     const deliveryDate = new Date();
@@ -1343,7 +1240,8 @@ router.post("/verify-payment", async (req, res) => {
         }
       ],
 
-      totalAmount: totalAmount,
+      totalAmount: totalAmount, // ✅ FIXED HERE
+
       paymentMethod: "Online",
       paymentStatus: "Paid",
 
@@ -1359,71 +1257,13 @@ router.post("/verify-payment", async (req, res) => {
       ]
     });
 
-    // ✅ SAVE FIRST
     await newOrder.save();
 
-    // 🚚 DELHIVERY INTEGRATION (FIXED)
-    try {
-      const payload = {
-        shipments: [
-          {
-            name: newOrder.name,
-            add: newOrder.address.house,
-            pin: newOrder.address.pincode,
-            city: newOrder.address.city,
-            state: newOrder.address.state,
-            country: "India",
-            phone: newOrder.phone,
-
-            order: newOrder._id.toString(),
-            payment_mode:
-              newOrder.paymentMethod === "COD" ? "COD" : "Prepaid",
-            total_amount: newOrder.totalAmount,
-
-            products_desc: newOrder.items.map(i => i.name).join(", "),
-            quantity: "1",
-
-            shipment_length: "10",
-            shipment_width: "10",
-            shipment_height: "10",
-            weight: "0.5"
-          }
-        ],
-        pickup_location: {
-          name: process.env.DELHIVERY_PICKUP_NAME
-        }
-      };
-
-     const response = await axios.post(
-  "https://staging-express.delhivery.com/api/cmu/create.json", // ✅ FIXED
-  payload,
-  {
-    headers: {
-      Authorization: `Token ${process.env.DELHIVERY_API_KEY}`,
-      "Content-Type": "application/json"
-    }
-  }
-);
-
-      const waybill = response.data?.packages?.[0]?.waybill;
-
-      if (waybill) {
-        newOrder.trackingId = waybill;
-        newOrder.courier = "Delhivery";
-        await newOrder.save();
-
-        console.log("✅ Delhivery AWB:", waybill);
-      }
-    } catch (err) {
-      console.log("❌ Delhivery Error:", err.response?.data || err.message);
-    }
-
-    // ✅ FINAL RESPONSE
-    res.json({ success: true });
+    return res.json({ success: true });
 
   } catch (err) {
     console.log("VERIFY ERROR:", err);
-    res.json({ success: false });
+    res.json({ success: false, message: "Server error" });
   }
 });
 
@@ -1456,29 +1296,7 @@ res.json({
   }
 });
 
-// admin page
-// router.get("/admin/shipments", async (req, res) => {
-//   const orders = await Order.find();
-//   res.render("adminShipments", { orders });
-// });
 
-// update status
-// router.post("/admin/update-status", async (req, res) => {
-//   const { id, status } = req.body;
-
-//   const order = await Order.findById(id);
-
-//   order.status = status;
-
-//   order.statusHistory.push({
-//     status,
-//     date: new Date()
-//   });
-
-//   await order.save();
-
-//   res.redirect("/admin/shipments");
-// });
 // ================= REVIEW =================
 router.post("/add-review", async (req, res) => {
   const { productId, name, rating, comment } = req.body;
@@ -1554,11 +1372,6 @@ router.get("/admin/order/:id", isLoggedIn, async (req, res) => {
   res.render("adminOrders", { order });
 
 });
-
-// router.get("/admin/products", async (req, res) => {
-//   const products = await Product.find().sort({ createdAt: -1 });
-//   res.render("adminProducts", { products });
-// });
 
 // ================= EDIT PRODUCT PAGE =================
 router.get("/admin/edit-product/:id", async (req, res) => {
@@ -1696,7 +1509,7 @@ if (sizes) {
       images,
       highlights,
       specifications,
-      sizes: sizeArray
+      
     });
 
     res.redirect("/admin");
@@ -1712,31 +1525,7 @@ router.get("/admin/delete-product/:id", async (req, res) => {
   res.redirect('/admin'); // ✅ already correct
 });
 
-// router.get("/admin/dashboard", async (req, res) => {
 
-//   const totalProducts = await Product.countDocuments();
-//   const totalOrders = await Order.countDocuments();
-
-//   const orders = await Order.find();
-
-//  let revenue = 0;
-
-// orders.forEach(o => {
-//   if (o.payment) {
-//     const match = o.payment.match(/\d+/);
-//     if (match) {
-//       revenue += o.totalAmount || 0;
-//     }
-//   }
-// });
-
-  
-//   res.render("adminDashboard", {
-//     totalProducts,
-//     totalOrders,
-//     revenue
-//   });
-// });
 
 router.get("/admin/products/search", async (req, res) => {
   try {
